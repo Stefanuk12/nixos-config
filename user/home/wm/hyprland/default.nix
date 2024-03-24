@@ -10,6 +10,11 @@ in {
   wayland.windowManager.hyprland.enable = true;
   wayland.windowManager.hyprland.settings = {
     "$mod" = "SUPER";
+    monitor = [
+      "HDMI-A-1, 1920x1080@75, 0x0, 1, vrr, 1"
+      "DP-3, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10,"
+      ", preferred, auto, 1"
+    ];
     bind =
       [
         "$mod, F, exec, firefox"
