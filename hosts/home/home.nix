@@ -6,6 +6,7 @@ in {
   imports = [
     ./vars.nix
     ../../system/common/settings.nix
+    ../../user/common/settings.nix
     ../../user/home
   ];
 
