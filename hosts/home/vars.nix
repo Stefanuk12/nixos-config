@@ -1,0 +1,5 @@
+{ ... }:
+
+{
+  config.systemSettings = { };
+}
