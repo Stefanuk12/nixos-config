@@ -35,7 +35,7 @@
       home = lib.nixosSystem {
         system = "x86_64-linux";
         modules = [ ./hosts/home/configuration.nix ];
-	specialArgs = { };
+	specialArgs = { inherit inputs; };
       };
     };
     homeConfigurations = {
