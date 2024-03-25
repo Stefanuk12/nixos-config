@@ -40,6 +40,9 @@ in {
   users.users.${systemSettings.username} = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFi4KQP6TuvmqGZj52ZERC2cbBh4zbQ4BlHytSLmi5R stefan@home"
+    ];
   };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
