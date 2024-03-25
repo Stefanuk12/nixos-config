@@ -34,14 +34,19 @@
     nixosConfigurations = {
       home = lib.nixosSystem {
         system = "x86_64-linux";
-        modules = [ ./hosts/home/configuration.nix ];
+        modules = [
+          ./hosts/home/configuration.nix
+          ./secrets
+        ];
 	specialArgs = { inherit inputs; };
       };
     };
     homeConfigurations = {
       "stefan@home" = home-manager.lib.homeManagerConfiguration {
 	pkgs = nixpkgs.legacyPackages."x86_64-linux";
-        modules = [ ./hosts/home/home.nix ];
+        modules = [
+          ./hosts/home/home.nix
+        ];
 	extraSpecialArgs = { inherit inputs; };
       };
     };

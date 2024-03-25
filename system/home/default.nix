@@ -2,7 +2,6 @@
 
 {
   imports = [
-    ./hyprland.nix
-    ../../secrets 
+    ./hyprland.nix 
   ];
 }

@@ -1,14 +1,12 @@
-{ inputs, ... }:
+{ pkgs, inputs, config, ... }:
 
 {
   imports = [
     inputs.sops-nix.nixosModules.sops
   ];
 
-  sops = {
-    defaultSopsFile = ./.sops.yaml;
-    defaultSopsFormat = "yaml";
-
-    age.keyFile = "/home/user/.config/sops/age/keys.txt";
-  };
+  sops.defaultSopsFile = ./common/secrets.yaml;
+  sops.defaultSopsFormat = "yaml";
+  
+  sops.age.keyFile = "/home/stefan/.config/sops/age/keys.txt";
 }
