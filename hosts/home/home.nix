@@ -7,6 +7,7 @@ in {
     ./vars.nix
     ../../system/common/settings.nix
     ../../user/common/settings.nix
+    ../../user/common/secrets
     ../../user/home
   ];
 
