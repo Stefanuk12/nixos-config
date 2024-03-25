@@ -29,7 +29,8 @@ in {
   i18n.defaultLocale = locale;
 
   # Configure keymap in X11
-  services.xserver.xkb.layout = "us";
+  services.xserver.xkb.layout = kbLayout;
+  console.keyMap = kbLayout;
 
   # Enable sound.
   sound.enable = true;

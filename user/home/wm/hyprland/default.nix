@@ -17,6 +17,7 @@ in {
     ];
     input = {
       "force_no_accel" = true;
+      "kb_layout" = "us";
     };
     bind =
       [
