@@ -39,7 +39,7 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${systemSettings.username} = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "libvirtd" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFi4KQP6TuvmqGZj52ZERC2cbBh4zbQ4BlHytSLmi5R stefan@home"
     ];

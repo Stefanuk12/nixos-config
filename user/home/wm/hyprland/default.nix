@@ -19,6 +19,10 @@ in {
       "force_no_accel" = true;
       "kb_layout" = "us";
     };
+    bindm = [
+      "SUPER, mouse:272, movewindow"
+      "SUPER, mouse:273, resizewindow"
+    ];
     bind =
       [
         "$mod, F, exec, firefox"
