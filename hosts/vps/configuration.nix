@@ -35,6 +35,12 @@ in {
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
+  # Enable root login
+  services.openssh.enable = true;
+  users.users.root.openssh.authorizedKeys.keys = [
+    systemSettings.sshKeys."stefan@home"
+  ];
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
     isNormalUser = true;

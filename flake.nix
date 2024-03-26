@@ -40,7 +40,17 @@
         ];
 	specialArgs = {
           inherit inputs;
-
+          hostName = "home";
+        };
+      };
+      vps = lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/vps/configuration.nix
+          ./secrets
+        ];
+        specialArgs = {
+          inherit inputs;
           hostName = "home";
         };
       };
@@ -54,6 +64,17 @@
 	extraSpecialArgs = {
           inherit inputs;
           hostName = "home";
+          username = "stefan";
+        };
+      };
+      "stefan@vps" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages."x86_64-linux";
+        modules = [
+          ./hosts/vps/home.nix
+        ];
+        extraSpecialArgs = {
+          inherit inputs;
+          hostName = "vps";
           username = "stefan";
         };
       };

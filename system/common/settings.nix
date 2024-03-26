@@ -4,12 +4,17 @@ let
   types = lib.types;
 in {
   options.systemSettings = {
-    stateVersion = mkOption {
-      type = types.str;
-      default = "23.05";
+    sshKeys = mkOption {
+      type = types.attrsOf(types.str);
       description = ''
-        The version of NixOS to use.
+        Everyone's SSH public keys. 
       '';
+    };
+  };
+
+  config.systemSettings = {
+    sshKeys = {
+      "stefan@home" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFi4KQP6TuvmqGZj52ZERC2cbBh4zbQ4BlHytSLmi5R stefan@home";
     };
   };
 }
