@@ -6,15 +6,16 @@
   ];
 
   programs = {
-    dconf = {
-      enable = true;
-      "org/virt-manager/virt-manager/connections" = {
-        autoconnect = [ "qemu:///system" ];
-        uris = [ "qemu:///system" ];
-      };
-    };
+    dconf.enable = true;
     virt-manager.enable = true;
   };
+
+  # dconf.settings = {
+  #   "org/virt-manager/virt-manager/connections" = {
+  #     autoconnect = [ "qemu:///system" ];
+  #     uris = [ "qemu:///system" ];
+  #   };
+  # };
 
   environment.systemPackages = with pkgs; [
     spice

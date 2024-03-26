@@ -1,19 +1,17 @@
-{ config, pkgs, systemVars, ... }:
+{ config, pkgs, hostName, username, ... }:
 
-let
-  systemSettings = config.systemSettings;
-in {
+{
   imports = [
     ./vars.nix
     ../../system/common/settings.nix
     ../../user/common/settings.nix
-    ../../user/home
+    ../../user/${hostName}
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = systemSettings.username;
-  home.homeDirectory = "/home/" + systemSettings.username;
+  home.username = username;
+  home.homeDirectory = "/home/" + username;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release

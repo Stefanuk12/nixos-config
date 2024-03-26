@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 let
   userSettings = config.userSettings;
   systemSettings = config.systemSettings;
@@ -10,7 +10,7 @@ in {
     userEmail = userSettings.email;
     extraConfig = {
       init.defaultBranch = "main";
-      safe.directory = "/home/" + systemSettings.username + "/.dotfiles";
+      safe.directory = "/home/" + username + "/.dotfiles";
     };
   };
 }

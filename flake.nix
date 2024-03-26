@@ -38,7 +38,11 @@
           ./hosts/home/configuration.nix
           ./secrets
         ];
-	specialArgs = { inherit inputs; };
+	specialArgs = {
+          inherit inputs;
+
+          hostName = "home";
+        };
       };
     };
     homeConfigurations = {
@@ -47,7 +51,11 @@
         modules = [
           ./hosts/home/home.nix
         ];
-	extraSpecialArgs = { inherit inputs; };
+	extraSpecialArgs = {
+          inherit inputs;
+          hostName = "home";
+          username = "stefan";
+        };
       };
     };
   };

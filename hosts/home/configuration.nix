@@ -1,7 +1,6 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, hostName, ... }:
 
 let
-  hostName = "home";
   timeZone = "Europe/London";
   locale = "en_GB.UTF-8";
   kbLayout = "us";
@@ -11,7 +10,7 @@ in {
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../../system/common/settings.nix
-      ../../system/home
+      ../../system/${hostName}
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -37,7 +36,7 @@ in {
   hardware.pulseaudio.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.${systemSettings.username} = {
+  users.users.stefan = {
     isNormalUser = true;
     extraGroups = [ "wheel" "libvirtd" ];
     openssh.authorizedKeys.keys = [
