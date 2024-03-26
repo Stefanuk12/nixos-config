@@ -47,7 +47,7 @@
         system = "x86_64-linux";
         modules = [
           ./hosts/vps/configuration.nix
-          ./secrets
+          # ./secrets
         ];
         specialArgs = {
           inherit inputs;
