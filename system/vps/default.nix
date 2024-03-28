@@ -1,5 +1,8 @@
 { ... }:
 
 {
-
+  imports = [
+    ./nginx
+    ./mailserver.nix
+  ];
 }
