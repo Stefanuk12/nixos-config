@@ -5,6 +5,9 @@ let
 in {
   imports = [
     ../../../common/app/terminal
+    ./cursor
+    ./hypridle.nix
+    ./hyprlock.nix
   ];
 
   wayland.windowManager.hyprland.enable = true;

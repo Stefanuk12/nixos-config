@@ -12,6 +12,9 @@
     # sops
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+   
+    # wm stuff
+    hypridle.url = "github:hyprwm/hypridle";
   };
   
   outputs = {
@@ -47,11 +50,11 @@
         system = "x86_64-linux";
         modules = [
           ./hosts/vps/configuration.nix
-          # ./secrets
+          ./secrets
         ];
         specialArgs = {
           inherit inputs;
-          hostName = "home";
+          hostName = "vps";
         };
       };
     };
