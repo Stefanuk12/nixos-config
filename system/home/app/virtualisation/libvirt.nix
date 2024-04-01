@@ -1,6 +1,7 @@
 { pkgs, lib, ... }:
 
 let
+  guestName = "Windows";
   pciDevices = [
     "pci_0000_03_00_0"
     "pci_0000_03_00_1"
@@ -10,7 +11,7 @@ let
   ];
 
   buildPciAttach = list: mode: lib.concatMapStringsSep "\n" (pci: "virsh nodedev-" + mode + " " + pci) list;
-  buildModprobe = list: flag: lib.concatMapStringsSep "\n" (x: "modprobe -" + flag + " " + x) list;
+  buildModprobe = list: flag: lib.concatMapStringsSep "\n" (x: "modprobe " + flag + " " + x) list;
 in {
   networking.interfaces.eth0.useDHCP = true;
   networking.interfaces.br0.useDHCP = true;
@@ -81,25 +82,51 @@ in {
         ];
 
         text = ''
+          set -x
+
           GUEST_NAME="$1"
           OPERATION="$2"
 
           # Only works if our Windows machine is started
-          if [ "$GUEST_NAME" != "Windows" ]; then
+          if [ "$GUEST_NAME" != ${guestName} ]; then
             exit 0
           fi
 
           if [ "$OPERATION" == "prepare" ]; then
               systemctl stop display-manager.service
-              ${buildModprobe passthroughDrivers "r"}
+
+              echo 0 > /sys/class/vtconsole/vtcon0/bind
+              echo 0 > /sys/class/vtconsole/vtcon1/bind
+
+              echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+
+              sleep 5 
+
+              ${buildModprobe passthroughDrivers "-r"}
               ${buildPciAttach pciDevices "detach"}
+
+              modprobe vfio-pci
+              modprobe vfio_pci
+              modprobe vfio_iommu_type1
               systemctl start display-manager.service
           fi
 
           if [ "$OPERATION" == "release" ]; then
+            set -x
+
             systemctl stop display-manager.service
+
+            modprobe -r vfio_pci
+            modprobe -r vfio_iommu_type1
+            modprobe -r vfio
+
             ${buildPciAttach pciDevices "reattach"}
-            ${buildModprobe passthroughDrivers "a"}
+            echo 1 > /sys/class/vtconsole/vtcon0/bind
+            echo 0 > /sys/class/vtconsole/vtcon1/bind
+            echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
+
+            ${buildModprobe passthroughDrivers ""}
+
             systemctl start display-manager.service
           fi
         '';
@@ -113,6 +140,9 @@ in {
     "amd_iommu=pt"
     "kvm.ignore-msrs=1"
   ];
+  boot.extraModprobeConfig = ''
+    options snd_hda_intel probe_only=0,1
+  '';
   # boot.postBootCommands = ''
   #   DEVS="0000:03:00.0 0000:03:00.1"
   #
@@ -122,8 +152,8 @@ in {
   #   modprobe -i vfio-pci
   # '';
   
-  boot.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1.allow_unsafe_interrupts=1"]
-    ++ lib.optionals (lib.versionOlder pkgs.linux.version "6.2") [ "vfio_virqfd" ];
+  #boot.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1.allow_unsafe_interrupts=1"]
+  #  ++ lib.optionals (lib.versionOlder pkgs.linux.version "6.2") [ "vfio_virqfd" ];
   
   users.groups.libvirtd.members = [ "root" "stefan" ];
 }
