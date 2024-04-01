@@ -2,7 +2,8 @@
 
 {
   imports = [
-    ./hyprland.nix 
+    ./hyprland.nix
+    ./lanzaboote.nix 
     ./app/virtualisation
   ];
 }

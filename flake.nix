@@ -15,6 +15,10 @@
    
     # wm stuff
     hypridle.url = "github:hyprwm/hypridle";
+    
+    # Secure Boot
+    lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
   };
   
   outputs = {
