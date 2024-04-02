@@ -12,8 +12,15 @@
     # sops
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Nixvim!!
+    nixvim.url = "github:nix-community/nixvim";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
    
-    # wm stuff
+    # cool looks
+    nix-colors.url = "github:misterio77/nix-colors";
+
+	# wm stuff
     hypridle.url = "github:hyprwm/hypridle";
     
     # Secure Boot
@@ -25,7 +32,8 @@
     self,
     nixpkgs,
     home-manager,
-    ...
+    nix-colors,
+	...
   } @ inputs: let
     inherit (self) outputs;
     systems = [
@@ -45,7 +53,7 @@
           ./hosts/home/configuration.nix
           ./secrets
         ];
-	specialArgs = {
+	    specialArgs = {
           inherit inputs;
           hostName = "home";
         };
@@ -64,11 +72,11 @@
     };
     homeConfigurations = {
       "stefan@home" = home-manager.lib.homeManagerConfiguration {
-	pkgs = nixpkgs.legacyPackages."x86_64-linux";
+	    pkgs = nixpkgs.legacyPackages."x86_64-linux";
         modules = [
           ./hosts/home/home.nix
         ];
-	extraSpecialArgs = {
+	    extraSpecialArgs = {
           inherit inputs;
           hostName = "home";
           username = "stefan";
