@@ -8,6 +8,7 @@ in {
     ./cursor
     ./hypridle.nix
     ./hyprlock.nix
+	./grimblast.nix
   ];
 
   wayland.windowManager.hyprland.enable = true;
@@ -29,7 +30,6 @@ in {
     bind =
       [
         "$mod, F, exec, firefox"
-        ", Print, exec, grimblast copy area"
 
         "SUPER, RETURN, exec, ${userSettings.terminal}"
         "SUPER, code:47, exec, fuzzel"
