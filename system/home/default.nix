@@ -1,9 +1,7 @@
-{ config, ... }:
-
-{
+{config, ...}: {
   imports = [
     ./hyprland.nix
-    ./lanzaboote.nix 
+    ./lanzaboote.nix
     ./app/virtualisation
   ];
 }

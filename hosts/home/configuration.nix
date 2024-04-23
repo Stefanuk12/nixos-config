@@ -1,18 +1,22 @@
-{ config, lib, pkgs, hostName, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  hostName,
+  ...
+}: let
   timeZone = "Europe/London";
   locale = "en_GB.UTF-8";
   kbLayout = "us";
   systemSettings = config.systemSettings;
 in {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ../../system/common/font.nix
-      ../../system/common/settings.nix
-      ../../system/${hostName}
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ../../system/common/font.nix
+    ../../system/common/settings.nix
+    ../../system/${hostName}
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -20,7 +24,7 @@ in {
 
   # Setup networking
   networking.hostName = hostName; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = timeZone;
@@ -43,16 +47,28 @@ in {
     jack.enable = true;
   };
 
+  # MIME Setup
+  xdg.mime.defaultApplications = {
+    "text/html" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
+    "x-scheme-handler/about" = "firefox.desktop";
+    "x-scheme-handler/unknown" = "firefox.desktop";
+  };
+
+  environment.systemPackages = [
+    pkgs.pinentry
+  ];
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "libvirtd" ];
+    extraGroups = ["wheel" "libvirtd"];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
     ];
   };
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   system.stateVersion = "23.05";
 }
-

@@ -14,9 +14,8 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Nixvim!!
-    nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
-   
+    Neve.url = "github:redyf/Neve";
+
     # cool looks
     nix-colors.url = "github:misterio77/nix-colors";
 
@@ -91,7 +90,8 @@
           inherit inputs;
           hostName = "vps";
           username = "stefan";
-        };
+          system = "x86_64-linux";
+		};
       };
     };
   };

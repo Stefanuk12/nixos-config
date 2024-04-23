@@ -8,7 +8,7 @@ in {
     ./cursor
     ./hypridle.nix
     ./hyprlock.nix
-	./grimblast.nix
+    ./grimblast.nix
   ];
 
   wayland.windowManager.hyprland.enable = true;
@@ -16,8 +16,8 @@ in {
     "$mod" = "SUPER";
     monitor = [
       "HDMI-A-2, 1920x1080@75, 0x0, 1, vrr, 1"
-      "DP-3, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10,"
-      ", preferred, auto, 1"
+      "DP-4, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10,"
+      ",preferred, auto, 1"
     ];
     input = {
       "force_no_accel" = true;

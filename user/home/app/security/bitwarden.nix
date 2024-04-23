@@ -1,9 +1,11 @@
-{ config, pkgs, ... }:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   home.packages = with pkgs; [
     bitwarden-cli
-    goldwarden
+    bitwarden-menu
   ];
 
   #sops.secrets.bitwarden-master = {
