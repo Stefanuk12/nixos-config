@@ -19,9 +19,11 @@
     # cool looks
     nix-colors.url = "github:misterio77/nix-colors";
 
-	# wm stuff
+    # wm stuff
     hypridle.url = "github:hyprwm/hypridle";
-    
+
+    nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
+
     # Secure Boot
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
@@ -32,7 +34,8 @@
     nixpkgs,
     home-manager,
     nix-colors,
-	...
+    nixos-vfio,
+    ...
   } @ inputs: let
     inherit (self) outputs;
     systems = [
