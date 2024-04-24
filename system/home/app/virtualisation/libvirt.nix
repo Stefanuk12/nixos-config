@@ -47,7 +47,16 @@
     "vfio_iommu_type1"
   ];
   users.groups.libvirtd.members = [ "root" "stefan" ];
+  users.groups.kvm.members = [ "root" "stefan" ];
 
   hardware.opengl.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
+
+  # Looking Glass
+  systemd.tmpfiles.rules = [
+    "f /dev/shm/looking-glass 0660 stefan qemu-libvirtd -"
+  ];
+  environment.systemPackages = with pkgs; [
+    looking-glass-client
+  ];
 }
