@@ -17,7 +17,7 @@ in {
     monitor = [
       "HDMI-A-2, 1920x1080@75, 0x0, 1, vrr, 1"
       "DP-4, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10,"
-      ",preferred, auto, 1"
+      ", preferred, auto, 1"
     ];
     input = {
       "force_no_accel" = true;
@@ -34,9 +34,12 @@ in {
         "SUPER, RETURN, exec, ${userSettings.terminal}"
         "SUPER, code:47, exec, fuzzel"
         "SUPER, Q, killactive"
-        "SUPERSHIFT, Q,exit"
+        "SUPERSHIFT, Q, exit"
 
         "CONTROLALT, Delete, exec, hyprctl dispatch exit"
+
+        "CONTROLALT, Left, exec, sudo ddcutil -d 2 setvcp 60 0x0f"
+        "CONTROLALT, Right, exec, sudo ddcutil -d 2 setvcp 60 0x11"
       ]
       ++ (
         builtins.concatLists (builtins.genList (

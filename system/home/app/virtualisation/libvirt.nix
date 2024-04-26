@@ -1,8 +1,9 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, config, ... }:
 
 {
   imports = [
     inputs.nixos-vfio.nixosModules.vfio
+    ./qemu.nix
   ];
 
   networking.interfaces.eth0.useDHCP = true;
@@ -13,15 +14,31 @@
     };
   };
 
+  security.sudo.extraRules = [
+    {
+      groups = [ "libvirtd" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/ddcutil -d 2 setvcp 60 0x0f";
+          options = [ "SETENV" "NOPASSWD" ];
+        }
+        {
+          command = "/run/current-system/sw/bin/ddcutil -d 2 setvcp 60 0x11";
+          options = [ "SETENV" "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
   virtualisation.libvirtd = {
     enable = true;
+    clearEmulationCapabilities = false;
     qemuVerbatimConfig = ''
       nvram = [
         "/nix/store/v9x2ya2q7h001k70qwdpgsp6cnhwm6g8-OVMF-202402-fd/FV/OVMF_VARS.fd"
       ]
     '';
     qemu = {
-      package = pkgs.qemu_kvm;
       runAsRoot = true;
       swtpm.enable = true;
       ovmf = {
@@ -48,7 +65,7 @@
     
     devices = [
       {
-        size = 32;
+        size = 64;
 
         permissions = {
           user = "stefan";
@@ -69,7 +86,11 @@
     "vfio"
     "vfio_iommu_type1"
     "kvmfr"
+
+    "i2c_dev"
+    "ddcci_backlight"
   ];
+  boot.extraModulePackages = [config.boot.kernelPackages.ddcci-driver];
   users.groups.libvirtd.members = [ "root" "stefan" ];
   users.groups.kvm.members = [ "root" "stefan" ];
 
@@ -82,5 +103,6 @@
   ];
   environment.systemPackages = with pkgs; [
     looking-glass-client
+    ddcutil
   ];
 }

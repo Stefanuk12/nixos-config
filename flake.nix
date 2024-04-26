@@ -22,6 +22,7 @@
     # wm stuff
     hypridle.url = "github:hyprwm/hypridle";
 
+    # VM stuff
     nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
 
     # Secure Boot
