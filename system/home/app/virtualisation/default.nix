@@ -3,19 +3,16 @@
 {
   imports = [
     ./libvirt.nix
+    ./kernel.nix
+    ./kvmfr.nix
+    ./looking_glass.nix
+    ./qemu_hooks.nix
   ];
 
   programs = {
     dconf.enable = true;
     virt-manager.enable = true;
   };
-
-  # dconf.settings = {
-  #   "org/virt-manager/virt-manager/connections" = {
-  #     autoconnect = [ "qemu:///system" ];
-  #     uris = [ "qemu:///system" ];
-  #   };
-  # };
 
   environment.systemPackages = with pkgs; [
     spice
