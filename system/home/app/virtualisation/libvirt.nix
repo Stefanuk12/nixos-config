@@ -8,6 +8,7 @@
   imports = [
     inputs.nixos-vfio.nixosModules.vfio
     ./qemu.nix
+    ./xml
   ];
 
   networking.interfaces.eth0.useDHCP = true;
