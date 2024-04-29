@@ -24,6 +24,8 @@
 
     # VM stuff
     nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
+    nixvirt.url = "https://flakehub.com/f/AshleyYakeley/NixVirt/*.tar.gz";
+    nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
@@ -36,6 +38,7 @@
     home-manager,
     nix-colors,
     nixos-vfio,
+    nixvirt,
     ...
   } @ inputs: let
     inherit (self) outputs;

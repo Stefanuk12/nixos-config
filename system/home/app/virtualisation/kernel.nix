@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   boot.extraModprobeConfig = "options vfio-pci ids=1002:73a5,1002:ab28";
