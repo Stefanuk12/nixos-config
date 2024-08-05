@@ -30,7 +30,12 @@
     # Secure Boot
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
+  
+    # For VPS - Minecraft server
+    nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
+
+  nixpkgs.config.allowUnfree = true;
   
   outputs = {
     self,
@@ -39,6 +44,7 @@
     nix-colors,
     nixos-vfio,
     nixvirt,
+    nix-minecraft,
     ...
   } @ inputs: let
     inherit (self) outputs;
