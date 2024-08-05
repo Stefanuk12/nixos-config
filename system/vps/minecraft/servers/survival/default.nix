@@ -1,11 +1,11 @@
 { nixpkgs, lib, pkgs, inputs, ... }:
 
 let
-  mcVersion = "1.20.1";
-  fabricVersion = "0.15.7";
+  mcVersion = "1.21";
+  fabricVersion = "0.16.0";
   serverVersion = lib.replaceStrings ["."] ["_"] "fabric-${mcVersion}";
   allowUnfreesP = pkg: builtins.elem (lib.getName pkg) [
-    "minecraft-server-${mcVersion}"
+    "minecraft-server"
   ];
 in { 
   nixpkgs.config.allowUnfreePredicate = allowUnfreesP;
@@ -15,7 +15,7 @@ in {
 
   services.minecraft-servers.servers.survival = {
     enable = true;
-    enableReload = true;
+    enableReload = false;
     package = pkgs.fabricServers.${serverVersion}.override {loaderVersion = fabricVersion;};
     jvmOpts = ((import ../../aikar-flags.nix) "2G") + "-Dpaper.disableChannelLimit=true";
     serverProperties = {
@@ -24,8 +24,8 @@ in {
     symlinks = {
       mods = pkgs.linkFarmFromDrvs "mods" (builtins.attrValues {
         FabricApi = pkgs.fetchurl {
-          url = "https://cdn.modrinth.com/data/P7dR8mSH/versions/YG53rBmj/fabric-api-0.92.0%2B1.20.1.jar";
-          sha512 = "53ce4cb2bb5579cef37154c928837731f3ae0a3821dd2fb4c4401d22d411f8605855e8854a03e65ea4f949dfa0e500ac1661a2e69219883770c6099b0b28e4fa";
+          url = "https://cdn.modrinth.com/data/P7dR8mSH/versions/EY5IAcV9/fabric-api-0.101.2%2B1.21.jar";
+          sha512 = "aff4569ae74fbcf2f19874b56ea9a811a9b2aee217641724b0ea6d764aa9e3c756becc7908c9bc6ac3fc3b613aad235f62188325b1d7439d23cb9d2c69d3bad8";
         };
       });
     };
