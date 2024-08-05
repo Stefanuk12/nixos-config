@@ -66,13 +66,17 @@
 
   # Start the mailserver
   services.dovecot2.sieve.extensions = [ "fileinto" ];
-  services.postfix.config.smtp_helo_name = "petrovic.foo";
+  services.postfix.config.smtp_helo_name = "mail.petrovic.foo";
+  services.postfix.headerChecks = [
+    "/^Content-Type:/i PREPEND List-Unsubscribe: mailto:stefan@petrovic.foo?subject=unsubscribe"
+  ];
   mailserver = {
     enable = true;
     enablePop3 = true;
     enablePop3Ssl = true;
   
     fqdn = "mail.petrovic.foo";
+    sendingFqdn = "mail.petrovic.foo";
     domains = [ "petrovic.foo" ];
 
     # A list of all login accounts. To create the password hashes, use
