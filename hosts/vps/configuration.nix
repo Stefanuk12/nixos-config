@@ -45,6 +45,7 @@ in {
   };
   users.users.root.openssh.authorizedKeys.keys = [
     systemSettings.sshKeys."stefan@home"
+    systemSettings.sshKeys."stefan@windows-pc"
   ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -53,6 +54,7 @@ in {
     extraGroups = [ "wheel" "libvirtd" ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
+      systemSettings.sshKeys."stefan@windows-pc"
     ];
   };
 
