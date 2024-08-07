@@ -1,4 +1,4 @@
-{ inputs, config, lib, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -12,6 +12,11 @@
     group = "minecraft";
     mode = "0400";
     sopsFile = ../../../secrets/vps/minecraft.yaml;
+  };
+
+  programs.git = {
+    enable = true;
+    lfs.enable = true;
   };
 
   services.minecraft-servers = {

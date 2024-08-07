@@ -20,7 +20,12 @@ in {
     jvmOpts = ((import ../../aikar-flags.nix) "2G") + "-Dpaper.disableChannelLimit=true";
     serverProperties = {
       server-port = 25565;
+      level-seed = "6856302969725317931";
     };
+    path = [
+      "${pkgs.git}"
+      "${pkgs.git-lfs}"
+    ];
     files = {
       "config/Discord-Integration.toml".value = {
         general = {
