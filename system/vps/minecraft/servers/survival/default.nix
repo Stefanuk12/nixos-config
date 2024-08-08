@@ -36,9 +36,9 @@ in {
           whitelistMode = true;
         };
       };
-      # "config/Geyser-Fabric/config.yml".value = {
-      #   remote."auth-type" = "floodgate";
-      # };
+      "config/Geyser-Fabric/config.yml".value = {
+        remote."auth-type" = "floodgate";
+      };
     };
     symlinks = {
       mods = pkgs.linkFarmFromDrvs "mods" (builtins.attrValues {
@@ -74,10 +74,10 @@ in {
           url = "https://cdn.modrinth.com/data/wKkoqHrH/versions/jgAfD21j/geyser-fabric-2.4.1-SNAPSHOT%2Bbuild.639.jar";
           sha512 = "c9c07798bdfadb9e8d15710bc2bd57f8017b040bdd6f7c5a7ad94bf0b035abb91163498f7d650ebcb8ac6731dd26d2bb44498fffc69d33f2c52b3bff946ae032";
         };
-        # Floodgate = pkgs.fetchurl {
-        #   url = "https://cdn.modrinth.com/data/bWrNNfkb/versions/yL5NRQ1i/Floodgate-Fabric-2.2.3-SNAPSHOT%2Bbuild.30.jar";
-        #   sha512 = "1106987f23df5ba820cd7c1315ec8613dce5e1e84ef45fbab8244b0a48fa6fcd43daf90845759818e2a4face8b6dabaa620b016162f53c002ced9227f11a34db";
-        # };
+        Floodgate = pkgs.fetchurl {
+          url = "https://cdn.modrinth.com/data/bWrNNfkb/versions/iWEfqepR/Floodgate-Fabric-2.2.3-SNAPSHOT%2Bbuild.31.jar";
+          sha512 = "ba5ce3430d4ce4dcfe95b286def061d03cd4ce22071beb57651bf91e934ca842b3d67f3b61073aa41a9e07ccf802bab4d6ec565d64501059c1bfb693dc9a581e";
+        };
         ModsCommand = pkgs.fetchurl {
           url = "https://cdn.modrinth.com/data/PExmWQV8/versions/CSPwc34g/mods-command-mc1.21-1.1.7.jar";
           sha512 = "3549e36dccbbe71171bc35c93f53c00743a4647435377f7348a37deb15442d44a57378acbc8563fea3d7924fa02f218fe89102db8a11b36af173711af41510f0";
