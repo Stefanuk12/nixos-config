@@ -38,6 +38,9 @@ in {
   hardware.pulseaudio.enable = true;
 
   # Enable root login
+  security.sudo.enable = true;
+  security.pam.enableSSHAgentAuth = true;
+  security.pam.services.sudo.sshAgentAuth = true;
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;

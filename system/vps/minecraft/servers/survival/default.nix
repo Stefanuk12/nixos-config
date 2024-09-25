@@ -21,6 +21,7 @@ in {
     serverProperties = {
       server-port = 25565;
       level-seed = "6856302969725317931";
+      difficulty = "hard";
     };
     path = [
       "${pkgs.git}"
