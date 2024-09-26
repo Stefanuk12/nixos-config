@@ -1,4 +1,4 @@
-{ config, nixpkgs, ... }:
+{ config, nixpkgs, pkgs, ... }:
 
 {
   imports = [
@@ -7,4 +7,8 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+
+  home.packages = with pkgs; [
+    newman
+  ];
 }

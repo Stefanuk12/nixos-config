@@ -1,0 +1,2 @@
+[config]
+"secrets/vps/squid_extra.conf" = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmnotNFy29WvH0oVL094zdNdHi1GydZZXpEnxgpFgMe stefan@vps"]
