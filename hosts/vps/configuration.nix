@@ -5,6 +5,7 @@ let
   locale = "en_GB.UTF-8";
   kbLayout = "us";
   systemSettings = config.systemSettings;
+  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in {
   imports =
     [ # Include the results of the hardware scan.
@@ -37,6 +38,9 @@ in {
   hardware.pulseaudio.enable = true;
 
   # Enable root login
+  security.sudo.enable = true;
+  security.pam.enableSSHAgentAuth = true;
+  security.pam.services.sudo.sshAgentAuth = true;
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
@@ -51,7 +55,7 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "libvirtd" ];
+    extraGroups = [ "wheel" "libvirtd" ] ++ ifTheyExist [ "minecraft" ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
       systemSettings.sshKeys."stefan@windows-pc"

@@ -1,4 +1,4 @@
-{ inputs, config, lib, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -7,9 +7,22 @@
   ];
   nixpkgs.overlays = [ inputs.nix-minecraft.overlay ];
 
+  sops.secrets.minecraft = {
+    owner = "minecraft";
+    group = "minecraft";
+    mode = "0400";
+    sopsFile = ../../../secrets/vps/minecraft.yaml;
+  };
+
+  programs.git = {
+    enable = true;
+    lfs.enable = true;
+  };
+
   services.minecraft-servers = {
     enable = true;
     eula = true;
+    environmentFile = config.sops.secrets.minecraft.path;
   };
 
   networking.firewall = {

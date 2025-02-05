@@ -33,6 +33,7 @@
   
     # For VPS - Minecraft server
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+    nix-minecraft.inputs.nixpkgs.follows = "nixpkgs";
 
     # Custom packages
     customPkgs = {
@@ -40,8 +41,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-
-  nixpkgs.config.allowUnfree = true;
   
   outputs = {
     self,

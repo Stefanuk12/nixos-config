@@ -26,6 +26,7 @@
   # environment.
   home.packages = with pkgs; [
     sops
+    git-agecrypt
   ];
 
   # Let Home Manager install and manage itself.
