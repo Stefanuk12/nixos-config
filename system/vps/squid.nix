@@ -45,6 +45,9 @@
   users.groups."cf_secrets" = { };
 
   # Start Squid
+  nixpkgs.config.permittedInsecurePackages = [
+    "squid-6.12"
+  ];
   services.squid = {
     enable = true;
     extraConfig = "

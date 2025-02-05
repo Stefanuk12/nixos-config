@@ -74,6 +74,7 @@ in
             mkdir $out
 
             for i in $libraries; do
+              echo Found library: $i
               NIX_LIB=$(basename $i)
               NIX_LIB_NAME="''${NIX_LIB:33}"
 
@@ -83,7 +84,7 @@ in
 
                 if [[ $LIB_NAME == $NIX_LIB_NAME ]]; then
                   mkdir -p "$out/libraries/$(dirname $LIB)"
-                  ln -s $i $out/libraries/$LIB
+                  ln -s $i $out/libraries/$LIB || true
 
                   echo Linking library: $LIB_NAME
 
@@ -92,12 +93,19 @@ in
               done
             done
 
+            echo Done linking
+
+            echo $(ls $out/libraries/de/oceanlabs/mcp/mcp_config)
             MOJMAP_DIR_NAME=$(basename $out/libraries/de/oceanlabs/mcp/mcp_config/${gameVersion}-*)
             echo $MOJMAP_DIR_NAME
             MOJMAP_DIR=$out/libraries/net/minecraft/server/$MOJMAP_DIR_NAME
             mkdir -p "$MOJMAP_DIR"
 
-            ln -s ${mappings} $MOJMAP_DIR/server-$MOJMAP_DIR_NAME-mappings.txt
+            if [ -f ${mappings} ]; then
+              ln -s ${mappings} $MOJMAP_DIR/server-$MOJMAP_DIR_NAME-mappings.txt || true
+            else
+              echo "Mappings file does not exist: ${mappings}"
+            fi
 
             MINECRAFT_LIB=$out/libraries/net/minecraft/server/${gameVersion}
             mkdir -p "$MINECRAFT_LIB"

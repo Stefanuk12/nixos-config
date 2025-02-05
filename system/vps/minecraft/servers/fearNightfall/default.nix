@@ -1,4 +1,4 @@
-{ nixpkgs, lib, customPkgs, pkgs, inputs, ... }:
+{ nixpkgs, lib, pkgs, inputs, ... }:
 
 let
   mcVersion = "1.20.1";
@@ -6,13 +6,23 @@ let
   serverVersion = lib.replaceStrings ["."] ["_"] "forge-${mcVersion}";
   allowUnfreesP = pkg: builtins.elem (lib.getName pkg) [
     "minecraft-server-${mcVersion}"
+    "forge-loader"
   ];
   modpack = pkgs.fetchzip {
-    url = "https://www.curseforge.com/api/v1/mods/887839/files/6109374/download";
-    hash = "sha256-qizlevXTfRr5bqQM4u5dKfqV75fBpgjmxSprlwBHnC4=";
+    url = "https://mediafilez.forgecdn.net/files/6109/374/Fear%20Nightfall%20Remains%20of%20Chaos-v1.0.10.zip";
+    hash = "sha256-ec/M+0AOMkOPLoVG43Lxn20mo6kAQMuOpT8bUb1W/Oo=";
+    extension = "zip";
+    stripRoot = false;
   };
-in { 
+  customPkgs = import ../../../../../customPkgs { inherit pkgs; };
+  overlays = [
+    (self: super: {
+      forgeServers = customPkgs.forgeServers;
+    })
+  ];
+in {
   nixpkgs.config.allowUnfreePredicate = allowUnfreesP;
+  nixpkgs.overlays = overlays;
   imports = [
     inputs.nix-minecraft.nixosModules.minecraft-servers
   ];
@@ -22,7 +32,7 @@ in {
   services.minecraft-servers.servers.survival = {
     enable = true;
     enableReload = true;
-    package = customPkgs.forgeServers.${serverVersion}.override {
+    package = pkgs.forgeServers.${serverVersion}.override {
       loaderVersion = forgeVersion;
       jre_headless = pkgs.jdk17;
     };
@@ -31,6 +41,8 @@ in {
       server-port = 25565;
     };
     files = {
+    };
+    symlinks = {
       "config" = "${modpack}/config";
       "config/Discord-Integration.toml".value = {
         general = {
@@ -41,8 +53,6 @@ in {
           whitelistMode = true;
         };
       };
-    };
-    symlinks = {
       "mods" = "${modpack}/mods";
     };
   };

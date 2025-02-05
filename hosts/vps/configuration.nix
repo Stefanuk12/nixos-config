@@ -34,7 +34,7 @@ in {
   console.keyMap = kbLayout;
 
   # Enable sound.
-  sound.enable = true;
+  # sound.enable = true;
   hardware.pulseaudio.enable = true;
 
   # Enable root login
