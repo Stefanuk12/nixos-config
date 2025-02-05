@@ -33,6 +33,12 @@
   
     # For VPS - Minecraft server
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+
+    # Custom packages
+    customPkgs = {
+      path = ./customPkgs;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -45,6 +51,7 @@
     nixos-vfio,
     nixvirt,
     nix-minecraft,
+    customPkgs,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -65,9 +72,10 @@
           ./hosts/home/configuration.nix
           ./secrets
         ];
-	    specialArgs = {
+        specialArgs = {
           inherit inputs;
           hostName = "home";
+          customPkgs = inputs.customPkgs;
         };
       };
       vps = lib.nixosSystem {
@@ -79,19 +87,21 @@
         specialArgs = {
           inherit inputs;
           hostName = "vps";
+          customPkgs = inputs.customPkgs;
         };
       };
     };
     homeConfigurations = {
       "stefan@home" = home-manager.lib.homeManagerConfiguration {
-	    pkgs = nixpkgs.legacyPackages."x86_64-linux";
+        pkgs = nixpkgs.legacyPackages."x86_64-linux";
         modules = [
           ./hosts/home/home.nix
         ];
-	    extraSpecialArgs = {
+        extraSpecialArgs = {
           inherit inputs;
           hostName = "home";
           username = "stefan";
+          customPkgs = inputs.customPkgs;
         };
       };
       "stefan@vps" = home-manager.lib.homeManagerConfiguration {
@@ -104,7 +114,8 @@
           hostName = "vps";
           username = "stefan";
           system = "x86_64-linux";
-		};
+          customPkgs = inputs.customPkgs;
+        };
       };
     };
   };
