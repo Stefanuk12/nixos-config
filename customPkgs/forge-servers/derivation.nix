@@ -55,7 +55,7 @@ in
     src = fetchurl {
       name = forge-installer;
       inherit (loader) url;
-      hash = loader.md5;
+      hash = loader.hash;
     };
 
     preferLocalBuild = true;
