@@ -23,6 +23,7 @@
 #    is essential.  I'm also not 100% sure what patching methods are needed for each one,
 #    so they may need some attention for current and future builds.
 
+import base64
 import concurrent.futures
 import io
 import json
@@ -468,7 +469,7 @@ class Types:
         @classmethod
         def from_dict(cls: Type["Types.LauncherLibraryDownloads"], data: Dict[str, Any]) -> "Types.LauncherLibraryDownloads":
             return cls(
-                artifact=cls.artifact
+                artifact=Types.LockLibrary.from_dict(data["artifact"])
             )
 
         def to_dict(self) -> Dict[str, Any]:
@@ -484,8 +485,8 @@ class Types:
         @classmethod
         def from_dict(cls: Type["Types.LauncherLibrary"], data: Dict[str, Any]) -> "Types.LauncherLibrary":
             return cls(
-                name=cls.name,
-                downloads=cls.downloads
+                name=data["name"],
+                downloads=Types.LauncherLibraryDownloads.from_dict(data["downloads"])
             )
 
         def to_dict(self) -> Dict[str, Any]:
@@ -554,6 +555,14 @@ def get_game_version_data(client: requests.Session, version_url: str):
     """
     return client.get(version_url).json()
 
+def hex_to_sri(hex_hash: str) -> str:
+    """
+    Convert a hexadecimal hash to an SRI hash.
+    """
+    hash_bytes = bytes.fromhex(hex_hash)
+    base64_hash = base64.b64encode(hash_bytes).decode("utf-8")
+    return f"md5-{base64_hash}"
+
 def get_launcher_libraries(client: requests.Session, version: str) -> List[Types.LauncherLibrary]:
     """
     Fetch launcher libraries for a specific version.
@@ -619,6 +628,8 @@ def fetch_launcher_version(mc_version: Types.McVersion, builds: List[str], clien
 
     for build in builds:
         build_number = build.split("-")[1]
+        if build_number != "47.3.12":
+            continue
         if build_number in launcher_versions[mc_version]:
             continue
 
@@ -629,23 +640,23 @@ def fetch_launcher_version(mc_version: Types.McVersion, builds: List[str], clien
             launcher_versions[mc_version][build_number] = Types.LauncherVersionInstaller(
                 type="installer",
                 url=f"{MAVEN}/{build}/forge-{build}-installer.jar",
-                hash=classifiers.installer.jar,
+                hash=hex_to_sri(classifiers.installer.jar),
                 libraries = [],
             )
         elif classifiers.universal is not None:
             launcher_versions[mc_version][build_number] = Types.LauncherVersionUniversal(
                 type="universal",
                 universal_url = f"{MAVEN}/{build}/forge-{build}-universal.jar",
-                universal_hash = classifiers.universal.jar,
+                universal_hash = hex_to_sri(classifiers.universal.jar),
                 install_url = f"{MAVEN}/{build}/forge-{build}-installer.jar",
-                install_hash = classifiers.universal.jar,
+                install_hash = hex_to_sri(classifiers.universal.jar),
                 libraries = [],
             )
         elif classifiers.client is not None:
             launcher_versions[mc_version][build_number] = Types.LauncherVersionAncient(
                 type="ancient",
                 url=f"{MAVEN}/{build}/forge-{build}-client.zip",
-                hash=classifiers.client.zip,
+                hash=hex_to_sri(classifiers.client.zip),
                 libraries = [],
             )
         else:
@@ -653,9 +664,9 @@ def fetch_launcher_version(mc_version: Types.McVersion, builds: List[str], clien
             logging.info(launcher_build)
 
         forge_libraries = get_launcher_libraries(client, build)
-        for library in forge_libraries:
-            library_versions[library.name] = library.downloads.artifact
-            game_versions[mc_version].libraries.append(library.name)
+        for forge_library in forge_libraries:
+            library_versions[forge_library.name] = forge_library.downloads.artifact
+            launcher_versions[mc_version][build_number].libraries.append(forge_library.name)
 
 def main(game_versions: Dict[str, Types.LockGame], launcher_versions: Dict[str, Dict[str, Types.LauncherVersion]], library_versions: Dict[str, Types.LockLibrary], client: requests.Session):
     """
