@@ -9,8 +9,8 @@ let
     "forge-loader"
   ];
   modpack = pkgs.fetchzip {
-    url = "https://mediafilez.forgecdn.net/files/6109/374/Fear%20Nightfall%20Remains%20of%20Chaos-v1.0.10.zip";
-    hash = "sha256-ec/M+0AOMkOPLoVG43Lxn20mo6kAQMuOpT8bUb1W/Oo=";
+    url = "https://mediafilez.forgecdn.net/files/6109/390/Fear_Nightfall_Remains_of_Chaos_Server_Pack_v1.0.10.zip";
+    hash = "sha256-cBbvPeRT1m0jTERPFI9Jk4nbr2ep9++LvrY7wzIKHXk=";
     extension = "zip";
     stripRoot = false;
   };
@@ -29,7 +29,7 @@ in {
 
   networking.firewall.allowedUDPPorts = [ 24454 ];
 
-  services.minecraft-servers.servers.survival = {
+  services.minecraft-servers.servers.fearNightfall = {
     enable = true;
     enableReload = true;
     package = pkgs.forgeServers.${serverVersion}.override {
@@ -41,8 +41,6 @@ in {
       server-port = 25565;
     };
     files = {
-    };
-    symlinks = {
       "config" = "${modpack}/config";
       "config/Discord-Integration.toml".value = {
         general = {
@@ -54,6 +52,10 @@ in {
         };
       };
       "mods" = "${modpack}/mods";
+    };
+    symlinks = {
+      "defaultconfigs" = "${modpack}/defaultconfigs";
+      "modernfix" = "${modpack}/modernfix";
     };
   };
 }
