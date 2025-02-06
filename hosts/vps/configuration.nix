@@ -39,7 +39,7 @@ in {
 
   # Enable root login
   security.sudo.enable = true;
-  security.pam.enableSSHAgentAuth = true;
+  security.pam.sshAgentAuth.enable = true;
   security.pam.services.sudo.sshAgentAuth = true;
   services.openssh = {
     enable = true;

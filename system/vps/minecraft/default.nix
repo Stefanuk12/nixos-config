@@ -3,7 +3,7 @@
 {
   imports = [
     inputs.nix-minecraft.nixosModules.minecraft-servers
-    ./servers/survival
+    ./servers/fearNightfall
   ];
   nixpkgs.overlays = [ inputs.nix-minecraft.overlay ];
 
