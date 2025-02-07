@@ -41,6 +41,7 @@ in {
       server-port = 25565;
     };
     files = {
+      "mods" = "${modpack}/mods";
       "config" = "${modpack}/config";
       "config/Discord-Integration.toml".value = {
         general = {
@@ -51,7 +52,6 @@ in {
           whitelistMode = true;
         };
       };
-      "mods" = "${modpack}/mods";
     };
     symlinks = {
       "defaultconfigs" = "${modpack}/defaultconfigs";
