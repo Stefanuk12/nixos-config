@@ -20,6 +20,14 @@ let
       forgeServers = customPkgs.forgeServers;
     })
   ];
+  pkgs_graalvm = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "a343533bccc62400e8a9560423486a3b6c11a23b";
+    hash = "sha256-TofHtnlrOBCxtSZ9nnlsTybDnQXUmQrlIleXF1RQAwQ=";
+  }) {
+    inherit (pkgs) system;
+  };
 in {
   nixpkgs.config.allowUnfreePredicate = allowUnfreesP;
   nixpkgs.overlays = overlays;
@@ -29,16 +37,17 @@ in {
 
   networking.firewall.allowedUDPPorts = [ 24454 ];
 
-  services.minecraft-servers.servers.fearNightfall = {
+  services.minecraft-servers.servers.fearNightfallNew = {
     enable = true;
     enableReload = true;
     package = pkgs.forgeServers.${serverVersion}.override {
       loaderVersion = forgeVersion;
-      jre_headless = pkgs.jdk17;
+      jre_headless = pkgs_graalvm.graalvm-ce;
     };
-    jvmOpts = ((import ../../aikar-flags.nix) "2G") + "-Dpaper.disableChannelLimit=true";
+    jvmOpts = ((import ../../aikar-flags.nix) "6G") + "-Dpaper.disableChannelLimit=true";
     serverProperties = {
       server-port = 25565;
+      max-tick-time = -1;
     };
     files = {
       "mods" = "${modpack}/mods";
