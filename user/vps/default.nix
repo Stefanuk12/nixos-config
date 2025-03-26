@@ -10,5 +10,8 @@
 
   home.packages = with pkgs; [
     newman
+    tmux
   ];
+
+  programs.tmux.enable = true;
 }
