@@ -25,9 +25,11 @@
       forceSSL = true;
       enableACME = true;
     };
-    "crypto.petrovic.foo" = {
-      root = "/var/www/crypto.petrovic.foo";
-    }
+    "donate.petrovic.foo" = {
+      root = "/var/www/donate.petrovic.foo";
+      forceSSL = true;
+      enableACME = true;
+    };
   };
 
   security.acme.certs."petrovic.foo".webroot = null;
