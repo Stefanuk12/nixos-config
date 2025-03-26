@@ -13,10 +13,21 @@
 
   # NGINX setup
   services.nginx.enable = true;
-  services.nginx.virtualHosts."petrovic.foo" = {
-    root = "/var/www/petrovic.foo";
-    forceSSL = true;
-    enableACME = true;
+  services.nginx.virtualHosts = {
+    default = {
+      serverName = "_";
+      default = true;
+      rejectSSL = true;
+      locations."/".return = "444";
+    };
+    "petrovic.foo" = {
+      root = "/var/www/petrovic.foo";
+      forceSSL = true;
+      enableACME = true;
+    };
+    "crypto.petrovic.foo" = {
+      root = "/var/www/crypto.petrovic.foo";
+    }
   };
 
   security.acme.certs."petrovic.foo".webroot = null;
