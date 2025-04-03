@@ -100,19 +100,4 @@
       environmentFile = "/var/lib/cf_secrets/secret";
     };
   };
-
-  # Start webmail
-  services.roundcube = {
-    enable = true;
-    # this is the url of the vhost, not necessarily the same as the fqdn of
-    # the mailserver
-    hostName = "webmail.petrovic.foo";
-    extraConfig = ''
-      # starttls needed for authentication, so the fqdn required to match
-      # the certificate
-      $config['smtp_server'] = "tls://${config.mailserver.fqdn}";
-      $config['smtp_user'] = "%u";
-      $config['smtp_pass'] = "%p";
-    '';
-  };
 }
