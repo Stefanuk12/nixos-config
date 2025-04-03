@@ -85,6 +85,7 @@
       "stefan@petrovic.foo" = {
         hashedPasswordFile = config.sops.secrets.email_password.path;
         aliases = ["postmaster@petrovic.foo"];
+        aliasesRegexp = ["stefan(\+\w+)?@petrovic\.foo"];
       };
     };
 
