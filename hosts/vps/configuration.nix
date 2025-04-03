@@ -33,9 +33,9 @@ in {
   services.xserver.xkb.layout = kbLayout;
   console.keyMap = kbLayout;
 
-  # Enable sound.
+  # Disable sound.
   # sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  services.pulseaudio.enable = false;
 
   # Enable root login
   security.sudo.enable = true;
