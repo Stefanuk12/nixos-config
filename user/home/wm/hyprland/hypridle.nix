@@ -9,22 +9,21 @@ let
     fi
   '';
 in {
-  imports = [
-    inputs.hypridle.homeManagerModules.default
-  ];
+  services.hypridle.enable = true;
+  services.hypridle.settings = {
+    general = {
+      lock_cmd = lib.getExe pkgs.hyprlock;
+      before_sleep_cmd = "${pkgs.system}/bin/loginctl lock-session";
+      after_sleep_cmd = "notify-send 'Zzz'";
+      ignoreDbusInhibit = true;
+    };
 
-  services.hypridle = {
-    enable = true;
-    
-    lockCmd = lib.getExe pkgs.hyprlock;
-    beforeSleepCmd = "${pkgs.systemd}/bin/loginctl lock-session";
-    afterSleepCmd = "notify-send 'Zzz'";
-    ignoreDbusInhibit = true;
-
-    listeners = [{
-      timeout = 500;
-      onTimeout = suspendScript.outPath;
-      onResume = "notify-send 'Welcome back!'";
-    }];
+    listener = [
+      {
+        timeout = 500;
+        on-timeout = suspendScript.outPath;
+        on-resume = "notify-send 'Welcome back!'";
+      }
+    ];
   };
 }

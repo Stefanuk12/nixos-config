@@ -1,6 +1,20 @@
-{ config, ... }:
-
-{
+{ pkgs, config, lib, ... }:
+let
+  kernelPatches = {
+    svm = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/Kernel/linux-6.13-svm.patch";
+      hash = "sha256-zz18xerutulLGzlHhnu26WCY8rVQXApyeoDtCjbejIk=";
+    };
+    # svm = ./linux-6.13-svm.patch
+  };
+in {
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_13;
+  boot.kernelPatches = [
+    {
+      name = "hypervisor-phantom-svm";
+      patch = kernelPatches.svm;
+    }
+  ];
   boot.extraModprobeConfig = "options vfio-pci ids=1002:73a5,1002:ab28";
   boot.kernel.sysctl = {
     "vm.nr_hugepages" = 0;

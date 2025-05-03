@@ -19,16 +19,13 @@
     # cool looks
     nix-colors.url = "github:misterio77/nix-colors";
 
-    # wm stuff
-    hypridle.url = "github:hyprwm/hypridle";
-
     # VM stuff
     nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
     nixvirt.url = "https://flakehub.com/f/AshleyYakeley/NixVirt/*.tar.gz";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
-    lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
+    lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
   
     # For VPS - Minecraft server

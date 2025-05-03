@@ -25,5 +25,12 @@ in {
         The terminal to use.
       '';
     };
+    ghUsername = mkOption {
+      type = types.str;
+      default = "Stefanuk12";
+      description = ''
+        Your GitHub username.
+      '';
+    };
   };
 }

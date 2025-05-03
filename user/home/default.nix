@@ -5,6 +5,7 @@
     inputs.nix-colors.homeManagerModules.default
 
     ./wm
+    ./app/dev/vscode.nix
     ./app/comms/discord.nix
     ./app/browser/brave.nix
     ./app/security/bitwarden.nix

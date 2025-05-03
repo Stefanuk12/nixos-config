@@ -12,7 +12,9 @@
   };
   fonts.packages = with pkgs; [
     cascadia-code
-    (nerdfonts.override { fonts = [ "Arimo" "JetBrainsMono" "NerdFontsSymbolsOnly" ]; })
+    nerd-fonts.arimo
+    nerd-fonts.jetbrains-mono
+    # nerd-fonts.nerd-fonts-symbols-only
     noto-fonts-emoji
     sarasa-gothic
   ];
