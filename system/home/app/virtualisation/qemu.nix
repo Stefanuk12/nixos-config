@@ -1,25 +1,35 @@
 {pkgs, ...}: let
   # special anti-detection emulator
-  qemu-anti-detection =
-    pkgs.qemu_kvm.overrideAttrs (finalAttrs: previousAttrs: {
-      # ref: https://github.com/zhaodice/qemu-anti-detection
-      patches =
-        (previousAttrs.patches or [])
-        ++ [
-          (pkgs.fetchpatch {
-            url = "https://raw.githubusercontent.com/zhaodice/qemu-anti-detection/main/qemu-8.2.0.patch";
-            sha256 = "sha256-RG4lkSWDVbaUb8lXm1ayxvG3yc1cFdMDP1V00DA1YQE=";
-          })
-        ];
-    });
+  hypervisor-phantom_amd = {
+    main = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/QEMU/amd-qemu-9.2.0.patch";
+      hash = "sha256-ZnlutMy9HqOmFV4xkO2r0yj5tEZMyTfg6nAWrX5xxc0=";
+    };
+    libnfs6 = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/QEMU/qemu-9.2.0-libnfs6.patch";
+      hash = "sha256-HjZbgwWf7oOyvhJ4WKFQ996e9+3nVAjTPSzJfyTdF+4=";
+    };
+  };
+  qemuSpoof = builtins.readFile ./qemu-spoof.sh;
+  patched-qemu = pkgs.qemu.overrideAttrs (finalAttrs: previousAttrs: {
+    patches = [hypervisor-phantom_amd.main hypervisor-phantom_amd.libnfs6];
+    postPatch = ''
+      ${previousAttrs.postPatch}
+      CPU_VENDOR=amd
+      QEMU_VERSION=9.2.0
+      MANUFACTURER="Advanced Micro Devices, Inc."
+      echo "applying dynamic patches"
+      ${qemuSpoof}
+    '';
+  }); 
 in {
   # ref: https://github.com/NixOS/nixpkgs/issues/115996
   virtualisation.libvirtd = {
     allowedBridges = ["nm-bridge" "virbr0"];
     qemu = {
-      package = qemu-anti-detection;
+      package = patched-qemu;
     };
   };
 
-  environment.systemPackages = [qemu-anti-detection];
+  environment.systemPackages = [patched-qemu];
 }

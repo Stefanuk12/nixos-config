@@ -7,6 +7,7 @@
     ./kvmfr.nix
     ./looking_glass.nix
     ./qemu_hooks.nix
+    ./edk2.nix
   ];
 
   programs = {
