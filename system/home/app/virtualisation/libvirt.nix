@@ -7,7 +7,7 @@
 }: {
   imports = [
     inputs.nixos-vfio.nixosModules.vfio
-    ./qemu.nix
+    ./qemu
     ./xml
   ];
 
@@ -39,11 +39,6 @@
   virtualisation.libvirtd = {
     enable = true;
     clearEmulationCapabilities = false;
-    qemuVerbatimConfig = ''
-      nvram = [
-        "/nix/store/v9x2ya2q7h001k70qwdpgsp6cnhwm6g8-OVMF-202402-fd/FV/OVMF_VARS.fd"
-      ]
-    '';
     qemu = {
       runAsRoot = true;
       swtpm.enable = true;
@@ -51,6 +46,11 @@
         enable = true;
         packages = [pkgs.OVMFFull.fd];
       };
+      verbatimConfig = ''
+        nvram = [
+          "/nix/store/v9x2ya2q7h001k70qwdpgsp6cnhwm6g8-OVMF-202402-fd/FV/OVMF_VARS.fd"
+        ]
+      '';
     };
     deviceACL = [
       "/dev/null"

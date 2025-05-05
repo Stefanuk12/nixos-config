@@ -3,10 +3,8 @@
 {
   imports = [
     ./libvirt.nix
+    ./qemu
     ./kernel.nix
-    ./kvmfr.nix
-    ./looking_glass.nix
-    ./qemu_hooks.nix
     ./edk2.nix
   ];
 
