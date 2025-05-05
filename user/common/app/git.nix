@@ -16,6 +16,9 @@ in {
       init.defaultBranch = "main";
       safe.directory = "/home/" + username + "/.dotfiles";
     };
-    extraConfig.credential."https://github.com".username = userSettings.ghUsername;
+    extraConfig.credential."https://github.com" = {
+      username = userSettings.ghUsername;
+      identityFile = "/home/${username}/.ssh/id_ed25519";
+    };
   };
 }
