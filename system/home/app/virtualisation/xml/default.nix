@@ -7,7 +7,7 @@
 
   virtualisation.libvirt.connections."qemu:///system".domains = [
     {
-      definition = ./win11.xml;
+      definition = ./win11_2.xml;
       active = false;
     }
   ];

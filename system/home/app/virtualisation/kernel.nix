@@ -7,8 +7,8 @@ let
     };
   };
 in {
-  # Disabled - current patches mess up CPU frequency...
-  # boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_13;
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_14;
+  # Disabled - current patches mess up CPU frequency, purely visual though
   # boot.kernelPatches = [
   #   {
   #     name = "hypervisor-phantom-svm";
@@ -21,6 +21,8 @@ in {
     "vm.nr_overcommit_hugepages" = 15258;
   };
   boot.kernelParams = [
+    # "amdgpu.dc=0"
+    # "radeon.modeset=0"
     "iommu=pt"
     "kvm.ignore-msrs=1"
     "kvmfr.static_size_mb=32"
@@ -29,10 +31,13 @@ in {
     "vfio_pci"
     "vfio"
     "vfio_iommu_type1"
-    # "kvmfr"
+    "kvmfr"
 
     "i2c_dev"
     "ddcci_backlight"
   ];
-  boot.extraModulePackages = [config.boot.kernelPackages.ddcci-driver];
+  boot.extraModulePackages = [
+    config.boot.kernelPackages.ddcci-driver
+    pkgs.linuxKernel.packages.linux_6_14.kvmfr
+  ];
 }

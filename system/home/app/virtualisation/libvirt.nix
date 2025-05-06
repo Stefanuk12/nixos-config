@@ -4,7 +4,15 @@
   config,
   lib,
   ...
-}: {
+}:
+let
+  secureBootOVMF = pkgs.OVMF.override {
+    secureBoot = true;
+    # msVarsTemplate = true;
+    tpmSupport = true;
+    tlsSupport = true;
+  };
+in {
   imports = [
     inputs.nixos-vfio.nixosModules.vfio
     ./qemu
@@ -44,11 +52,11 @@
       swtpm.enable = true;
       ovmf = {
         enable = true;
-        packages = [pkgs.OVMFFull.fd];
+        packages = [secureBootOVMF.fd];
       };
       verbatimConfig = ''
         nvram = [
-          "/nix/store/v9x2ya2q7h001k70qwdpgsp6cnhwm6g8-OVMF-202402-fd/FV/OVMF_VARS.fd"
+          "/run/libvirt/nix-ovmf/OVMF_VARS.fd"
         ]
       '';
     };
@@ -69,4 +77,8 @@
 
   users.groups.libvirtd.members = ["root" "stefan"];
   users.groups.kvm.members = ["root" "stefan"];
+
+  environment.systemPackages = with pkgs; [
+    python313Packages.virt-firmware
+  ];
 }

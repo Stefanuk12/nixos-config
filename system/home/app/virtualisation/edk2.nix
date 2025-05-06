@@ -13,8 +13,8 @@ let
 in {
   nixpkgs.overlays = [
     (final: prev: {
-      edk2 = prev.edk2.overrideAttrs (finalAttrs: previousAttrs: {
-        patches = [edk2-patch_amd];
+      OVMF = prev.OVMF.overrideAttrs (finalAttrs: previousAttrs: {
+        patches = (previousAttrs.patches or []) ++ [edk2-patch_amd];
       });
     })
   ];

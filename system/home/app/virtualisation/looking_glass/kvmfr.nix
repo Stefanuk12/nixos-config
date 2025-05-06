@@ -4,7 +4,7 @@
   virtualisation.kvmfr.enable = true;
   virtualisation.devices = [
     {
-      size = 64;
+      size = 32;
 
       permissions = {
         user = "stefan";
