@@ -14,9 +14,9 @@ let
   };
 in {
   imports = [
-    inputs.nixos-vfio.nixosModules.vfio
+    # inputs.nixvirt.nixosModules.default
     ./qemu
-    ./xml
+    # ./xml
   ];
 
   networking.interfaces.eth0.useDHCP = true;
@@ -44,35 +44,18 @@ in {
     }
   ];
 
-  virtualisation.libvirtd = {
-    enable = true;
-    clearEmulationCapabilities = false;
-    qemu = {
-      runAsRoot = true;
-      swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [secureBootOVMF.fd];
-      };
-      verbatimConfig = ''
-        nvram = [
-          "/run/libvirt/nix-ovmf/OVMF_VARS.fd"
-        ]
-      '';
+  virtualisation.libvirtd.qemu = {
+    runAsRoot = true;
+    swtpm.enable = true;
+    ovmf = {
+      enable = true;
+      packages = [secureBootOVMF.fd];
     };
-    deviceACL = [
-      "/dev/null"
-      "/dev/full"
-      "/dev/zero"
-      "/dev/random"
-      "/dev/urandom"
-      "/dev/ptmx"
-      "/dev/kvm"
-      "/dev/kqemu"
-      "/dev/rtc"
-      "/dev/hpet"
-      "/dev/net/tun"
-    ];
+    verbatimConfig = ''
+      nvram = [
+        "/run/libvirt/nix-ovmf/OVMF_VARS.fd"
+      ]
+    '';
   };
 
   users.groups.libvirtd.members = ["root" "stefan"];

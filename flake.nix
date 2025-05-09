@@ -21,7 +21,7 @@
 
     # VM stuff
     nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
-    nixvirt.url = "https://flakehub.com/f/AshleyYakeley/NixVirt/*.tar.gz";
+    nixvirt.url = "github:AshleyYakeley/NixVirt";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot

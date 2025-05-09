@@ -6,6 +6,7 @@
     ./qemu
     ./kernel.nix
     ./edk2.nix
+    ./xml.nix
   ];
 
   programs = {
