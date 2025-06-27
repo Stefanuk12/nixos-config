@@ -9,6 +9,9 @@ let
   makeController = type: index: model: {
     inherit type index model;
   };
+  makeControllerAddr = type: index: address: {
+    inherit type index address;
+  };
   
   win11 = {
     type = "kvm";
@@ -204,7 +207,7 @@ let
       input = [
         {
           type = "evdev";
-          source.dev = "/dev/input/by-id/usb-Razer_Razer_Viper_V3_Pro-event-mouse";
+          source.dev = "/dev/input/event5";
         }
         {
           type = "evdev";
@@ -238,6 +241,11 @@ let
           function = 0;
         };
       };
+      audio = {
+        id = 1;
+        type = "pulseaudio";
+        serverName = "/run/user/1000/pulse/native";
+      };
 
       video.model.type = "none";
 
@@ -267,8 +275,47 @@ let
         (makeController "pci" 0 "pcie-root")
         (makeController "pci" 1 "pcie-root-port")
         (makeController "pci" 16 "pcie-to-pci-bridge")
-        # (makeController "sata" 0 "none" { domain = 0; bus = 0; slot = 31; function = 2; })
-        # (makeController "virtio-serial" 0 "none" { domain = 0; bus = 3; slot = 0; function = 0; })
+        (makeControllerAddr "sata" 0 { type = "pci"; domain = 0; bus = 0; slot = 31; function = 2; })
+        (makeControllerAddr "virtio-serial" 0 { type = "pci"; domain = 0; bus = 3; slot = 0; function = 0; })
+      ];
+
+      hostdev = [
+        {
+          mode = "subsystem";
+          type = "pci";
+          managed = true;
+          source.address = {
+            domain = 0;
+            bus = 3;
+            slot = 0;
+            function = 0;
+          };
+          address = {
+            type = "pci";
+            domain = 0;
+            bus = 4;
+            slot = 0;
+            function = 0;
+          };
+        }
+        {
+          mode = "subsystem";
+          type = "pci";
+          managed = true;
+          source.address = {
+            domain = 0;
+            bus = 3;
+            slot = 0;
+            function = 1;
+          };
+          address = {
+            type = "pci";
+            domain = 0;
+            bus = 5;
+            slot = 0;
+            function = 0;
+          };
+        }
       ];
     };
 

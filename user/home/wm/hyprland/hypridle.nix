@@ -15,7 +15,7 @@ in {
       lock_cmd = lib.getExe pkgs.hyprlock;
       before_sleep_cmd = "${pkgs.system}/bin/loginctl lock-session";
       after_sleep_cmd = "notify-send 'Zzz'";
-      ignoreDbusInhibit = true;
+      ignoreDbusInhibit = false;
     };
 
     listener = [

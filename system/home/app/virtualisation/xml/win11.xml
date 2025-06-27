@@ -356,7 +356,7 @@
     <!-- Input (evdev) passthrough
     -->
     <input type="evdev">
-      <source dev="/dev/input/by-id/usb-Razer_Razer_Viper_V3_Pro-event-mouse"/>
+      <source dev="/dev/input/by-id/event5"/>
     </input>
     <input type="evdev">
       <source dev="/dev/input/by-id/usb-Razer_Razer_BlackWidow_V4_75_-event-kbd" grab="all" grabToggle="ctrl-ctrl" repeat="on"/>

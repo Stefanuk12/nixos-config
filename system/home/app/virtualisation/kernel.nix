@@ -15,7 +15,10 @@ in {
   #     patch = kernelPatches.svm;
   #   }
   # ];
-  boot.extraModprobeConfig = "options vfio-pci ids=1002:73a5,1002:ab28";
+  boot.extraModprobeConfig = ''
+    options vfio-pci ids=1002:73a5,1002:ab28
+    options kvm_amd nested=1
+  '';
   boot.kernel.sysctl = {
     "vm.nr_hugepages" = 0;
     "vm.nr_overcommit_hugepages" = 15258;
