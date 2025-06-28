@@ -1,5 +1,10 @@
 { pkgs, ... }:
 
 {
-  home.packages = [ pkgs.hyprlock ];
+  programs.hyprlock.enable = true;
+
+  # https://wiki.hyprland.org/Hypr-Ecosystem/hyprlock/
+  programs.hyprlock.settings = {
+
+  };
 }

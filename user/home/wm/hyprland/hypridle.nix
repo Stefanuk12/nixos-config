@@ -10,6 +10,8 @@ let
   '';
 in {
   services.hypridle.enable = true;
+
+  # https://wiki.hyprland.org/Hypr-Ecosystem/hypridle/
   services.hypridle.settings = {
     general = {
       lock_cmd = lib.getExe pkgs.hyprlock;

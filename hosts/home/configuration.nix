@@ -33,8 +33,7 @@ in {
   i18n.defaultLocale = locale;
 
   # Configure keymap in X11
-  services.xserver.xkb.layout = kbLayout;
-  console.keyMap = kbLayout;
+  console.useXkbConfig = true;
 
   # Enable PipeWire - screenshare + sound
   security.rtkit.enable = true;

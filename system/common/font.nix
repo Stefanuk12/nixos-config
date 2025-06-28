@@ -1,6 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
-{
+let
+  allowUnfreesP = pkg: builtins.elem (lib.getName pkg) [
+    "corefonts"
+    "vista-fonts"
+  ];
+in {
   fonts.fontconfig = {
     defaultFonts = {
       emoji = [ "Noto Color Emoji" ];
@@ -11,6 +16,8 @@
     includeUserConf = false;
   };
   fonts.packages = with pkgs; [
+    corefonts
+    vista-fonts
     cascadia-code
     nerd-fonts.arimo
     nerd-fonts.jetbrains-mono
@@ -18,4 +25,5 @@
     noto-fonts-emoji
     sarasa-gothic
   ];
+  nixpkgs.config.allowUnfreePredicate = allowUnfreesP;
 }
