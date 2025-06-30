@@ -55,8 +55,8 @@ in {
     "x-scheme-handler/unknown" = "firefox.desktop";
   };
 
-  environment.systemPackages = [
-    pkgs.pinentry
+  environment.systemPackages = with pkgs; [
+    pinentry
   ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.

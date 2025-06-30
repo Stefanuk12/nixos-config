@@ -12,7 +12,9 @@
     # sops
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-
+    bwm.url = "github:firecat53/bitwarden-menu";
+    bwm.inputs.nixpkgs.follows = "nixpkgs";
+  
     # Nixvim!!
     Neve.url = "github:redyf/Neve";
 
@@ -20,8 +22,7 @@
     nix-colors.url = "github:misterio77/nix-colors";
 
     # VM stuff
-    nixos-vfio.url = "github:Stefanuk12/nixos-vfio/patch-1";    
-    nixvirt.url = "github:AshleyYakeley/NixVirt";
+    nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
@@ -38,7 +39,6 @@
     nixpkgs,
     home-manager,
     nix-colors,
-    nixos-vfio,
     nixvirt,
     nix-minecraft,
     ...

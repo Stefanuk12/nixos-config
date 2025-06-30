@@ -1,11 +1,6 @@
 { pkgs, lib, ... }:
 
-let
-  allowUnfreesP = pkg: builtins.elem (lib.getName pkg) [
-    "corefonts"
-    "vista-fonts"
-  ];
-in {
+{
   fonts.fontconfig = {
     defaultFonts = {
       emoji = [ "Noto Color Emoji" ];
@@ -25,5 +20,4 @@ in {
     noto-fonts-emoji
     sarasa-gothic
   ];
-  nixpkgs.config.allowUnfreePredicate = allowUnfreesP;
 }

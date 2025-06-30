@@ -42,21 +42,6 @@ let
       (makeVcpupin 11 "15")
     ];
 
-    sysinfo.type = "smbios";
-    sysinfo.bios.entry = [
-      (makeNameValue "vendor" "American Megatrends International, LLC.")
-      (makeNameValue "version" "1809")
-      (makeNameValue "date" "09/26/2023")
-    ];
-    sysinfo.system.entry = [
-      (makeNameValue "manufacturer" "ASUSTeK COMPUTER INC.")
-      (makeNameValue "product" "ROG STRIX B560-F GAMING WIFI")
-      (makeNameValue "version" "Rev 1.xx")
-      (makeNameValue "serial" "231027170200317")
-      (makeNameValue "uuid" "cad4ffc1-bd63-4faa-b0af-9f6740589f31")
-      (makeNameValue "sku" "sku")
-    ];
-
     os = {
       type = "hvm";
       arch = "x86_64";
@@ -321,17 +306,7 @@ let
 
     qemu-commandline.arg = [
       (makeValue "-smbios")
-      (makeValue "type=0,uefi=true")
-      (makeValue "-smbios")
-      (makeValue "type=1,serial=To be filled by O.E.M.,uuid=67623a0b-415d-4705-a562-65dbd6c90583")
-      (makeValue "-smbios")
-      (makeValue "type=2,serial=To be filled by O.E.M.")
-      (makeValue "-smbios")
-      (makeValue "type=3,serial=To be filled by O.E.M.")
-      (makeValue "-smbios")
-      (makeValue "type=4,sock_pfx=AM5,max-speed=4400,current-speed=3600")
-      (makeValue "-smbios")
-      (makeValue "type=17,loc_pfx=DIMM_B2,bank=BANK 3,manufacturer=Corsair,serial=00000000,asset=Not Specified,part=CMK32GX5M2B5600C36,speed=5600")
+      (makeValue ("file=" + toString ./smbios.bin))
     ];
 
     qemu-override.device = {
