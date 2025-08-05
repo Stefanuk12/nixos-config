@@ -1,5 +1,0 @@
-{ nixpkgs, config, ... }:
-
-{
-  config.systemSettings = { };
-}

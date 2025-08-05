@@ -77,18 +77,6 @@
           hostName = "vps";
         };
       };
-      mail-server = lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [
-          ./hosts/mail-server/configuration.nix
-          ./hosts/mail-server/hardware-configuration.nix
-          ./secrets
-        ];
-        specialArgs = {
-          inherit inputs;
-          hostName = "mail-server";
-        };
-      };
     };
     homeConfigurations = {
       "stefan@home" = home-manager.lib.homeManagerConfiguration {
@@ -112,18 +100,6 @@
           hostName = "vps";
           username = "stefan";
           system = "x86_64-linux";
-        };
-      };
-      "stefan@mail-server" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages."aarch64-linux";
-        modules = [
-          ./hosts/mail-server/home.nix
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          hostName = "mail-server";
-          username = "stefan";
-          system = "aarch64-linux";
         };
       };
     };
