@@ -33,6 +33,7 @@
     defaults.email = "stefan@petrovic.foo";
     certs."petrovic.foo" = {
       dnsProvider = "cloudflare";
+      webroot = null;
       environmentFile = config.sops.secrets."cloudflare/api_token".path;
       extraDomainNames = [ "*.petrovic.foo" ];
     };
