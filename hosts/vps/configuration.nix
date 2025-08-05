@@ -55,7 +55,7 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "libvirtd" ] ++ ifTheyExist [ "minecraft" ];
+    extraGroups = [ "wheel" "libvirtd" ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
       systemSettings.sshKeys."stefan@windows-pc"
