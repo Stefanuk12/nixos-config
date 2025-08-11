@@ -5,7 +5,6 @@ let
   locale = "en_GB.UTF-8";
   kbLayout = "us";
   systemSettings = config.systemSettings;
-  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in {
   imports =
     [
@@ -74,7 +73,7 @@ in {
   # Enable passwordless sudo.
   security.sudo.extraRules = [
     {
-      users = ["stefan" ];
+      users = [ "stefan" ];
       commands = [
         {
           command = "ALL";
