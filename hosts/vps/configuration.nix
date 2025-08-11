@@ -88,7 +88,7 @@ in {
   documentation.enable = false;
 
   # Systemd-journald limits (avoid log bloat)
-  systemd.journald.extraConfig = ''
+  services.journald.extraConfig = ''
     SystemMaxUse=500M
     RuntimeMaxUse=200M
     MaxFileSec=1month
