@@ -2,9 +2,17 @@
 
 {
   # Load Cloudflare API credentials
-  sops.secrets."api_token" = {
+  sops.secrets."cf_api_token" = {
     sopsFile = ../../../secrets/vps/cloudflare.yaml;
     owner = "acme";
+  };
+  sops.templates."acme-env" = {
+    owner = "acme";
+    group = "acme";
+    mode = "0400";
+    content = ''
+      CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder.cf_api_token}
+    '';
   };
 
   # NGINX setup
@@ -34,7 +42,7 @@
     certs."petrovic.foo" = {
       dnsProvider = "cloudflare";
       webroot = null;
-      environmentFile = config.sops.secrets."api_token".path;
+      environmentFile = config.sops.templates."acme-env".path;
       extraDomainNames = [ "*.petrovic.foo" ];
     };
   };
