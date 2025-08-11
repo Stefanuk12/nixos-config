@@ -38,6 +38,10 @@ let
       ip6tables -A INPUT -p tcp -m multiport --dports 80,443 -s ${ip} -j ACCEPT
     '') cloudflareIPv6);
 in {
+  # Fail2Ban (basic SSH protection)
+  services.fail2ban.enable = true;
+
+  # Allow SSH openly but only Cloudflare IPs on HTTP(S)
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];

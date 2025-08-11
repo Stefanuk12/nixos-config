@@ -8,10 +8,5 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  home.packages = with pkgs; [
-    newman
-    tmux
-  ];
-
-  programs.tmux.enable = true;
+  home.packages = with pkgs; [];
 }

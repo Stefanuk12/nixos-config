@@ -2,7 +2,7 @@
 
 {
   # Load Cloudflare API credentials
-  sops.secrets."cloudflare/api_token" = {
+  sops.secrets."api_token" = {
     sopsFile = ../../../secrets/vps/cloudflare.yaml;
     owner = "acme";
   };
@@ -34,7 +34,7 @@
     certs."petrovic.foo" = {
       dnsProvider = "cloudflare";
       webroot = null;
-      environmentFile = config.sops.secrets."cloudflare/api_token".path;
+      environmentFile = config.sops.secrets."api_token".path;
       extraDomainNames = [ "*.petrovic.foo" ];
     };
   };
