@@ -2,7 +2,7 @@
 
 {
   # Load Cloudflare API credentials
-  sops.secrets."cf_api_token" = {
+  sops.secrets."api_token" = {
     sopsFile = ../../../secrets/vps/cloudflare.yaml;
     owner = "acme";
   };
@@ -11,7 +11,7 @@
     group = "acme";
     mode = "0400";
     content = ''
-      CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder.cf_api_token}
+      CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder.api_token}
     '';
   };
 
