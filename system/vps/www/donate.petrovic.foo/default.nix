@@ -9,6 +9,6 @@ let
 in {
   systemd.tmpfiles.rules = [
     "d /var/www 0755 nginx nginx - -"
-    "L /var/www/donate.petrovic.foo - - - - ${donateRoot}"
+    "L+ /var/www/donate.petrovic.foo - - - - ${donateRoot}"
   ];
 }
