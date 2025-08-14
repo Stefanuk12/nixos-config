@@ -1,9 +1,10 @@
+<!-- entirely vibe coded -->
 <!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>give me money</title>
 
     <!-- Dark mode + theme -->
@@ -43,9 +44,8 @@
             box-sizing: border-box;
         }
 
-        html,
-        body {
-            height: 100%;
+        html {
+            min-height: 100%;
         }
 
         body {
@@ -56,8 +56,10 @@
                 var(--bg);
             color: var(--text);
             display: grid;
-            place-items: center;
+            align-items: start;
+            justify-items: center;
             padding: 24px;
+            min-height: 100vh;
         }
 
         .wrap {
@@ -270,6 +272,10 @@
             .subgrid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @supports (min-height: 100dvh) {
+            body { min-height: 100dvh; }
         }
     </style>
 </head>
