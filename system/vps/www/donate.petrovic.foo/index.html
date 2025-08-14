@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>give me money</title>
+
+    <!-- Dark mode + theme -->
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+
+    <!-- Social embed (Open Graph / Twitter) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://donate.petrovic.foo/" />
+    <meta property="og:site_name" content="donate.petrovic.foo" />
+    <meta property="og:title" content="Donate" />
+    <meta property="og:description" content="support my money addiction" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Donate" />
+    <meta name="twitter:description" content="support my money addiction" />
+    <link rel="canonical" href="https://donate.petrovic.foo/" />
+
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0b0d10;
+            --surface: #12161a;
+            --elev: #151a20;
+            --text: #e7ecf3;
+            --muted: #a7b0bd;
+            --line: #222831;
+            --accent: #7c5cff;
+            --accent-2: #55c2ff;
+            --ok: #44d07b;
+            --warn: #ffb86b;
+            --radius: 14px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .35), 0 1px 0 rgba(255, 255, 255, .03) inset;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 800px at 10% -10%, rgba(124, 92, 255, .10), transparent 60%),
+                radial-gradient(1000px 700px at 110% -10%, rgba(85, 194, 255, .12), transparent 60%),
+                var(--bg);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 1100px;
+            background: linear-gradient(180deg, var(--surface), var(--elev));
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 28px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .title {
+            display: grid;
+            gap: 6px;
+        }
+
+        h1 {
+            font-size: 28px;
+            line-height: 1.2;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .sections {
+            display: grid;
+            gap: 18px;
+        }
+
+        section {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02), rgba(255, 255, 255, 0) 50%);
+        }
+
+        section h2 {
+            margin: 0 0 12px;
+            font-size: 16px;
+            letter-spacing: .3px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, .16);
+        }
+
+        .left {
+            display: grid;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .label {
+            font-weight: 600;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        a.btn {
+            appearance: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 9px;
+            border: 1px solid color-mix(in oklab, var(--accent) 60%, white 0%);
+            color: white;
+            background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 60%, black 20%), color-mix(in oklab, var(--accent) 60%, black 35%));
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(124, 92, 255, .25);
+            transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+            white-space: nowrap;
+        }
+
+        a.btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(124, 92, 255, .32);
+        }
+
+        a.btn:active {
+            transform: translateY(0);
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            word-break: break-all;
+        }
+
+        .addr {
+            display: grid;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+        }
+
+        .addr-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .2);
+            white-space: nowrap;
+        }
+
+        .copy {
+            cursor: pointer;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(0, 0, 0, .06));
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: background .2s ease, transform .06s ease;
+            white-space: nowrap;
+        }
+
+        .copy:hover {
+            background: rgba(255, 255, 255, .10);
+        }
+
+        .copy:active {
+            transform: translateY(1px);
+        }
+
+        .foot {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            a.btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* USDT grouping */
+        .item.usdt {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .subgrid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .subitem {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, .12);
+            display: grid;
+            gap: 8px;
+        }
+
+        @media (max-width: 800px) {
+            .subgrid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap" role="main">
+        <header>
+            <div class="title">
+                <h1>Donate</h1>
+                <p class="subtitle">support my money addiction</p>
+            </div>
+        </header>
+
+        <div class="sections">
+            <section aria-labelledby="fiat">
+                <h2 id="fiat">Fiat</h2>
+                <div class="list" role="list">
+                    <div class="item" role="listitem">
+                        <div class="left">
+                            <div class="label">PayPal</div>
+                        </div>
+                        <a class="btn" href="https://paypal.me/Stefanuk12" target="_blank" rel="noopener noreferrer"
+                            aria-label="Donate with PayPal">Open PayPal</a>
+                    </div>
+
+                    <div class="item" role="listitem">
+                        <div class="left">
+                            <div class="label">Amazon Wishlist</div>
+                        </div>
+                        <a class="btn" href="https://www.amazon.co.uk/hz/wishlist/ls/SS4UCUNBU5D8" target="_blank"
+                            rel="noopener noreferrer" aria-label="Open Amazon wishlist">Open Wishlist</a>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="crypto">
+                <h2 id="crypto">Crypto</h2>
+                <div class="list" role="list">
+                    <!-- LTC -->
+                    <div class="item" role="listitem">
+                        <div class="left">
+                            <div class="label">Litecoin (LTC)</div>
+                            <div class="meta">Minimum: 0.01 LTC</div>
+                            <div class="addr">
+                                <div class="addr-row">
+                                    <code class="mono" id="addr-ltc">LU3fQKkQ1vMJk4tAUuAeaFeEmLB7k1QVpr</code>
+                                </div>
+                                <div>
+                                    <button class="copy" data-target="#addr-ltc">Copy address</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- USDT grouped -->
+                    <div class="item usdt" role="listitem">
+                        <div class="left">
+                            <div class="label">Tether USD (USDT)</div>
+                            <div class="meta">Two networks supported</div>
+                            <div class="subgrid">
+                                <div class="subitem">
+                                    <div class="label">Solana</div>
+                                    <div class="meta">Minimum: 0.4 USDT • SPL</div>
+                                    <div class="addr">
+                                        <div class="addr-row">
+                                            <code class="mono"
+                                                id="addr-usdt-sol">qMaihYkYXaoWHyW9cc1mXHCzzC3dZUfGCAXFWzB8bGh</code>
+                                        </div>
+                                        <div>
+                                            <button class="copy" data-target="#addr-usdt-sol">Copy address</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="subitem">
+                                    <div class="label">Tron</div>
+                                    <div class="meta">Minimum: 5 USDT • TRC20</div>
+                                    <div class="addr">
+                                        <div class="addr-row">
+                                            <code class="mono"
+                                                id="addr-usdt-tron">TL62HyZAQsVkQYc7rjxq7zjU4R8sHcnN1o</code>
+                                        </div>
+                                        <div>
+                                            <button class="copy" data-target="#addr-usdt-tron">Copy address</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <p class="foot">Thank you for the support. You're awesome.</p>
+    </main>
+
+    <script>
+        function copyText(selector) {
+            const el = document.querySelector(selector);
+            if (!el) return false;
+            const text = el.textContent.trim();
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'absolute';
+            area.style.left = '-9999px';
+            document.body.appendChild(area);
+            area.select();
+            try { document.execCommand('copy'); } catch { }
+            document.body.removeChild(area);
+            return Promise.resolve();
+        }
+
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.copy');
+            if (!btn) return;
+            const target = btn.getAttribute('data-target');
+            const original = btn.textContent;
+            try {
+                await copyText(target);
+                btn.textContent = 'Copied!';
+                btn.style.borderColor = 'color-mix(in oklab, var(--ok) 70%, white 0%)';
+                setTimeout(() => { btn.textContent = original; btn.style.borderColor = 'var(--line)'; }, 1500);
+            } catch (err) {
+                btn.textContent = 'Copy failed';
+                btn.style.borderColor = 'color-mix(in oklab, var(--warn) 70%, white 0%)';
+                setTimeout(() => { btn.textContent = original; btn.style.borderColor = 'var(--line)'; }, 1500);
+            }
+        });
+    </script>
+</body>
+
+</html>
