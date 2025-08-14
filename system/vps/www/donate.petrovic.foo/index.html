@@ -101,13 +101,16 @@
         .sections {
             display: grid;
             gap: 18px;
+            border-top: 1px solid var(--line);
+            padding-top: 16px;
         }
 
         section {
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 18px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .02), rgba(255, 255, 255, 0) 50%);
+            /* headers only – no container box */
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: none;
         }
 
         section h2 {
@@ -187,12 +190,78 @@
             background: rgba(255, 255, 255, .03);
             border: 1px dashed var(--line);
             border-radius: 8px;
+            position: relative; /* for the copied badge */
         }
 
         .addr-row {
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* Make address text interactive */
+        .addr [data-copy] {
+            cursor: pointer;
+        }
+
+        .addr [data-copy]:hover {
+            text-decoration: none;
+            outline: none;
+        }
+
+        .addr [data-copy]:focus {
+            outline: none;
+        }
+
+        /* Highlight the dashed box itself on hover/focus of the address */
+        .addr:has([data-copy]:hover),
+        .addr:has([data-copy]:focus-visible) {
+            border-color: color-mix(in oklab, var(--ok) 70%, white 0%);
+        }
+
+        .addr.copied {
+            border-color: color-mix(in oklab, var(--ok) 70%, white 0%);
+            animation: addrPulse 650ms ease-out 0s 1;
+        }
+
+        .addr.copied::after {
+            content: 'Copied!';
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text);
+            background: linear-gradient(180deg, rgba(68, 208, 123, .20), rgba(68, 208, 123, .06));
+            border: 1px solid color-mix(in oklab, var(--ok) 70%, white 0%);
+            padding: 2px 8px;
+            border-radius: 999px;
+            box-shadow: 0 2px 8px color-mix(in oklab, var(--ok) 40%, transparent);
+            animation: badgePop 1200ms ease-out both;
+            pointer-events: none;
+        }
+
+        /* Reserve space on the right so the badge doesn't overlap address text */
+        .addr.copied .addr-row {
+            padding-right: 64px; /* slightly closer to the badge */
+        }
+
+        @keyframes addrPulse {
+            0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 45%, transparent); }
+            70% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--ok) 0%, transparent); }
+            100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 0%, transparent); }
+        }
+
+        @keyframes badgePop {
+            0% { opacity: 0; transform: translateY(-50%) scale(.9); }
+            15% { opacity: 1; transform: translateY(-50%) scale(1); }
+            85% { opacity: 1; transform: translateY(-50%) scale(1); }
+            100% { opacity: 0; transform: translateY(-50%) scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .addr.copied { animation: none; }
+            .addr.copied::after { animation: none; }
         }
 
         .pill {
@@ -321,10 +390,7 @@
                             <div class="meta">Minimum: 0.01 LTC</div>
                             <div class="addr">
                                 <div class="addr-row">
-                                    <code class="mono" id="addr-ltc">LU3fQKkQ1vMJk4tAUuAeaFeEmLB7k1QVpr</code>
-                                </div>
-                                <div>
-                                    <button class="copy" data-target="#addr-ltc">Copy address</button>
+                                    <code class="mono" id="addr-ltc" data-copy role="button" tabindex="0" title="Click to copy">LU3fQKkQ1vMJk4tAUuAeaFeEmLB7k1QVpr</code>
                                 </div>
                             </div>
                         </div>
@@ -341,11 +407,7 @@
                                     <div class="meta">Minimum: 0.4 USDT • SPL</div>
                                     <div class="addr">
                                         <div class="addr-row">
-                                            <code class="mono"
-                                                id="addr-usdt-sol">qMaihYkYXaoWHyW9cc1mXHCzzC3dZUfGCAXFWzB8bGh</code>
-                                        </div>
-                                        <div>
-                                            <button class="copy" data-target="#addr-usdt-sol">Copy address</button>
+                                            <code class="mono" id="addr-usdt-sol" data-copy role="button" tabindex="0" title="Click to copy">qMaihYkYXaoWHyW9cc1mXHCzzC3dZUfGCAXFWzB8bGh</code>
                                         </div>
                                     </div>
                                 </div>
@@ -354,11 +416,7 @@
                                     <div class="meta">Minimum: 5 USDT • TRC20</div>
                                     <div class="addr">
                                         <div class="addr-row">
-                                            <code class="mono"
-                                                id="addr-usdt-tron">TL62HyZAQsVkQYc7rjxq7zjU4R8sHcnN1o</code>
-                                        </div>
-                                        <div>
-                                            <button class="copy" data-target="#addr-usdt-tron">Copy address</button>
+                                            <code class="mono" id="addr-usdt-tron" data-copy role="button" tabindex="0" title="Click to copy">TL62HyZAQsVkQYc7rjxq7zjU4R8sHcnN1o</code>
                                         </div>
                                     </div>
                                 </div>
@@ -373,17 +431,14 @@
     </main>
 
     <script>
-        function copyText(selector) {
-            const el = document.querySelector(selector);
-            if (!el) return false;
-            const text = el.textContent.trim();
-
+        function copyString(text) {
+            const value = (text || '').trim();
+            if (!value) return Promise.resolve();
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text);
+                return navigator.clipboard.writeText(value);
             }
-
             const area = document.createElement('textarea');
-            area.value = text;
+            area.value = value;
             area.setAttribute('readonly', '');
             area.style.position = 'absolute';
             area.style.left = '-9999px';
@@ -394,20 +449,42 @@
             return Promise.resolve();
         }
 
+        function markCopied(el, ok = true) {
+            const box = el.closest('.addr');
+            if (!box) return;
+            const prev = box.style.borderColor;
+            box.classList.toggle('copied', ok);
+            if (!ok) box.style.borderColor = 'color-mix(in oklab, var(--warn) 70%, white 0%)';
+            setTimeout(() => {
+                box.classList.remove('copied');
+                box.style.borderColor = '';
+            }, 1500);
+        }
+
+        // Click to copy on address code elements
         document.addEventListener('click', async (e) => {
-            const btn = e.target.closest('.copy');
-            if (!btn) return;
-            const target = btn.getAttribute('data-target');
-            const original = btn.textContent;
+            const code = e.target.closest('.addr [data-copy]');
+            if (!code) return;
             try {
-                await copyText(target);
-                btn.textContent = 'Copied!';
-                btn.style.borderColor = 'color-mix(in oklab, var(--ok) 70%, white 0%)';
-                setTimeout(() => { btn.textContent = original; btn.style.borderColor = 'var(--line)'; }, 1500);
+                await copyString(code.textContent);
+                markCopied(code, true);
             } catch (err) {
-                btn.textContent = 'Copy failed';
-                btn.style.borderColor = 'color-mix(in oklab, var(--warn) 70%, white 0%)';
-                setTimeout(() => { btn.textContent = original; btn.style.borderColor = 'var(--line)'; }, 1500);
+                markCopied(code, false);
+            }
+        });
+
+        // Keyboard support (Enter/Space)
+        document.addEventListener('keydown', async (e) => {
+            const target = e.target.closest('.addr [data-copy]');
+            if (!target) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                try {
+                    await copyString(target.textContent);
+                    markCopied(target, true);
+                } catch (err) {
+                    markCopied(target, false);
+                }
             }
         });
     </script>
