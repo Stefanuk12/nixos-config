@@ -231,6 +231,7 @@
             right: 8px;
             transform: translateY(-50%);
             font-size: 12px;
+            font-weight: 600;
             color: var(--text);
             background: linear-gradient(180deg, rgba(68, 208, 123, .20), rgba(68, 208, 123, .06));
             border: 1px solid color-mix(in oklab, var(--ok) 70%, white 0%);
@@ -253,10 +254,10 @@
         }
 
         @keyframes badgePop {
-            0% { opacity: 0; transform: translateY(-50%) scale(.9); }
-            15% { opacity: 1; transform: translateY(-50%) scale(1); }
-            85% { opacity: 1; transform: translateY(-50%) scale(1); }
-            100% { opacity: 0; transform: translateY(-50%) scale(1); }
+            0% { opacity: 0; transform: translateY(-50%); }
+            15% { opacity: 1; transform: translateY(-50%); }
+            85% { opacity: 1; transform: translateY(-50%); }
+            100% { opacity: 0; transform: translateY(-50%); }
         }
 
         @media (prefers-reduced-motion: reduce) {
