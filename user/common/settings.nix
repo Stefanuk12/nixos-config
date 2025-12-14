@@ -13,7 +13,7 @@ in {
     };
     email = mkOption {
       type = types.str;
-      default = "stefanukpadd@gmail.com";
+      default = "stefan@petrovic.foo";
       description = ''
         An email to use for things like Git.
       '';

@@ -1,14 +1,18 @@
 { lib, config, ... }:
 
 {
-  # Load the secrets in
-  sops.secrets."petrovic.foo/key" = {
-    sopsFile = ../../../secrets/vps/ssl.yaml;
-    owner = "nginx";
+  # Load Cloudflare API credentials
+  sops.secrets."api_token" = {
+    sopsFile = ../../../secrets/vps/cloudflare.yaml;
+    owner = "acme";
   };
-  sops.secrets."petrovic.foo/cert" = {
-    sopsFile = ../../../secrets/vps/ssl.yaml;
-    owner = "nginx";
+  sops.templates."acme-env" = {
+    owner = "acme";
+    group = "acme";
+    mode = "0400";
+    content = ''
+      CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder.api_token}
+    '';
   };
 
   # NGINX setup
@@ -32,5 +36,14 @@
     };
   };
 
-  security.acme.certs."petrovic.foo".webroot = null;
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "stefan@petrovic.foo";
+    certs."petrovic.foo" = {
+      dnsProvider = "cloudflare";
+      webroot = null;
+      environmentFile = config.sops.templates."acme-env".path;
+      extraDomainNames = [ "*.petrovic.foo" ];
+    };
+  };
 }

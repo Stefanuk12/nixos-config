@@ -1,6 +1,6 @@
 keys:
   - &home_stefan age1dajz50c7jpv7z6mtc4tx20gtes7twc8w3qa0502j43k0wz029f7shy7d3r
-  - &vps_stefan age1qpd3cg2juq55e7v3rvarlred3k2vm2gaxm3x9hprnzn8te8yyezqjdamp4
+  - &vps_stefan age17uewr2tu8humxsgf6l4t97dyt55weyuecf9jajesclxnasakdf4semu6qv 
 creation_rules:
   - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
     key_groups:

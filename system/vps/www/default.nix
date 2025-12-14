@@ -1,0 +1,7 @@
+{ ... }:
+
+{
+  imports = [
+    ./donate.petrovic.foo
+  ];
+}
