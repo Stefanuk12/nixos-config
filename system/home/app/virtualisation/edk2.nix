@@ -1,8 +1,8 @@
 { pkgs, ... }:
 let
   edk2-patch_amd = pkgs.fetchpatch {
-    url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/EDK2/amd-edk2-stable202505.patch";
-    hash = "sha256-NWOI6bQ+8BtyYGYpkmroSHenYjBCy8Knk+aQS9xUS5A=";
+    url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/patches/EDK2/amd-edk2-stable202511.patch";
+    hash = "sha256-yvu1Elbn1a8WHIu11sH3F8C/eFAM+WoQ2/cCJk1lFfc=";
     # Convert to DOS line endings
     # https://github.com/Scrut1ny/Hypervisor-Phantom/issues/43#top
     decode = "sed 's/$/\\r/'";

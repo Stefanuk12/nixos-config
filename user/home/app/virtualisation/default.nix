@@ -18,7 +18,7 @@
   ];
 
   home.file.".config/libvirt/qemu.conf".text = ''
-    nvram = ["/run/libvirt/nix-ovmf/OVMF_CODE.fd:/run/libvirt/nix-ovmf/OVMF_VARS.fd"]
+    nvram = ["/run/libvirt/nix-ovmf/edk2-x86_64-secure-code.fd:/run/libvirt/nix-ovmf/edk2-i386-vars.fd"]
   '';
 
   dconf.settings = {

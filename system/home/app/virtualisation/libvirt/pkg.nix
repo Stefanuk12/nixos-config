@@ -1,24 +1,6 @@
-{
-  pkgs,
-  inputs,
-  config,
-  lib,
-  ...
-}:
-let
-  secureBootOVMF = pkgs.OVMF.override {
-    secureBoot = true;
-    # msVarsTemplate = true;
-    tpmSupport = true;
-    tlsSupport = true;
-  };
-in {
-  imports = [
-    # inputs.nixvirt.nixosModules.default
-    ./qemu
-    # ./xml
-  ];
+{ pkgs, inputs, config, lib, ... }:
 
+{
   networking.interfaces.eth0.useDHCP = true;
   networking.interfaces.br0.useDHCP = true;
   networking.bridges = {
@@ -47,19 +29,28 @@ in {
   virtualisation.libvirtd.qemu = {
     runAsRoot = true;
     swtpm.enable = true;
-    ovmf = {
-      enable = true;
-      packages = [secureBootOVMF.fd];
-    };
     verbatimConfig = ''
       nvram = [
-        "/run/libvirt/nix-ovmf/OVMF_VARS.fd"
+        "/run/libvirt/nix-ovmf/edk2-i386-vars.fd"
+      ]
+
+      cgroup_device_acl = [
+        "/dev/kvmfr0",
+        "/dev/null",
+        "/dev/kvm",
+        "/dev/full",
+        "/dev/zero",
+        "/dev/random",
+        "/dev/urandom",
+        "/dev/ptmx",
+        "/dev/kqemu",
+        "/dev/rtc"
       ]
     '';
   };
 
   users.groups.libvirtd.members = ["root" "stefan"];
-  users.groups.kvm.members = ["root" "stefan"];
+  users.groups.kvm.members = ["root" "stefan" "qemu-libvirtd"];
 
   environment.systemPackages = with pkgs; [
     python313Packages.virt-firmware

@@ -7,7 +7,7 @@ let
     };
   };
 in {
-  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_14;
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_18;
   # Disabled - current patches mess up CPU frequency, purely visual though
   # boot.kernelPatches = [
   #   {
@@ -41,6 +41,6 @@ in {
   ];
   boot.extraModulePackages = [
     config.boot.kernelPackages.ddcci-driver
-    pkgs.linuxKernel.packages.linux_6_14.kvmfr
+    pkgs.linuxKernel.packages.linux_6_18.kvmfr
   ];
 }

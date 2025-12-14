@@ -35,7 +35,15 @@ in {
 
   # Disable sound.
   # sound.enable = true;
-  services.pulseaudio.enable = false;
+  services.pulseaudio = {
+    enable = true;
+    systemWide = true;
+  };
+  users.groups.pulse-access.members = [
+    "root"
+    "stefan"
+    "qemu-libvirtd"
+  ];
 
   # Enable root login
   security.sudo.enable = true;

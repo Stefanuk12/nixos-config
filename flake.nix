@@ -26,7 +26,7 @@
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
-    lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
+    lanzaboote.url = "github:nix-community/lanzaboote/v1.0.0";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
   
     # For VPS - Minecraft server

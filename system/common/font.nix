@@ -17,7 +17,7 @@
     nerd-fonts.arimo
     nerd-fonts.jetbrains-mono
     # nerd-fonts.nerd-fonts-symbols-only
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     sarasa-gothic
   ];
 }

@@ -56,7 +56,7 @@ in {
   };
 
   environment.systemPackages = with pkgs; [
-    pinentry
+    pinentry-curses
   ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.

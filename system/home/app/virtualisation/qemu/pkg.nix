@@ -2,22 +2,29 @@
 
 let
   hypervisor-phantom_amd = {
-    main = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/QEMU/amd-qemu-10.0.2.patch";
-      hash = "sha256-eZOH00WZQ7nDF+yny01vYrvmpPlrH6cGxtxL/QxNE7g=";
+    main = pkgs.substitute {
+      src = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/patches/QEMU/amd-qemu-10.1.1.patch";
+        hash = "sha256-dIS6nSiMe+r+mWHu8WeFUowEfR5uDlvwtA7KA7tzCCQ=";
+      };
+      substitutions = [
+        "--replace-fail"
+        "AMD Ryzen 7 7700X 8-Core Processor"
+        "AMD Ryzen 7 7600X 6-Core Processor"
+        "--replace-fail"
+        ''0x1022 // "Red Hat, Inc."''
+        ''0x1b36 // "Red Hat, Inc."''
+      ];
     };
     libnfs6 = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/QEMU/libnfs6-qemu-10.0.2.patch";
+      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/patches/QEMU/libnfs6-qemu-10.1.1.patch";
       hash = "sha256-8DYaDJgNqjExUfEF9NMAv/IpmsJTDeGebQuk3r2F6BQ=";
     };
-    cpu = builtins.readFile ./cpu.patch;
   };
   qemuSpoof = builtins.readFile ./qemu-spoof.sh;
   patched-qemu = pkgs.qemu.overrideAttrs (finalAttrs: previousAttrs: {
-    nativeBuildInputs = (previousAttrs.nativeBuildInputs or []) ++ [ pkgs.hexdump ];
     patches = [
       hypervisor-phantom_amd.main
-      ./cpu.patch
       hypervisor-phantom_amd.libnfs6
     ];
     postPatch = ''

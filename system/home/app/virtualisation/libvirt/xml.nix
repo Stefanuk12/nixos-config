@@ -53,10 +53,10 @@ let
       loader = {
         readonly = true;
         type = "pflash";
-        path = /run/libvirt/nix-ovmf/OVMF_CODE.fd;
+        path = /run/libvirt/nix-ovmf/edk2-x86_64-secure-code.fd;
       };
       nvram = {
-        template = /run/libvirt/nix-ovmf/OVMF_VARS.fd;
+        template = /run/libvirt/nix-ovmf/edk2-i386-vars.fd;
         path = /var/lib/libvirt/qemu/nvram/win11_VARS.fd;
       };
     };
@@ -79,12 +79,20 @@ let
           state = true;
           value = "AuthenticAMD";
         };
+        reenlightenment.state = false;
+        tlbflush.state = false;
+        ipi.state = false;
+        evmcs.state = false;
+        avic.state = false;
+        emsr_bitmap.state = false;
+        xmm_input.state = false;
       };
       kvm.hidden.state = true;
       smm.state = true;
       pmu.state = false;
       ioapic.driver = "kvm";
       msrs.unknown = "fault";
+      vmport.state = false;
     };
 
     cpu = {
@@ -105,6 +113,8 @@ let
         (makeFeature "require" "svm")
         (makeFeature "require" "topoext")
         (makeFeature "require" "invtsc")
+        (makeFeature "disable" "vmx-vnmi")
+        (makeFeature "disable" "hypervisor")
         (makeFeature "disable" "ssbd")
         (makeFeature "disable" "amd-ssbd")
         (makeFeature "disable" "virt-ssbd")
@@ -117,13 +127,13 @@ let
       timezone = "Europe/London";
     
       timer = [
-        { name = "hpet"; present = false; }
-        { name = "rtc"; present = false; tickpolicy = "catchup"; }
-        { name = "pit"; tickpolicy = "discard"; }
-        { name = "tsc"; present = true; mode = "native"; }
+        { name = "tsc"; present = true; mode = "native"; tickpolicy = "discard"; }
+        { name = "hpet"; present = true; }
+        { name = "rtc"; present = false; }
+        { name = "pit"; present = false; }
 
         { name = "kvmclock"; present = false; }
-        { name = "hypervclock"; present = true; }
+        { name = "hypervclock"; present = false; }
       ];
     };
 
@@ -174,15 +184,15 @@ let
 
       interface = [
         {
-          type = "bridge";
-          mac.address = "52:54:00:20:c8:5d";
-          source.bridge = "br0";
-          model.type = "e1000e"; 
+          type = "network";
+          mac.address = "52:54:3a:20:c8:5d";
+          source.network = "network";
+          model.type = "rtl8139"; 
           link.state = "up";
           address = {
             type = "pci";
             domain = 0;
-            bus = 1;
+            bus = 10;
             slot = 0;
             function = 0;
           };
@@ -192,12 +202,12 @@ let
       input = [
         {
           type = "evdev";
-          source.dev = "/dev/input/event5";
+          source.dev = "/dev/input/event0";
         }
         {
           type = "evdev";
           source = {
-            dev = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_V4_75_-event-kbd";
+            dev = "/dev/input/event5";
             grab = "all";
             grabToggle = "ctrl-ctrl";
             repeat = true;
@@ -241,19 +251,19 @@ let
 
       memballoon.model = "none";
 
-      shmem = {
-        name = "looking-glass";
+      # shmem = {
+      #   name = "looking-glass";
 
-        model.type = "ivshmem-plain";
-        size = makeUnitCount "M" 32;
-        address = {
-          type = "pci";
-          domain = 0;
-          bus = 16;
-          slot = 0;
-          function = 0;
-        };
-      };
+      #   model.type = "ivshmem-plain";
+      #   size = makeUnitCount "M" 32;
+      #   address = {
+      #     type = "pci";
+      #     domain = 0;
+      #     bus = 16;
+      #     slot = 0;
+      #     function = 0;
+      #   };
+      # };
 
       controller = [
         (makeController "usb" 0 "qemu-xhci")
@@ -306,7 +316,11 @@ let
 
     qemu-commandline.arg = [
       (makeValue "-smbios")
-      (makeValue ("file=" + toString ./smbios.bin))
+      (makeValue ("file=" + toString ./smbios2.bin))
+      # (makeValue "-device")
+      # (makeValue "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}")
+      # (makeValue "-object")
+      # (makeValue "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':33554432,'share':true}")
     ];
 
     qemu-override.device = {

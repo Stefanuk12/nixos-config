@@ -1,14 +1,7 @@
 { ... }:
 
 {
-  virtualisation.kvmfr.enable = true;
-  virtualisation.devices = [
-    {
-      size = 32;
-
-      permissions = {
-        user = "stefan";
-      };
-    }
-  ];
+  services.udev.extraRules = ''
+    SUBSYSTEM=="kvmfr", OWNER="stefan", GROUP="kvm", MODE="0660"
+  '';
 }

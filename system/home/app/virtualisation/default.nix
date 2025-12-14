@@ -2,11 +2,11 @@
 
 {
   imports = [
-    ./libvirt.nix
+    ./libvirt
+    ./looking_glass
     ./qemu
-    ./kernel.nix
     ./edk2.nix
-    ./xml.nix
+    ./kernel.nix
   ];
 
   programs = {
