@@ -31,7 +31,7 @@
     swtpm.enable = true;
     verbatimConfig = ''
       nvram = [
-        "/run/libvirt/nix-ovmf/edk2-i386-vars.fd"
+        "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd"
       ]
 
       cgroup_device_acl = [

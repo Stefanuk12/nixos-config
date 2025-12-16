@@ -27,7 +27,7 @@ in {
     # "amdgpu.dc=0"
     # "radeon.modeset=0"
     "iommu=pt"
-    "kvm.ignore-msrs=1"
+    "kvm.ignore_msrs=1"
     "kvmfr.static_size_mb=32"
   ];
   boot.initrd.kernelModules = [

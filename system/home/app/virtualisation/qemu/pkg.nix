@@ -22,7 +22,7 @@ let
     };
   };
   qemuSpoof = builtins.readFile ./qemu-spoof.sh;
-  patched-qemu = pkgs.qemu.overrideAttrs (finalAttrs: previousAttrs: {
+  patched-qemu = pkgs.qemu_kvm.overrideAttrs (finalAttrs: previousAttrs: {
     patches = [
       hypervisor-phantom_amd.main
       hypervisor-phantom_amd.libnfs6

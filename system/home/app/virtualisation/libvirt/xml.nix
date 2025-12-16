@@ -53,10 +53,12 @@ let
       loader = {
         readonly = true;
         type = "pflash";
-        path = /run/libvirt/nix-ovmf/edk2-x86_64-secure-code.fd;
+        path = "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd";
+        format = "raw";
       };
       nvram = {
-        template = /run/libvirt/nix-ovmf/edk2-i386-vars.fd;
+        template = "${pkgs.OVMF.fd}/FV/OVMF_VARS.fd";
+        templateFormat = "raw";
         path = /var/lib/libvirt/qemu/nvram/win11_VARS.fd;
       };
     };
