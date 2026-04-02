@@ -2,7 +2,7 @@
 let
   kernelPatches = {
     svm = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/Hypervisor-Phantom/patches/Kernel/linux-6.13-svm.patch";
+      url = "https://raw.githubusercontent.com/Scrut1ny/AutoVirt/refs/heads/main/patches/Kernel/Archive/linux-6.18.8-svm.patch";
       hash = "sha256-zz18xerutulLGzlHhnu26WCY8rVQXApyeoDtCjbejIk=";
     };
   };
@@ -11,7 +11,7 @@ in {
   # Disabled - current patches mess up CPU frequency, purely visual though
   # boot.kernelPatches = [
   #   {
-  #     name = "hypervisor-phantom-svm";
+  #     name = "autovirt-svm";
   #     patch = kernelPatches.svm;
   #   }
   # ];
@@ -26,21 +26,19 @@ in {
   boot.kernelParams = [
     # "amdgpu.dc=0"
     # "radeon.modeset=0"
+    "amdgpu.ppfeaturemask=0xf7fff"
     "iommu=pt"
     "kvm.ignore_msrs=1"
-    "kvmfr.static_size_mb=32"
   ];
   boot.initrd.kernelModules = [
     "vfio_pci"
     "vfio"
     "vfio_iommu_type1"
-    "kvmfr"
 
     "i2c_dev"
     "ddcci_backlight"
   ];
   boot.extraModulePackages = [
     config.boot.kernelPackages.ddcci-driver
-    pkgs.linuxKernel.packages.linux_6_18.kvmfr
   ];
 }

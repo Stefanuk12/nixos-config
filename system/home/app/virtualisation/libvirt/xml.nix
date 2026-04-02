@@ -186,9 +186,9 @@ let
 
       interface = [
         {
-          type = "network";
+          type = "bridge";
           mac.address = "52:54:3a:20:c8:5d";
-          source.network = "network";
+          source.bridge = "br0";
           model.type = "rtl8139"; 
           link.state = "up";
           address = {
@@ -244,6 +244,14 @@ let
         serverName = "/run/user/1000/pulse/native";
       };
 
+      graphics = {
+        type = "spice";
+        port = -1;
+        autoport = false;
+        listen.type = "address";
+        image.compression = false;
+        gl.enable = false;
+      };
       video.model.type = "none";
 
       watchdog = {

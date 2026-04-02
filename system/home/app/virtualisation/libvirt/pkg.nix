@@ -1,14 +1,6 @@
 { pkgs, inputs, config, lib, ... }:
 
 {
-  networking.interfaces.eth0.useDHCP = true;
-  networking.interfaces.br0.useDHCP = true;
-  networking.bridges = {
-    "br0" = {
-      interfaces = ["eth0"];
-    };
-  };
-
   # remove need for sudo auth when switching inputs
   security.sudo.extraRules = [
     {

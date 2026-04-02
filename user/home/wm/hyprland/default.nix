@@ -13,9 +13,12 @@ in {
   ];
 
   wayland.windowManager.hyprland.enable = true;
+  wayland.windowManager.hyprland.systemd.enable = false; 
   wayland.windowManager.hyprland.settings = {
     "$mod" = "SUPER";
 
+    debug.disable_logs = true;
+ 
     general = {
       no_border_on_floating = true;
 
