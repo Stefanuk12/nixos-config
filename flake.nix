@@ -32,6 +32,10 @@
     # For VPS - Minecraft server
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
     nix-minecraft.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Other tools
+    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
+    claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
   };
   
   outputs = {
