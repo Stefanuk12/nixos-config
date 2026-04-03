@@ -2,7 +2,8 @@
 let
   mkOption = lib.mkOption;
   types = lib.types;
-in {
+in
+{
   options.userSettings = {
     name = mkOption {
       type = types.str;

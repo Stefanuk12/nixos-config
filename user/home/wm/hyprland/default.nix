@@ -2,7 +2,8 @@
 
 let
   userSettings = config.userSettings;
-in {
+in
+{
   imports = [
     ../../../common/app/terminal
     ./cursor
@@ -13,12 +14,12 @@ in {
   ];
 
   wayland.windowManager.hyprland.enable = true;
-  wayland.windowManager.hyprland.systemd.enable = false; 
+  wayland.windowManager.hyprland.systemd.enable = false;
   wayland.windowManager.hyprland.settings = {
     "$mod" = "SUPER";
 
     debug.disable_logs = true;
- 
+
     general = {
       no_border_on_floating = true;
 
@@ -102,33 +103,34 @@ in {
       "blurpopups, waybar"
       "ignorealpha 0.2, waybar"
     ];
-    bind =
-      [
-        "$mod, F, exec, firefox"
+    bind = [
+      "$mod, F, exec, firefox"
 
-        "SUPER, RETURN, exec, ${userSettings.terminal}"
-        "SUPER, code:47, exec, fuzzel"
-        "SUPER, Q, killactive"
-        "SUPERSHIFT, Q, exit"
+      "SUPER, RETURN, exec, ${userSettings.terminal}"
+      "SUPER, code:47, exec, fuzzel"
+      "SUPER, Q, killactive"
+      "SUPERSHIFT, Q, exit"
 
-        "CONTROLALT, Delete, exec, hyprctl dispatch exit"
+      "CONTROLALT, Delete, exec, hyprctl dispatch exit"
 
-        "CONTROLALT, Left, exec, sudo ddcutil -d 2 setvcp 60 0x0f"
-        "CONTROLALT, Right, exec, sudo ddcutil -d 2 setvcp 60 0x11"
-      ]
-      ++ (
-        builtins.concatLists (builtins.genList (
-            x: let
-              ws = let
-                c = (x + 1) / 10;
-              in
-                builtins.toString (x + 1 - (c * 10));
-            in [
-              "$mod, ${ws}, workspace, ${toString (x + 1)}"
-              "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
-            ]
-          )
-          10)
-      );
+      "CONTROLALT, Left, exec, sudo ddcutil -d 2 setvcp 60 0x0f"
+      "CONTROLALT, Right, exec, sudo ddcutil -d 2 setvcp 60 0x11"
+    ]
+    ++ (builtins.concatLists (
+      builtins.genList (
+        x:
+        let
+          ws =
+            let
+              c = (x + 1) / 10;
+            in
+            builtins.toString (x + 1 - (c * 10));
+        in
+        [
+          "$mod, ${ws}, workspace, ${toString (x + 1)}"
+          "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
+        ]
+      ) 10
+    ));
   };
 }

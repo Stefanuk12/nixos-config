@@ -28,16 +28,19 @@ let
     "2c0f:f248::/32"
   ];
 
-  ipv4Commands = builtins.concatStringsSep "\n"
-    (map (ip: ''
+  ipv4Commands = builtins.concatStringsSep "\n" (
+    map (ip: ''
       iptables -A INPUT -p tcp -m multiport --dports 80,443 -s ${ip} -j ACCEPT
-    '') cloudflareIPv4);
+    '') cloudflareIPv4
+  );
 
-  ipv6Commands = builtins.concatStringsSep "\n"
-    (map (ip: ''
+  ipv6Commands = builtins.concatStringsSep "\n" (
+    map (ip: ''
       ip6tables -A INPUT -p tcp -m multiport --dports 80,443 -s ${ip} -j ACCEPT
-    '') cloudflareIPv6);
-in {
+    '') cloudflareIPv6
+  );
+in
+{
   # Fail2Ban (basic SSH protection)
   services.fail2ban.enable = true;
 

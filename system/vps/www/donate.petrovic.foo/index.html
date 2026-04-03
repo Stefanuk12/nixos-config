@@ -190,7 +190,8 @@
             background: rgba(255, 255, 255, .03);
             border: 1px dashed var(--line);
             border-radius: 8px;
-            position: relative; /* for the copied badge */
+            position: relative;
+            /* for the copied badge */
         }
 
         .addr-row {
@@ -244,25 +245,54 @@
 
         /* Reserve space on the right so the badge doesn't overlap address text */
         .addr.copied .addr-row {
-            padding-right: 64px; /* slightly closer to the badge */
+            padding-right: 64px;
+            /* slightly closer to the badge */
         }
 
         @keyframes addrPulse {
-            0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 45%, transparent); }
-            70% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--ok) 0%, transparent); }
-            100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 0%, transparent); }
+            0% {
+                box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 45%, transparent);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px color-mix(in oklab, var(--ok) 0%, transparent);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 0%, transparent);
+            }
         }
 
         @keyframes badgePop {
-            0% { opacity: 0; transform: translateY(-50%); }
-            15% { opacity: 1; transform: translateY(-50%); }
-            85% { opacity: 1; transform: translateY(-50%); }
-            100% { opacity: 0; transform: translateY(-50%); }
+            0% {
+                opacity: 0;
+                transform: translateY(-50%);
+            }
+
+            15% {
+                opacity: 1;
+                transform: translateY(-50%);
+            }
+
+            85% {
+                opacity: 1;
+                transform: translateY(-50%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-50%);
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .addr.copied { animation: none; }
-            .addr.copied::after { animation: none; }
+            .addr.copied {
+                animation: none;
+            }
+
+            .addr.copied::after {
+                animation: none;
+            }
         }
 
         .pill {
@@ -345,7 +375,9 @@
         }
 
         @supports (min-height: 100dvh) {
-            body { min-height: 100dvh; }
+            body {
+                min-height: 100dvh;
+            }
         }
     </style>
 </head>
@@ -391,7 +423,8 @@
                             <div class="meta">Minimum: 0.01 LTC</div>
                             <div class="addr">
                                 <div class="addr-row">
-                                    <code class="mono" id="addr-ltc" data-copy role="button" tabindex="0" title="Click to copy">LU3fQKkQ1vMJk4tAUuAeaFeEmLB7k1QVpr</code>
+                                    <code class="mono" id="addr-ltc" data-copy role="button" tabindex="0"
+                                        title="Click to copy">LU3fQKkQ1vMJk4tAUuAeaFeEmLB7k1QVpr</code>
                                 </div>
                             </div>
                         </div>
@@ -408,7 +441,8 @@
                                     <div class="meta">Minimum: 0.4 USDT • SPL</div>
                                     <div class="addr">
                                         <div class="addr-row">
-                                            <code class="mono" id="addr-usdt-sol" data-copy role="button" tabindex="0" title="Click to copy">qMaihYkYXaoWHyW9cc1mXHCzzC3dZUfGCAXFWzB8bGh</code>
+                                            <code class="mono" id="addr-usdt-sol" data-copy role="button" tabindex="0"
+                                                title="Click to copy">qMaihYkYXaoWHyW9cc1mXHCzzC3dZUfGCAXFWzB8bGh</code>
                                         </div>
                                     </div>
                                 </div>
@@ -417,7 +451,8 @@
                                     <div class="meta">Minimum: 5 USDT • TRC20</div>
                                     <div class="addr">
                                         <div class="addr-row">
-                                            <code class="mono" id="addr-usdt-tron" data-copy role="button" tabindex="0" title="Click to copy">TL62HyZAQsVkQYc7rjxq7zjU4R8sHcnN1o</code>
+                                            <code class="mono" id="addr-usdt-tron" data-copy role="button" tabindex="0"
+                                                title="Click to copy">TL62HyZAQsVkQYc7rjxq7zjU4R8sHcnN1o</code>
                                         </div>
                                     </div>
                                 </div>

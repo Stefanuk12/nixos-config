@@ -4,12 +4,14 @@
   pkgs,
   hostName,
   ...
-}: let
+}:
+let
   timeZone = "Europe/London";
   locale = "en_GB.UTF-8";
   kbLayout = "us";
   systemSettings = config.systemSettings;
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -62,12 +64,15 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
     isNormalUser = true;
-    extraGroups = ["wheel"];
+    extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
     ];
   };
 
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   system.stateVersion = "23.05";
 }

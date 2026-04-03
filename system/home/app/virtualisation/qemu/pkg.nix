@@ -22,30 +22,36 @@ let
     };
   };
   qemuSpoof = builtins.readFile ./qemu-spoof.sh;
-  patched-qemu = pkgs.qemu_kvm.overrideAttrs (finalAttrs: previousAttrs: {
-    patches = [
-      hypervisor-phantom_amd.main
-      hypervisor-phantom_amd.libnfs6
-    ];
-    postPatch = ''
-      ${previousAttrs.postPatch}
-      CPU_VENDOR=amd
-      QEMU_VERSION=10.0.0
-      MANUFACTURER="Advanced Micro Devices, Inc."
-      echo "applying dynamic patches"
+  patched-qemu = pkgs.qemu_kvm.overrideAttrs (
+    finalAttrs: previousAttrs: {
+      patches = [
+        hypervisor-phantom_amd.main
+        hypervisor-phantom_amd.libnfs6
+      ];
+      postPatch = ''
+        ${previousAttrs.postPatch}
+        CPU_VENDOR=amd
+        QEMU_VERSION=10.0.0
+        MANUFACTURER="Advanced Micro Devices, Inc."
+        echo "applying dynamic patches"
 
-      manufacturer="Advanced Micro Devices, Inc." # sudo dmidecode --string processor-manufacturer
-      chassis_type="Desktop" # sudo dmidecode --string chassis-type
-      ${qemuSpoof}
-    '';
-  });
-in {
+        manufacturer="Advanced Micro Devices, Inc." # sudo dmidecode --string processor-manufacturer
+        chassis_type="Desktop" # sudo dmidecode --string chassis-type
+        ${qemuSpoof}
+      '';
+    }
+  );
+in
+{
   virtualisation.libvirtd = {
-    allowedBridges = ["nm-bridge" "virbr0"];
+    allowedBridges = [
+      "nm-bridge"
+      "virbr0"
+    ];
     qemu = {
       package = patched-qemu;
     };
   };
 
-  environment.systemPackages = [patched-qemu];
+  environment.systemPackages = [ patched-qemu ];
 }

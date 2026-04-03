@@ -2,7 +2,8 @@
 
 let
   css = import ./css pkgs;
-in {
+in
+{
   programs.waybar.enable = true;
   programs.waybar.systemd.enable = true;
   programs.waybar.style = css.file;
@@ -20,7 +21,7 @@ in {
       "hyprland/workspaces"
       "wlr/taskbar"
     ];
-    modules-center = [];
+    modules-center = [ ];
     modules-right = [
       "cpu"
       "temperature"
@@ -68,7 +69,7 @@ in {
       path = "/";
       tooltip = true;
       unit = "GB";
-      tooltip-format =  "Available {free} of {total}";
+      tooltip-format = "Available {free} of {total}";
     };
     memory = {
       interval = 10;
@@ -83,7 +84,7 @@ in {
       spacing = 3;
       on-click-middle = "close";
       tooltip-format = "{title}";
-      ignore-list = [];
+      ignore-list = [ ];
       on-click = "activate";
     };
     tray = {

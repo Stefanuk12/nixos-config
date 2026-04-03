@@ -3,8 +3,9 @@
 let
   inherit (import ./utils.nix { inherit pkgs; })
     buildVscodeExtensionFromGitHub
-    extFromMarketplace;
-  
+    extFromMarketplace
+    ;
+
   selene-vscode = buildVscodeExtensionFromGitHub {
     name = "selene-vscode";
     publisher = "kampfkarren";
@@ -17,7 +18,8 @@ let
     };
     npmDepsHash = "sha256-gCHRAnfUgZxmeoeVCF0NaTvnjTszlr6FaWaVsFZ5ClQ=";
   };
-in {
+in
+{
   programs.vscode = {
     enable = true;
     package = pkgs.vscodium;
@@ -32,8 +34,13 @@ in {
     redhat.vscode-yaml
 
     (extFromMarketplace "rbxexecute" "Spoorloos" "0.5.0" "q706Yq2jICzmeHdtIIJ6t6I6aL0vJLPaNInqZMD8dG4=")
-    (extFromMarketplace "luau-lsp" "johnnymorganz" "1.64.1" "Go0+DDvtTO4D3yBwx0t5Zcz0qOi187RWu9oT1+1JLZ8=")
+    (extFromMarketplace "luau-lsp" "johnnymorganz" "1.64.1"
+      "Go0+DDvtTO4D3yBwx0t5Zcz0qOi187RWu9oT1+1JLZ8="
+    )
     (extFromMarketplace "stylua" "johnnymorganz" "1.7.1" "AbMCYYyK6Ywm/VljzAdmjk0VWm7JRH5GgJAC38T3j/c=")
+    (extFromMarketplace "jbockle-format-files" "jbockle" "3.4.0"
+      "BHw+T2EPdQq/wOD5kzvSln5SBFTYUXip8QDjnAGBfFY="
+    )
     selene-vscode
   ];
 }

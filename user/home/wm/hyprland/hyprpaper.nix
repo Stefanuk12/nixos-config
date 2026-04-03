@@ -9,7 +9,8 @@ let
     left = ../wallpapers/misty_swimming_pool/left.jpg;
     right = ../wallpapers/misty_swimming_pool/right.jpg;
   };
-in {
+in
+{
   services.hyprpaper.enable = true;
 
   # https://wiki.hypr.land/Hypr-Ecosystem/hyprpaper/

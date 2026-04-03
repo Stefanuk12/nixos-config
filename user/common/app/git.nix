@@ -1,9 +1,18 @@
-{ config, pkgs, username, ... }:
+{
+  config,
+  pkgs,
+  username,
+  ...
+}:
 let
   userSettings = config.userSettings;
   systemSettings = config.systemSettings;
-in {
-  home.packages = with pkgs; [ git git-credential-manager ];
+in
+{
+  home.packages = with pkgs; [
+    git
+    git-credential-manager
+  ];
   programs.git.enable = true;
   programs.git.settings = {
     init.defaultBranch = "main";

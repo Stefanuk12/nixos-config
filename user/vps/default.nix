@@ -1,4 +1,9 @@
-{ config, nixpkgs, pkgs, ... }:
+{
+  config,
+  nixpkgs,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -8,5 +13,5 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  home.packages = with pkgs; [];
+  home.packages = with pkgs; [ ];
 }

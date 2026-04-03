@@ -2,10 +2,11 @@
 let
   mkOption = lib.mkOption;
   types = lib.types;
-in {
+in
+{
   options.systemSettings = {
     sshKeys = mkOption {
-      type = types.attrsOf(types.str);
+      type = types.attrsOf (types.str);
       description = ''
         Everyone's SSH public keys. 
       '';
@@ -14,9 +15,12 @@ in {
 
   config.systemSettings = {
     sshKeys = {
-      "stefan@windows-pc" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEQOdcA45T5jqnvhSiFy0/QihCMJiNAjOqgyxYuvYNcS stefan@windows-pc";
-      "stefan@home" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFi4KQP6TuvmqGZj52ZERC2cbBh4zbQ4BlHytSLmi5R stefan@home";
-      "stefan@vps" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAIP/AfCKZdRKb+w2BdlpTLiK+6NqlYeONB26DF3Y+fw stefan@vps";
+      "stefan@windows-pc" =
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEQOdcA45T5jqnvhSiFy0/QihCMJiNAjOqgyxYuvYNcS stefan@windows-pc";
+      "stefan@home" =
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFi4KQP6TuvmqGZj52ZERC2cbBh4zbQ4BlHytSLmi5R stefan@home";
+      "stefan@vps" =
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAIP/AfCKZdRKb+w2BdlpTLiK+6NqlYeONB26DF3Y+fw stefan@vps";
     };
   };
 }

@@ -1,17 +1,23 @@
-{ config, lib, pkgs, hostName, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  hostName,
+  ...
+}:
 
 let
   timeZone = "Europe/London";
   locale = "en_GB.UTF-8";
   kbLayout = "us";
   systemSettings = config.systemSettings;
-in {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../../system/common/settings.nix
-      ../../system/${hostName}
-    ];
+in
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../../system/common/settings.nix
+    ../../system/${hostName}
+  ];
 
   # Use systemd
   boot.initrd.systemd.enable = true;
@@ -63,7 +69,11 @@ in {
   users.mutableUsers = false;
   users.users.stefan = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "libvirtd" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "libvirtd"
+    ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
       systemSettings.sshKeys."stefan@windows-pc"
@@ -77,7 +87,7 @@ in {
       commands = [
         {
           command = "ALL";
-          options = ["NOPASSWD"];
+          options = [ "NOPASSWD" ];
         }
       ];
     }
@@ -131,6 +141,9 @@ in {
   };
 
   # Misc
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   system.stateVersion = "23.05";
 }

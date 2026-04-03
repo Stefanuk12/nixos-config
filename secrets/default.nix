@@ -1,4 +1,9 @@
-{ pkgs, inputs, config, ... }:
+{
+  pkgs,
+  inputs,
+  config,
+  ...
+}:
 
 {
   imports = [
@@ -7,6 +12,6 @@
 
   sops.defaultSopsFile = ./common/secrets.yaml;
   sops.defaultSopsFormat = "yaml";
-  
+
   sops.age.keyFile = "/home/stefan/.config/sops/age/keys.txt";
 }

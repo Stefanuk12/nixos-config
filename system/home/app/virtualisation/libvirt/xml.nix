@@ -1,4 +1,10 @@
-{ inputs, pkgs, config, lib, ... }:
+{
+  inputs,
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 let
   makeUnitCount = unit: count: { inherit unit count; };
@@ -12,7 +18,7 @@ let
   makeControllerAddr = type: index: address: {
     inherit type index address;
   };
-  
+
   win11 = {
     type = "kvm";
     name = "win11-111";
@@ -26,8 +32,13 @@ let
     vcpu.placement = "static";
     vcpu.count = 12;
 
-    cputune.emulatorpin = { cpuset = "0-1,8-9"; };
-    cputune.iothreadpin = { iothread = 1; cpuset = "0-1,8-9"; };
+    cputune.emulatorpin = {
+      cpuset = "0-1,8-9";
+    };
+    cputune.iothreadpin = {
+      iothread = 1;
+      cpuset = "0-1,8-9";
+    };
     cputune.vcpupin = [
       (makeVcpupin 0 "2")
       (makeVcpupin 1 "10")
@@ -127,15 +138,35 @@ let
     clock = {
       offset = "timezone";
       timezone = "Europe/London";
-    
-      timer = [
-        { name = "tsc"; present = true; mode = "native"; tickpolicy = "discard"; }
-        { name = "hpet"; present = true; }
-        { name = "rtc"; present = false; }
-        { name = "pit"; present = false; }
 
-        { name = "kvmclock"; present = false; }
-        { name = "hypervclock"; present = false; }
+      timer = [
+        {
+          name = "tsc";
+          present = true;
+          mode = "native";
+          tickpolicy = "discard";
+        }
+        {
+          name = "hpet";
+          present = true;
+        }
+        {
+          name = "rtc";
+          present = false;
+        }
+        {
+          name = "pit";
+          present = false;
+        }
+
+        {
+          name = "kvmclock";
+          present = false;
+        }
+        {
+          name = "hypervclock";
+          present = false;
+        }
       ];
     };
 
@@ -189,7 +220,7 @@ let
           type = "bridge";
           mac.address = "52:54:3a:20:c8:5d";
           source.bridge = "br0";
-          model.type = "rtl8139"; 
+          model.type = "rtl8139";
           link.state = "up";
           address = {
             type = "pci";
@@ -227,7 +258,7 @@ let
 
       sound = {
         model = "ich9";
-        
+
         codec.type = "micro";
         audio.id = 1;
         address = {
@@ -280,8 +311,20 @@ let
         (makeController "pci" 0 "pcie-root")
         (makeController "pci" 1 "pcie-root-port")
         (makeController "pci" 16 "pcie-to-pci-bridge")
-        (makeControllerAddr "sata" 0 { type = "pci"; domain = 0; bus = 0; slot = 31; function = 2; })
-        (makeControllerAddr "virtio-serial" 0 { type = "pci"; domain = 0; bus = 3; slot = 0; function = 0; })
+        (makeControllerAddr "sata" 0 {
+          type = "pci";
+          domain = 0;
+          bus = 0;
+          slot = 31;
+          function = 2;
+        })
+        (makeControllerAddr "virtio-serial" 0 {
+          type = "pci";
+          domain = 0;
+          bus = 3;
+          slot = 0;
+          function = 0;
+        })
       ];
 
       hostdev = [
@@ -349,7 +392,8 @@ let
       ];
     };
   };
-in {
+in
+{
   imports = [
     inputs.nixvirt.nixosModules.default
   ];

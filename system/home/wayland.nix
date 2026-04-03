@@ -1,16 +1,16 @@
 { pkgs, ... }:
 
 let
-  isoUsFile = pkgs.writeText "iso_us"
-  ''
-  xkb_symbols "intl" {
-    include "us(basic)"
+  isoUsFile = pkgs.writeText "iso_us" ''
+    xkb_symbols "intl" {
+      include "us(basic)"
 
-    key <BKSL> {[ numbersign, asciitilde ]};
-    key <LSGT> {[ backslash, bar ]};
-  };
+      key <BKSL> {[ numbersign, asciitilde ]};
+      key <LSGT> {[ backslash, bar ]};
+    };
   '';
-in {
+in
+{
   environment.systemPackages = with pkgs; [
     waydroid
   ];

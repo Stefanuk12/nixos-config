@@ -1,4 +1,9 @@
-{ pkgs, lib, inputs, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   suspendScript = pkgs.writeShellScript "suspend-script" ''
@@ -8,7 +13,8 @@ let
       ${pkgs.systemd}/bin/systemctl suspend
     fi
   '';
-in {
+in
+{
   services.hypridle.enable = true;
 
   # https://wiki.hyprland.org/Hypr-Ecosystem/hypridle/

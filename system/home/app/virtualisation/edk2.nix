@@ -7,15 +7,20 @@ let
     # https://github.com/Scrut1ny/Hypervisor-Phantom/issues/43#top
     decode = "sed 's/$/\\r/'";
   };
-  patched-edk2 = pkgs.edk2.overrideAttrs (finalAttrs: previousAttrs: {
-    patches = [edk2-patch_amd];
-  });
-in {
+  patched-edk2 = pkgs.edk2.overrideAttrs (
+    finalAttrs: previousAttrs: {
+      patches = [ edk2-patch_amd ];
+    }
+  );
+in
+{
   nixpkgs.overlays = [
     (final: prev: {
-      OVMF = prev.OVMF.overrideAttrs (finalAttrs: previousAttrs: {
-        patches = (previousAttrs.patches or []) ++ [edk2-patch_amd];
-      });
+      OVMF = prev.OVMF.overrideAttrs (
+        finalAttrs: previousAttrs: {
+          patches = (previousAttrs.patches or [ ]) ++ [ edk2-patch_amd ];
+        }
+      );
     })
   ];
 }

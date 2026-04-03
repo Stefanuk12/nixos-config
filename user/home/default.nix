@@ -1,4 +1,9 @@
-{ inputs, config, nixpkgs, ... }:
+{
+  inputs,
+  config,
+  nixpkgs,
+  ...
+}:
 
 {
   imports = [

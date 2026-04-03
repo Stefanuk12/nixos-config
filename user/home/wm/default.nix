@@ -5,6 +5,6 @@
     ./hyprland
     ./waybar
     ./fuzzel.nix
-    ./fnott.nix    
+    ./fnott.nix
   ];
 }

@@ -9,7 +9,8 @@ let
     dgpu-enable = "sh " + ./../../../../system/home/app/virtualisation/scripts/dgpu-enable.sh;
     dgpu-disable = "sh " + ./../../../../system/home/app/virtualisation/scripts/dgpu-disable.sh;
   };
-in {
+in
+{
   programs.zsh = {
     inherit shellAliases;
 

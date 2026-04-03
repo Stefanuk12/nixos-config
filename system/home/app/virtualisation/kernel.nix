@@ -1,4 +1,9 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 let
   kernelPatches = {
     svm = pkgs.fetchurl {
@@ -6,7 +11,8 @@ let
       hash = "sha256-zz18xerutulLGzlHhnu26WCY8rVQXApyeoDtCjbejIk=";
     };
   };
-in {
+in
+{
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_18;
   # Disabled - current patches mess up CPU frequency, purely visual though
   # boot.kernelPatches = [
