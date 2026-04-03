@@ -1,11 +1,11 @@
 { pkgs, ... }:
 
 let
-  hypervisor-phantom_amd = {
+  autovirt_amd = {
     main = pkgs.substitute {
       src = pkgs.fetchurl {
-        url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/patches/QEMU/amd-qemu-10.1.1.patch";
-        hash = "sha256-dIS6nSiMe+r+mWHu8WeFUowEfR5uDlvwtA7KA7tzCCQ=";
+        url = "https://raw.githubusercontent.com/Scrut1ny/AutoVirt/refs/heads/main/patches/QEMU/Archive/amd-qemu-10.1.1.patch";
+        hash = "sha256-xCwEIDK6CTSDIUCzcTAaqg3DkNFUUwos4ULRC6TS6zw=";
       };
       substitutions = [
         "--replace-fail"
@@ -17,7 +17,7 @@ let
       ];
     };
     libnfs6 = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/Scrut1ny/Hypervisor-Phantom/refs/heads/main/patches/QEMU/libnfs6-qemu-10.1.1.patch";
+      url = "https://raw.githubusercontent.com/Scrut1ny/AutoVirt/refs/heads/main/patches/QEMU/Archive/libnfs6-qemu-10.1.1.patch";
       hash = "sha256-8DYaDJgNqjExUfEF9NMAv/IpmsJTDeGebQuk3r2F6BQ=";
     };
   };
@@ -25,8 +25,8 @@ let
   patched-qemu = pkgs.qemu_kvm.overrideAttrs (
     finalAttrs: previousAttrs: {
       patches = [
-        hypervisor-phantom_amd.main
-        hypervisor-phantom_amd.libnfs6
+        autovirt_amd.main
+        autovirt_amd.libnfs6
       ];
       postPatch = ''
         ${previousAttrs.postPatch}
