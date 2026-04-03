@@ -28,6 +28,7 @@
       user = "stefan";
       group = "kvm";
       shmSize = 32;
+      spoofKvmfrIds = false;
     };
   };
 
