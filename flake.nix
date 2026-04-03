@@ -22,6 +22,9 @@
     nix-colors.url = "github:misterio77/nix-colors";
 
     # VM stuff
+    nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+    barely-metal.url = "github:Dreaming-Codes/BarelyMetal";
+    barely-metal.inputs.nixpkgs.follows = "nixpkgs";
     nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -46,6 +49,8 @@
       nix-colors,
       nixvirt,
       nix-minecraft,
+      barely-metal, 
+      nixos-facter-modules,
       ...
     }@inputs:
     let

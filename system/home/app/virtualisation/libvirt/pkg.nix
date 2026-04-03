@@ -30,29 +30,6 @@
     }
   ];
 
-  virtualisation.libvirtd.qemu = {
-    runAsRoot = true;
-    swtpm.enable = true;
-    verbatimConfig = ''
-      nvram = [
-        "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd"
-      ]
-
-      cgroup_device_acl = [
-        "/dev/kvmfr0",
-        "/dev/null",
-        "/dev/kvm",
-        "/dev/full",
-        "/dev/zero",
-        "/dev/random",
-        "/dev/urandom",
-        "/dev/ptmx",
-        "/dev/kqemu",
-        "/dev/rtc"
-      ]
-    '';
-  };
-
   users.groups.libvirtd.members = [
     "root"
     "stefan"

@@ -35,6 +35,7 @@ in
     "amdgpu.ppfeaturemask=0xf7fff"
     "iommu=pt"
     "kvm.ignore_msrs=1"
+    "vfio-pci.ids=1002:73a5,1002:ab28"
   ];
   boot.initrd.kernelModules = [
     "vfio_pci"

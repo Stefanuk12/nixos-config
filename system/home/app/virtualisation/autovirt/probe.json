@@ -1,0 +1,26 @@
+{
+  "cpu": "amd",
+  "acpi": {
+    "oem_id": "ALASKA",
+    "oem_table_id": "A M I   ",
+    "oem_table_id_hex": "0x00002049204d2041",
+    "oem_revision": "0x01072009",
+    "creator_id": "AMI ",
+    "creator_id_hex": "0x20494d41",
+    "creator_revision": "0x00010013",
+    "pm_profile": 1
+  },
+  "bios": {
+    "vendor": "American Megatrends Inc.",
+    "version": "2616",
+    "date": "04/29/2024",
+    "revision": "0x00010000"
+  },
+  "smbios": {
+    "processor_manufacturer": "Advanced Micro Devices, Inc."
+  },
+  "battery": {
+    "present": false,
+    "ssdt_path": ""
+  }
+}

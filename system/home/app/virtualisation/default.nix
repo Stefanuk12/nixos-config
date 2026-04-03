@@ -3,10 +3,9 @@
 {
   imports = [
     ./libvirt
-    ./looking_glass
     ./qemu
-    ./edk2.nix
     ./kernel.nix
+    ./autovirt
   ];
 
   programs = {

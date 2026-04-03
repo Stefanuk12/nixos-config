@@ -59,17 +59,15 @@ let
       machine = "q35";
 
       bootmenu.enable = true;
-      smbios.mode = "host";
 
       loader = {
         readonly = true;
+        secure = true;
         type = "pflash";
-        path = "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd";
-        format = "raw";
+        path = "/var/lib/barely-metal/firmware/OVMF_CODE.fd";
       };
       nvram = {
-        template = "${pkgs.OVMF.fd}/FV/OVMF_VARS.fd";
-        templateFormat = "raw";
+        template = "/var/lib/barely-metal/firmware/OVMF_VARS.fd";
         path = /var/lib/libvirt/qemu/nvram/win11_VARS.fd;
       };
     };
@@ -121,6 +119,7 @@ let
       };
 
       cache.mode = "passthrough";
+      maxphysaddr.mode = "passthrough";
 
       feature = [
         (makeFeature "require" "svm")
@@ -182,38 +181,57 @@ let
     devices = {
       emulator = /run/libvirt/nix-emulators/qemu-system-x86_64;
 
-      disk = {
-        type = "file";
-        device = "disk";
-        serial = "01f4c755-1dc4-4d93-9343-8c3c65d20467";
+      disk = [
+        {
+          type = "file";
+          device = "disk";
+          serial = "ECFE037C590CE21A24AE";
 
-        driver = {
-          name = "qemu";
-          type = "qcow2";
-          cache = "none";
-          io = "native";
-          discard = "ignore";
-        };
+          driver = {
+            name = "qemu";
+            type = "qcow2";
+            cache = "none";
+            io = "native";
+            discard = "unmap";
+          };
 
-        source.file = /var/lib/libvirt/images/win11.qcow2;
+          source.file = /var/lib/libvirt/images/win11.qcow2;
 
-        backingStore = { };
+          backingStore = { };
 
-        target = {
-          dev = "sda";
-          bus = "sata";
-        };
+          target = {
+            dev = "sda";
+            bus = "sata";
+          };
 
-        boot.order = 1;
+          boot.order = 1;
 
-        address = {
-          type = "drive";
-          controller = 0;
-          bus = 0;
-          target = 0;
-          unit = 0;
-        };
-      };
+          address = {
+            type = "drive";
+            controller = 0;
+            bus = 0;
+            target = 0;
+            unit = 0;
+          };
+        }
+        {
+          type = "file";
+          device = "cdrom";
+          readonly = { };
+
+          driver = {
+            name = "qemu";
+            type = "raw";
+          };
+
+          source.file = "/var/lib/barely-metal/firmware/guest-scripts.iso";
+
+          target = {
+            dev = "sdc";
+            bus = "sata";
+          };
+        }
+      ];
 
       interface = [
         {
@@ -235,12 +253,12 @@ let
       input = [
         {
           type = "evdev";
-          source.dev = "/dev/input/event0";
+          source.dev = "/dev/input/event1";
         }
         {
           type = "evdev";
           source = {
-            dev = "/dev/input/event5";
+            dev = "/dev/input/event6";
             grab = "all";
             grabToggle = "ctrl-ctrl";
             repeat = true;
@@ -277,12 +295,26 @@ let
 
       graphics = {
         type = "spice";
-        port = -1;
-        autoport = false;
+        autoport = true;
         listen.type = "address";
         image.compression = false;
         gl.enable = false;
       };
+      channel = [
+        {
+          type = "spicevmc";
+          target = {
+            type = "virtio";
+            name = "com.redhat.spice.0";
+          };
+          address = {
+            type = "virtio-serial";
+            controller = 0;
+            bus = 0;
+            port = 1;
+          };
+        }
+      ];
       video.model.type = "none";
 
       watchdog = {
@@ -291,20 +323,6 @@ let
       };
 
       memballoon.model = "none";
-
-      # shmem = {
-      #   name = "looking-glass";
-
-      #   model.type = "ivshmem-plain";
-      #   size = makeUnitCount "M" 32;
-      #   address = {
-      #     type = "pci";
-      #     domain = 0;
-      #     bus = 16;
-      #     slot = 0;
-      #     function = 0;
-      #   };
-      # };
 
       controller = [
         (makeController "usb" 0 "qemu-xhci")
@@ -369,11 +387,15 @@ let
 
     qemu-commandline.arg = [
       (makeValue "-smbios")
-      (makeValue ("file=" + toString ./smbios2.bin))
-      # (makeValue "-device")
-      # (makeValue "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}")
-      # (makeValue "-object")
-      # (makeValue "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':33554432,'share':true}")
+      (makeValue "file=/var/lib/barely-metal/firmware/smbios.bin")
+      (makeValue "-acpitable")
+      (makeValue "file=/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml")
+      # (makeValue "-cpu")
+      # (makeValue "host,kvm-pv-enforce-cpuid=on")
+      (makeValue "-device")
+      (makeValue "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}")
+      (makeValue "-object")
+      (makeValue "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':33554432,'share':true}")
     ];
 
     qemu-override.device = {
