@@ -2,7 +2,8 @@
 
 {
   imports = [
-    ./spotify.nix
     ./claude_desktop.nix
+    ./nixfmt.nix
+    ./spotify.nix
   ];
 }
