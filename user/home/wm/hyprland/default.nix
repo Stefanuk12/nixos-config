@@ -20,6 +20,10 @@ in
 
     debug.disable_logs = true;
 
+    env = [
+      "AQ_DRM_DEVICES,/dev/dri/amd-igpu"
+    ];
+
     general = {
       no_border_on_floating = true;
 
