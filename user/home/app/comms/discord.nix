@@ -5,7 +5,15 @@
 
   # https://github.com/Vencord/Vesktop/blob/main/src/shared/settings.d.ts
   programs.vesktop.settings = {
-
+    discordBranch = "stable";
+    hardwareAcceleration = true;
+    arRPC = true;
+    enableTaskbarFlashing = false;
+    customTitleBar = true;
+    spellCheckLanguages = [
+      "en-GB"
+      "en"
+    ];
   };
 
   # https://github.com/Vendicated/Vencord/blob/main/src/api/Settings.ts

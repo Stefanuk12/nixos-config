@@ -26,7 +26,7 @@ in
     ];
 
     general = {
-      no_border_on_floating = true;
+      # no_border_on_floating = true;
 
       gaps_in = 4;
       gaps_out = 8;
@@ -104,9 +104,9 @@ in
       "SUPER, mouse:273, resizewindow"
     ];
     layerrule = [
-      "blur, waybar"
-      "blurpopups, waybar"
-      "ignorealpha 0.2, waybar"
+      # "blur, waybar"
+      # "blurpopups, waybar"
+      # "ignorealpha 0.2, waybar"
     ];
     bind = [
       "$mod, F, exec, firefox"
