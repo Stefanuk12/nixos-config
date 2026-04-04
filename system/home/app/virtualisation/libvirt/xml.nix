@@ -293,28 +293,6 @@ let
         serverName = "/run/user/1000/pulse/native";
       };
 
-      graphics = {
-        type = "spice";
-        autoport = true;
-        listen.type = "address";
-        image.compression = false;
-        gl.enable = false;
-      };
-      channel = [
-        {
-          type = "spicevmc";
-          target = {
-            type = "virtio";
-            name = "com.redhat.spice.0";
-          };
-          address = {
-            type = "virtio-serial";
-            controller = 0;
-            bus = 0;
-            port = 1;
-          };
-        }
-      ];
       video.model.type = "none";
 
       watchdog = {
