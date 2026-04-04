@@ -393,9 +393,9 @@ let
       # (makeValue "-cpu")
       # (makeValue "host,kvm-pv-enforce-cpuid=on")
       (makeValue "-device")
-      (makeValue "{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}")
+      (makeValue "{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}")
       (makeValue "-object")
-      (makeValue "{'qom-type':'memory-backend-file','id':'looking-glass','mem-path':'/dev/kvmfr0','size':33554432,'share':true}")
+      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":33554432,\"share\":true}") 
     ];
 
     qemu-override.device = {

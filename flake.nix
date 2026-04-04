@@ -23,7 +23,7 @@
 
     # VM stuff
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
-    barely-metal.url = "github:Dreaming-Codes/BarelyMetal";
+    barely-metal.url = "github:Stefanuk12/BarelyMetal/lg";
     barely-metal.inputs.nixpkgs.follows = "nixpkgs";
     nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";

@@ -56,15 +56,15 @@
     "autovirt": {
       "flake": false,
       "locked": {
-        "lastModified": 1772738088,
-        "narHash": "sha256-rmUfGWxz0Z2Lwmdvyt5oHNOzZGndyusWwu7TnFq1qC4=",
-        "owner": "Scrut1ny",
+        "lastModified": 1775325431,
+        "narHash": "sha256-8e2owj3ZYbzx6JrqZxn2QO7sPJf+Km6b8V/Y+mIGFfg=",
+        "owner": "Stefanuk12",
         "repo": "AutoVirt",
-        "rev": "00ec7153c06184a36f028559fec3ae0e6051cbf6",
+        "rev": "0b642aa3c4cc5d5a79f0e5c8aa78daa2e7ebe6da",
         "type": "github"
       },
       "original": {
-        "owner": "Scrut1ny",
+        "owner": "Stefanuk12",
         "repo": "AutoVirt",
         "type": "github"
       }
@@ -79,15 +79,16 @@
         "qemu-src": "qemu-src"
       },
       "locked": {
-        "lastModified": 1773477705,
-        "narHash": "sha256-QaXYrqDduSotTKhasYoqkSOrq4Xu5P2ZzkpWzqsRg8U=",
-        "owner": "Dreaming-Codes",
+        "lastModified": 1775328198,
+        "narHash": "sha256-TPB8BwZ0CpZV9lKPj+AiLWsYR3pP7dZUqIUP+fXpY1c=",
+        "owner": "Stefanuk12",
         "repo": "BarelyMetal",
-        "rev": "f16b6e6018f2dfd1891f6a8b21f19c49de2b3067",
+        "rev": "95adf2009ead7eb76c621d2bb926a3cd5a3fec04",
         "type": "github"
       },
       "original": {
-        "owner": "Dreaming-Codes",
+        "owner": "Stefanuk12",
+        "ref": "lg",
         "repo": "BarelyMetal",
         "type": "github"
       }
@@ -318,11 +319,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775247674,
-        "narHash": "sha256-MCaiC3iWarAsmu8KJXgJHb1H8lf+BD9gymvxkbmNVdc=",
+        "lastModified": 1775320414,
+        "narHash": "sha256-pIDPHus8udcxO4lT+zUULBfvue2D08E73abzVEJNE+8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "03bdcf84f092956943dcf9ef164481e463512716",
+        "rev": "5ee3b3ef63e469c84639c2c9e282726352c86069",
         "type": "github"
       },
       "original": {
