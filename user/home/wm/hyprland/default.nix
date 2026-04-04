@@ -113,6 +113,7 @@ in
 
       "SUPER, RETURN, exec, ${userSettings.terminal}"
       "SUPER, code:47, exec, fuzzel"
+      "SUPER, B, exec, pgrep -x bwm || bwm"
       "SUPER, Q, killactive"
       "SUPERSHIFT, Q, exit"
 
