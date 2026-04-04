@@ -18,7 +18,7 @@ in
   wayland.windowManager.hyprland.settings = {
     "$mod" = "SUPER";
 
-    exec-once = [ "waybar" ];
+    exec-once = [ "waybar" "kdeconnect-indicator" ];
     debug.disable_logs = true;
 
     env = [

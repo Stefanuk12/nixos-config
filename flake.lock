@@ -20,6 +20,39 @@
         "type": "github"
       }
     },
+    "ancs4linux": {
+      "inputs": {
+        "ancs4linux-src": "ancs4linux-src",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./packages/ancs4linux",
+        "type": "path"
+      },
+      "original": {
+        "path": "./packages/ancs4linux",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "ancs4linux-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1652616293,
+        "narHash": "sha256-iP4OkWvX2RjMPQYoR+erQoB10d7+4NKYFsJoZUqhcDs=",
+        "owner": "pzmarzly",
+        "repo": "ancs4linux",
+        "rev": "ce8d3f173fd14566e516334ef23af632d840d64e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pzmarzly",
+        "repo": "ancs4linux",
+        "type": "github"
+      }
+    },
     "autovirt": {
       "flake": false,
       "locked": {
@@ -567,6 +600,7 @@
     "root": {
       "inputs": {
         "Neve": "Neve",
+        "ancs4linux": "ancs4linux",
         "barely-metal": "barely-metal",
         "bwm": "bwm",
         "claude-desktop": "claude-desktop",

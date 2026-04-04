@@ -37,6 +37,8 @@
     nix-minecraft.inputs.nixpkgs.follows = "nixpkgs";
 
     # Other tools
+    ancs4linux.url = "./packages/ancs4linux";
+    ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
     claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
     claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -51,6 +53,7 @@
       nix-minecraft,
       barely-metal, 
       nixos-facter-modules,
+      ancs4linux,
       ...
     }@inputs:
     let
