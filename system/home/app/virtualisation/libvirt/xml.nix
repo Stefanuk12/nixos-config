@@ -104,6 +104,7 @@ let
       ioapic.driver = "kvm";
       msrs.unknown = "fault";
       vmport.state = false;
+      ps2.state = false;
     };
 
     cpu = {
@@ -172,6 +173,9 @@ let
     on_poweroff = "destroy";
     on_reboot = "restart";
     on_crash = "destroy";
+
+    console = "none";
+    channel = "none";
 
     pm = {
       suspend-to-mem.enabled = true;
@@ -252,6 +256,14 @@ let
 
       input = [
         {
+          type = "keyboard";
+          bus = "usb";
+        }
+        {
+          type = "mouse";
+          bus = "usb";
+        }
+        {
           type = "evdev";
           source.dev = "/dev/input/event1";
         }
@@ -289,11 +301,25 @@ let
       };
       audio = {
         id = 1;
-        type = "pulseaudio";
-        serverName = "/run/user/1000/pulse/native";
+        type = "pipewire";
+        runtimeDir = "/run/user/1000";
+        input.mixingEngine = false;
+        output.mixingEngine = false;
       };
 
-      video.model.type = "none";
+      redirdev = [
+        { bus = "usb"; type = "spicevmc"; }
+        { bus = "usb"; type = "spicevmc"; }
+      ];
+      graphics = {
+        type = "spice";
+        port = "-1";
+        tlsPort = "-1";
+        autoport = true;
+        listen.type = "address";
+      };
+      
+      video.model.type = "vga";
 
       watchdog = {
         model = "itco";

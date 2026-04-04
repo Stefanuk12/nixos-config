@@ -40,7 +40,7 @@
         jitRender = true;
       };
       spice = {
-        enable = false;
+        enable = true;
         audio = false;
       };
       input = {
