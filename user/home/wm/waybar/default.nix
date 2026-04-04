@@ -5,12 +5,11 @@ let
 in
 {
   programs.waybar.enable = true;
-  programs.waybar.systemd.enable = true;
   programs.waybar.style = css.file;
   programs.waybar.settings.mainBar = {
-    layer = "bottom";
+    layer = "top";
     position = "bottom";
-    mod = "dock";
+    mode = "dock";
     exclusive = true;
     gtk-layer-shell = true;
     margin-bottom = -1;

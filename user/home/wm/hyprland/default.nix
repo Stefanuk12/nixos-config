@@ -18,6 +18,7 @@ in
   wayland.windowManager.hyprland.settings = {
     "$mod" = "SUPER";
 
+    exec-once = [ "waybar" ];
     debug.disable_logs = true;
 
     env = [

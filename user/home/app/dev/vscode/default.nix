@@ -6,18 +6,22 @@ let
     extFromMarketplace
     ;
 
-  selene-vscode = buildVscodeExtensionFromGitHub {
-    name = "selene-vscode";
-    publisher = "kampfkarren";
-    version = "0-unstable";
-    src = pkgs.fetchFromGitHub {
-      owner = "Stefanuk12";
-      repo = "selene";
-      rev = "9818feb84a82bf9ea146d2f6e41c8c52a00eace9";
-      sha256 = "nkz85X1+5JDZe0WHQuu18Vwvk+LwpqYXkREXKSj4Bzs=";
-    };
-    npmDepsHash = "sha256-gCHRAnfUgZxmeoeVCF0NaTvnjTszlr6FaWaVsFZ5ClQ=";
-  };
+  selene-vscode =
+    (buildVscodeExtensionFromGitHub {
+      name = "selene-vscode";
+      publisher = "kampfkarren";
+      version = "0-unstable";
+      src = pkgs.fetchFromGitHub {
+        owner = "Stefanuk12";
+        repo = "selene";
+        rev = "9818feb84a82bf9ea146d2f6e41c8c52a00eace9";
+        sha256 = "nkz85X1+5JDZe0WHQuu18Vwvk+LwpqYXkREXKSj4Bzs=";
+      };
+      npmDepsHash = "sha256-gCHRAnfUgZxmeoeVCF0NaTvnjTszlr6FaWaVsFZ5ClQ=";
+    }).overrideAttrs
+      (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.unzip ];
+      });
 in
 {
   programs.vscode = {
