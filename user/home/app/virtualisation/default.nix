@@ -27,4 +27,26 @@
       uris = [ "qemu:///system" ];
     };
   };
+
+  programs.looking-glass-client = {
+    enable = true;
+    settings = {
+      app = {
+        shmFile = "/dev/kvmfr0";
+        allowDMA = true;
+      };
+      win = {
+        fullScreen = true;
+        jitRender = true;
+      };
+      spice = {
+        enable = false;
+        audio = false;
+      };
+      input = {
+        rawMouse = true;
+        escapeKey = 62;
+      };
+    };
+  };
 }
