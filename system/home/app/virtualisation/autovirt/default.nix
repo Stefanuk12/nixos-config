@@ -32,7 +32,7 @@
       enable = true;
       user = "stefan";
       group = "kvm";
-      shmSize = 32;
+      shmSize = 64;
       spoofKvmfrIds = false;
     };
   };

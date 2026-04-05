@@ -20,5 +20,10 @@
     "virbr0"
     "br0"
   ];
-  networking.firewall.interfaces.br0.allowedTCPPorts = [ 33882 ];
+
+  networking.firewall.interfaces.br0 = {
+    allowedTCPPorts = [ 33882 ];
+    allowedTCPPortRanges = [{ from = 1714; to = 1764; }];
+    allowedUDPPortRanges = [{ from = 1714; to = 1764; }];
+  };
 }

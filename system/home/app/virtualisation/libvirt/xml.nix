@@ -242,7 +242,7 @@ let
           type = "bridge";
           mac.address = "52:54:3a:20:c8:5d";
           source.bridge = "br0";
-          model.type = "rtl8139";
+          model.type = "e1000e";
           link.state = "up";
           address = {
             type = "pci";
@@ -319,7 +319,7 @@ let
         listen.type = "address";
       };
       
-      video.model.type = "vga";
+      video.model.type = "none";
 
       watchdog = {
         model = "itco";
@@ -399,7 +399,7 @@ let
       (makeValue "-device")
       (makeValue "{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}")
       (makeValue "-object")
-      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":33554432,\"share\":true}") 
+      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":67108864,\"share\":true}") 
     ];
 
     qemu-override.device = {
