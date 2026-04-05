@@ -10,12 +10,21 @@
     };
   };
 
-  outputs = { self, nixpkgs, ancs4linux-src }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      ancs4linux-src,
+    }:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-      mkPackage = system:
+      mkPackage =
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           python = pkgs.python3;
@@ -23,7 +32,9 @@
         python.pkgs.buildPythonApplication {
           pname = "ancs4linux";
           # Date prefix gives monotonic ordering across commits.
-          version = "unstable-${ancs4linux-src.lastModifiedDate or "19700101"}-${ancs4linux-src.shortRev or "dirty"}";
+          version = "unstable-${ancs4linux-src.lastModifiedDate or "19700101"}-${
+            ancs4linux-src.shortRev or "dirty"
+          }";
           pyproject = true;
 
           src = ancs4linux-src;
@@ -73,16 +84,17 @@
         default = ancs4linux;
       });
 
-      formatter = forAllSystems (system:
-        nixpkgs.legacyPackages.${system}.nixfmt-rfc-style
-      );
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
       overlays.default = final: _prev: {
         ancs4linux = self.packages.${final.system}.ancs4linux;
       };
 
-      devShells = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system}; in
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
         {
           default = pkgs.mkShell {
             inputsFrom = [ self.packages.${system}.ancs4linux ];
@@ -94,25 +106,30 @@
       # -------------------------------------------------------------------
       # Checks – `nix flake check` runs these.
       # -------------------------------------------------------------------
-      checks = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system}; in
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
         {
           module-test = pkgs.testers.nixosTest {
             name = "ancs4linux";
 
-            nodes.machine = { ... }: {
-              imports = [ self.nixosModules.default ];
+            nodes.machine =
+              { ... }:
+              {
+                imports = [ self.nixosModules.default ];
 
-              hardware.bluetooth.enable = true;
+                hardware.bluetooth.enable = true;
 
-              services.ancs4linux = {
-                enable = true;
-                advertisingName = "test-machine";
-                user = "alice";
+                services.ancs4linux = {
+                  enable = true;
+                  advertisingName = "test-machine";
+                  user = "alice";
+                };
+
+                users.users.alice.isNormalUser = true;
               };
-
-              users.users.alice.isNormalUser = true;
-            };
 
             testScript = ''
               machine.wait_for_unit("multi-user.target")
@@ -145,7 +162,13 @@
       # -------------------------------------------------------------------
       # NixOS module
       # -------------------------------------------------------------------
-      nixosModules.default = { config, lib, pkgs, ... }:
+      nixosModules.default =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
         let
           cfg = config.services.ancs4linux;
           pkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
@@ -213,23 +236,35 @@
           # down.  Only the root service carries `wantedBy`; dependents
           # are pulled in via the Wants= chain.
           # ---------------------------------------------------------------
-          mkAncsService = name: {
-            execStart,
-            after ? [ "dbus.service" ],
-            wants ? [ ],
-            bindsTo ? [ ],
-            partOf ? [ ],
-            wantedBy ? [ ],
-            type ? "simple",
-            extraServiceConfig ? { },
-          }: {
-            description = "ANCS4Linux ${name}";
-            inherit after wants bindsTo partOf wantedBy;
-            serviceConfig = commonServiceConfig // {
-              Type = type;
-              ExecStart = execStart;
-            } // extraServiceConfig;
-          };
+          mkAncsService =
+            name:
+            {
+              execStart,
+              after ? [ "dbus.service" ],
+              wants ? [ ],
+              bindsTo ? [ ],
+              partOf ? [ ],
+              wantedBy ? [ ],
+              type ? "simple",
+              extraServiceConfig ? { },
+            }:
+            {
+              description = "ANCS4Linux ${name}";
+              inherit
+                after
+                wants
+                bindsTo
+                partOf
+                wantedBy
+                ;
+              serviceConfig =
+                commonServiceConfig
+                // {
+                  Type = type;
+                  ExecStart = execStart;
+                }
+                // extraServiceConfig;
+            };
         in
         {
           options.services.ancs4linux = {
@@ -287,8 +322,7 @@
                 message = "services.ancs4linux requires hardware.bluetooth.enable = true.";
               }
               {
-                assertion = config.users.users ? ${cfg.user}
-                            || cfg.user == "root";
+                assertion = config.users.users ? ${cfg.user} || cfg.user == "root";
                 message = "services.ancs4linux.user '${cfg.user}' must be a declared user.";
               }
             ];
@@ -297,22 +331,20 @@
 
             services.dbus.packages =
               let
-                dbusConf = pkgs.writeTextDir
-                  "share/dbus-1/system.d/ancs4linux.conf"
-                  ''
-                    <!DOCTYPE busconfig PUBLIC
-                      "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
-                      "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
-                    <busconfig>
-                      <policy user="${cfg.user}">
-                        <allow own_prefix="ancs4linux"/>
-                        <allow send_destination_prefix="ancs4linux"/>
-                      </policy>
-                      <policy context="default">
-                        <allow send_destination_prefix="ancs4linux"/>
-                      </policy>
-                    </busconfig>
-                  '';
+                dbusConf = pkgs.writeTextDir "share/dbus-1/system.d/ancs4linux.conf" ''
+                  <!DOCTYPE busconfig PUBLIC
+                    "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+                    "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+                  <busconfig>
+                    <policy user="${cfg.user}">
+                      <allow own_prefix="ancs4linux"/>
+                      <allow send_destination_prefix="ancs4linux"/>
+                    </policy>
+                    <policy context="default">
+                      <allow send_destination_prefix="ancs4linux"/>
+                    </policy>
+                  </busconfig>
+                '';
               in
               [ dbusConf ];
 
@@ -321,19 +353,20 @@
                 bin = lib.getExe' cfg.package;
 
                 resolveAddress =
-                  if cfg.hciAddress != null
-                  then ''address=${lib.escapeShellArg cfg.hciAddress}''
-                  else ''
-                    address=$(
-                      ${bin "ancs4linux-ctl"} get-all-hci \
-                        | ${lib.getExe pkgs.jq} -r '.[0] // empty'
-                    )
+                  if cfg.hciAddress != null then
+                    "address=${lib.escapeShellArg cfg.hciAddress}"
+                  else
+                    ''
+                      address=$(
+                        ${bin "ancs4linux-ctl"} get-all-hci \
+                          | ${lib.getExe pkgs.jq} -r '.[0] // empty'
+                      )
 
-                    if [ -z "$address" ]; then
-                      echo "error: no HCI adapter found" >&2
-                      exit 1
-                    fi
-                  '';
+                      if [ -z "$address" ]; then
+                        echo "error: no HCI adapter found" >&2
+                        exit 1
+                      fi
+                    '';
 
                 setupScript = pkgs.writeShellScript "ancs4linux-setup" ''
                   set -euo pipefail
@@ -347,34 +380,39 @@
                     --name ${lib.escapeShellArg cfg.advertisingName}
                 '';
 
-                rootUnit    = "ancs4linux-advertising.service";
-                setupUnit   = "ancs4linux-setup.service";
+                rootUnit = "ancs4linux-advertising.service";
+                setupUnit = "ancs4linux-setup.service";
                 observerUnit = "ancs4linux-observer.service";
                 desktopUnit = "ancs4linux-desktop-integration.service";
 
-                optionalDesktop =
-                  lib.optional cfg.desktopIntegration desktopUnit;
+                optionalDesktop = lib.optional cfg.desktopIntegration desktopUnit;
               in
               {
                 ancs4linux-advertising = mkAncsService "Advertising" {
                   execStart = bin "ancs4linux-advertising";
                   # Wait for both the D-Bus session bus *and* BlueZ.
-                  after    = [ "dbus.service" "bluetooth.target" ];
-                  wants    = [ "dbus.service" setupUnit observerUnit ]
-                             ++ optionalDesktop;
+                  after = [
+                    "dbus.service"
+                    "bluetooth.target"
+                  ];
+                  wants = [
+                    "dbus.service"
+                    setupUnit
+                    observerUnit
+                  ]
+                  ++ optionalDesktop;
                   wantedBy = [ "default.target" ];
                 };
 
                 ancs4linux-setup = mkAncsService "BLE Advertising Setup" {
                   execStart = toString setupScript;
-                  after   = [ rootUnit ];
+                  after = [ rootUnit ];
                   bindsTo = [ rootUnit ];
-                  partOf  = [ rootUnit ];
-                  type    = "oneshot";
+                  partOf = [ rootUnit ];
+                  type = "oneshot";
                   extraServiceConfig = {
                     RemainAfterExit = true;
-                    ExecStartPre =
-                      "${pkgs.coreutils}/bin/sleep ${toString cfg.setupDelay}";
+                    ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.setupDelay}";
                     # Don't let a stuck adapter hang the service manager
                     # for the default 90 s.
                     TimeoutStartSec = 30;
@@ -383,16 +421,23 @@
 
                 ancs4linux-observer = mkAncsService "Observer" {
                   execStart = bin "ancs4linux-observer";
-                  after   = [ rootUnit setupUnit ];
+                  after = [
+                    rootUnit
+                    setupUnit
+                  ];
                   bindsTo = [ rootUnit ];
-                  partOf  = [ rootUnit ];
+                  partOf = [ rootUnit ];
                 };
-              } // lib.optionalAttrs cfg.desktopIntegration {
+              }
+              // lib.optionalAttrs cfg.desktopIntegration {
                 ancs4linux-desktop-integration = mkAncsService "Desktop Integration" {
                   execStart = bin "ancs4linux-desktop-integration";
-                  after   = [ observerUnit setupUnit ];
+                  after = [
+                    observerUnit
+                    setupUnit
+                  ];
                   bindsTo = [ observerUnit ];
-                  partOf  = [ rootUnit ];
+                  partOf = [ rootUnit ];
                 };
               };
           };

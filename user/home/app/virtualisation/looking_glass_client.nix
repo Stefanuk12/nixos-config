@@ -11,7 +11,8 @@ let
       }' src/main.c
     '';
   });
-in {
+in
+{
   programs.looking-glass-client = {
     enable = true;
     package = patchedLookingGlass;

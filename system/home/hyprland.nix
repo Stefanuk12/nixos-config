@@ -14,8 +14,8 @@
       '';
       destination = "/etc/udev/rules.d/70-gpu-symlinks.rules";
     }
-  ); 
-  
+  );
+
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;

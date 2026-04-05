@@ -9,5 +9,5 @@
       }
     ];
     allowedUDPPortRanges = allowedTCPPortRanges;
-  };  
+  };
 }

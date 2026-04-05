@@ -37,7 +37,9 @@ in
     tamasfe.even-better-toml
     redhat.vscode-yaml
 
-    (extFromMarketplace "icrawl" "discord-vscode" "5.9.2" "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k=")
+    (extFromMarketplace "icrawl" "discord-vscode" "5.9.2"
+      "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k="
+    )
     (extFromMarketplace "Spoorloos" "rbxexecute" "0.5.0" "q706Yq2jICzmeHdtIIJ6t6I6aL0vJLPaNInqZMD8dG4=")
     (extFromMarketplace "johnnymorganz" "luau-lsp" "1.64.1"
       "Go0+DDvtTO4D3yBwx0t5Zcz0qOi187RWu9oT1+1JLZ8="

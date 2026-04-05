@@ -308,8 +308,14 @@ let
       };
 
       redirdev = [
-        { bus = "usb"; type = "spicevmc"; }
-        { bus = "usb"; type = "spicevmc"; }
+        {
+          bus = "usb";
+          type = "spicevmc";
+        }
+        {
+          bus = "usb";
+          type = "spicevmc";
+        }
       ];
       graphics = {
         type = "spice";
@@ -318,7 +324,7 @@ let
         autoport = true;
         listen.type = "address";
       };
-      
+
       video.model.type = "none";
 
       watchdog = {
@@ -399,7 +405,7 @@ let
       (makeValue "-device")
       (makeValue "{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}")
       (makeValue "-object")
-      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":67108864,\"share\":true}") 
+      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":67108864,\"share\":true}")
     ];
 
     qemu-override.device = {

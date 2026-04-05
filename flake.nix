@@ -51,7 +51,7 @@
       nix-colors,
       nixvirt,
       nix-minecraft,
-      barely-metal, 
+      barely-metal,
       nixos-facter-modules,
       ancs4linux,
       ...
