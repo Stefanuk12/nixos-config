@@ -7,7 +7,7 @@ in
   options.userSettings = {
     name = mkOption {
       type = types.str;
-      default = "Stefan";
+      default = "Stefan Petrovic";
       description = ''
         A name to use for things like Git.
       '';

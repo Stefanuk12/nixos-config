@@ -13,6 +13,7 @@ in
     git
     git-credential-manager
   ];
+  
   programs.git.enable = true;
   programs.git.settings = {
     init.defaultBranch = "main";

@@ -4,7 +4,7 @@
   imports = [
     ./comms/discord.nix
     ./browser/brave.nix
-    ./security/bitwarden.nix
+    ./security
     ./utils/nixvim
     ./dev
     ./virtualisation
