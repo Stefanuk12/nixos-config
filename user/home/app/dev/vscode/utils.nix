@@ -2,11 +2,11 @@
 
 {
   extFromMarketplace =
-    name: publisher: version: sha256:
+    publisher: name: version: sha256:
     (pkgs.vscode-utils.extensionFromVscodeMarketplace {
       inherit
-        name
         publisher
+        name
         version
         sha256
         ;

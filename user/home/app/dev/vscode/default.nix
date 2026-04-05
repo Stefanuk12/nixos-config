@@ -37,12 +37,13 @@ in
     tamasfe.even-better-toml
     redhat.vscode-yaml
 
-    (extFromMarketplace "rbxexecute" "Spoorloos" "0.5.0" "q706Yq2jICzmeHdtIIJ6t6I6aL0vJLPaNInqZMD8dG4=")
-    (extFromMarketplace "luau-lsp" "johnnymorganz" "1.64.1"
+    (extFromMarketplace "icrawl" "discord-vscode" "5.9.2" "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k=")
+    (extFromMarketplace "Spoorloos" "rbxexecute" "0.5.0" "q706Yq2jICzmeHdtIIJ6t6I6aL0vJLPaNInqZMD8dG4=")
+    (extFromMarketplace "johnnymorganz" "luau-lsp" "1.64.1"
       "Go0+DDvtTO4D3yBwx0t5Zcz0qOi187RWu9oT1+1JLZ8="
     )
-    (extFromMarketplace "stylua" "johnnymorganz" "1.7.1" "AbMCYYyK6Ywm/VljzAdmjk0VWm7JRH5GgJAC38T3j/c=")
-    (extFromMarketplace "jbockle-format-files" "jbockle" "3.4.0"
+    (extFromMarketplace "johnnymorganz" "stylua" "1.7.1" "AbMCYYyK6Ywm/VljzAdmjk0VWm7JRH5GgJAC38T3j/c=")
+    (extFromMarketplace "jbockle" "jbockle-format-files" "3.4.0"
       "BHw+T2EPdQq/wOD5kzvSln5SBFTYUXip8QDjnAGBfFY="
     )
     selene-vscode
