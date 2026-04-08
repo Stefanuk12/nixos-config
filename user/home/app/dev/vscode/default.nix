@@ -36,6 +36,8 @@ in
     usernamehw.errorlens
     tamasfe.even-better-toml
     redhat.vscode-yaml
+    mkhl.direnv
+    wakatime.vscode-wakatime
 
     (extFromMarketplace "icrawl" "discord-vscode" "5.9.2"
       "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k="
