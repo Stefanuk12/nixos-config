@@ -1,10 +1,6 @@
 { pkgs, lib, ... }:
 
 {
-  imports = [
-    ./wayland.nix
-  ];
-
   services.udev.packages = lib.singleton (
     pkgs.writeTextFile {
       name = "gpu-symlinks";

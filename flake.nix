@@ -2,8 +2,10 @@
   description = "yo mother";
 
   inputs = {
-    # Nixpkgs
+    # Nixpkgs + HyDE
+    hydenix.url = "github:richen604/hydenix";
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.follows = "hydenix/nixpkgs";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager";
@@ -47,6 +49,7 @@
     {
       self,
       nixpkgs,
+      hydenix,
       home-manager,
       nix-colors,
       nixvirt,
