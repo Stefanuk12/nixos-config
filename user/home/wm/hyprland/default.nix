@@ -6,11 +6,11 @@ in
 {
   imports = [
     ../../../common/app/terminal
-    ./cursor
-    ./grimblast.nix
-    ./hypridle.nix
-    ./hyprlock.nix
-    ./hyprpaper.nix
+    # ./cursor
+    # ./grimblast.nix
+    # ./hypridle.nix
+    # ./hyprlock.nix
+    # ./hyprpaper.nix
   ];
 
   wayland.windowManager.hyprland.enable = true;

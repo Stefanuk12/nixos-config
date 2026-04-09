@@ -15,6 +15,6 @@
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
-    portalPackage = pkgs.xdg-desktop-portal-hyprland;
+    portalPackage = lib.mkDefault pkgs.xdg-desktop-portal-hyprland;
   };
 }

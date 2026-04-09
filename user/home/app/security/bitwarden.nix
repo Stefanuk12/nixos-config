@@ -1,7 +1,7 @@
 { inputs, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
+  home.packages = with pkgs.userPkgs; [
     bitwarden-cli
     inputs.bwm.packages.${pkgs.stdenv.hostPlatform.system}.default
     pinentry-qt

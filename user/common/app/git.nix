@@ -9,7 +9,7 @@ let
   systemSettings = config.systemSettings;
 in
 {
-  home.packages = with pkgs; [
+  home.packages = with pkgs.userPkgs; [
     git
     git-credential-manager
   ];

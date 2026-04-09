@@ -25,14 +25,14 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Setup networking
-  networking.hostName = hostName; # Define your hostname.
+  networking.hostName = lib.mkDefault hostName; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
-  time.timeZone = timeZone;
+  time.timeZone = lib.mkDefault timeZone;
 
   # Select internationalisation properties.
-  i18n.defaultLocale = locale;
+  i18n.defaultLocale = lib.mkDefault locale;
 
   # Configure keymap in X11
   console.useXkbConfig = true;
@@ -70,5 +70,5 @@ in
     "nix-command"
     "flakes"
   ];
-  system.stateVersion = "23.05";
+  system.stateVersion = lib.mkDefault "23.05";
 }

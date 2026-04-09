@@ -29,7 +29,7 @@ in
     enableCompletion = true;
   };
 
-  home.packages = with pkgs; [
+  home.packages = with pkgs.userPkgs; [
     eza
   ];
 }

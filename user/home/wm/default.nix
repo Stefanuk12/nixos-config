@@ -2,9 +2,10 @@
 
 {
   imports = [
-    ./hyprland
-    ./waybar
-    ./fuzzel.nix
-    ./fnott.nix
+    # ./hyprland
+    ./hydenix.nix
+    # ./waybar
+    # ./fuzzel.nix
+    # ./fnott.nix
   ];
 }

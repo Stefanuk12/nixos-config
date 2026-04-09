@@ -4,8 +4,9 @@
   inputs = {
     # Nixpkgs + HyDE
     hydenix.url = "github:richen604/hydenix";
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.follows = "hydenix/nixpkgs";
+    nixos-hardware.url = "github:nixos/nixos-hardware/master";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager";
