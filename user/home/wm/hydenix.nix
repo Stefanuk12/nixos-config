@@ -10,6 +10,8 @@
     networkmanagerapplet
   ];
 
+  xdg.userDirs.setSessionVariables = true;
+
   hydenix.hm = {
     enable = true;
 

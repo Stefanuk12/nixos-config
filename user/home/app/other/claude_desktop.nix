@@ -13,6 +13,6 @@
   };
 
   home.packages = with pkgs; [
-    claude-desktop
+    claude-desktop-fhs
   ];
 }
