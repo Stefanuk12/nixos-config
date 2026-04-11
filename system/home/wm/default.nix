@@ -12,9 +12,6 @@ let
 in
 {
   imports = [
-    ./hyprland.nix
-    ./wayland.nix
-
     ./hydenix.nix
   ];
 

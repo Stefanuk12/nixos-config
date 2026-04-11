@@ -19,6 +19,5 @@
     network.enable = false;
   };
 
-  programs.nm-applet.enable = true;
   services.displayManager.sddm.wayland.compositorCommand = "kwin_wayland --drm-device=/dev/dri/card0";
 }

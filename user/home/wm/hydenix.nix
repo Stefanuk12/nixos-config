@@ -1,9 +1,13 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
     inputs.hydenix.homeModules.default
   ];  
+
+  home.packages = with pkgs; [
+    networkmanagerapplet
+  ];
 
   hydenix.hm = {
     enable = true;
