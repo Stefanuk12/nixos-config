@@ -24,6 +24,7 @@ in
   boot.extraModprobeConfig = ''
     options vfio-pci ids=1002:73a5,1002:ab28
     options kvm_amd nested=1
+    softdep amdgpu pre: vfio-pci
   '';
   boot.kernel.sysctl = {
     "vm.nr_hugepages" = 0;

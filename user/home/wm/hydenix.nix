@@ -15,7 +15,7 @@
 
     editors.neovim = false;
     editors.vscode.enable = false;
-    editors.vim.enable = false;
+    editors.vim = false;
     editors.default = "codium";
 
     firefox.enable = false;
