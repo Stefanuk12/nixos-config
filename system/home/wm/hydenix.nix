@@ -1,8 +1,7 @@
-{ inputs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports = [
-    inputs.hydenix.inputs.home-manager.nixosModules.home-manager
     inputs.hydenix.nixosModules.default
 
     inputs.nixos-hardware.nixosModules.common-gpu-amd
@@ -19,4 +18,7 @@
     boot.enable = false;
     network.enable = false;
   };
+
+  programs.nm-applet.enable = true;
+  services.displayManager.sddm.wayland.compositorCommand = "kwin_wayland --drm-device=/dev/dri/card0";
 }

@@ -13,7 +13,7 @@ in
   imports = [
     ./other
     ./virtualisation
-    ./home_manager.nix
+    # ./home_manager.nix
   ];
 
   # nixpkgs.config.allowUnfreePredicate = lib.mkDefault allowUnfreesP;

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  home.packages = with pkgs.userPkgs; [
+  home.packages = with pkgs; [
     nixfmt
   ];
 }

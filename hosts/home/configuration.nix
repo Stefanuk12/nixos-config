@@ -49,16 +49,17 @@ in
   };
 
   # MIME Setup
-  xdg.mime.defaultApplications = {
-    "text/html" = "firefox.desktop";
-    "x-scheme-handler/http" = "firefox.desktop";
-    "x-scheme-handler/https" = "firefox.desktop";
-    "x-scheme-handler/about" = "firefox.desktop";
-    "x-scheme-handler/unknown" = "firefox.desktop";
-  };
+  # xdg.mime.defaultApplications = {
+  #   "text/html" = "firefox.desktop";
+  #   "x-scheme-handler/http" = "firefox.desktop";
+  #   "x-scheme-handler/https" = "firefox.desktop";
+  #   "x-scheme-handler/about" = "firefox.desktop";
+  #   "x-scheme-handler/unknown" = "firefox.desktop";
+  # };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.stefan = {
+    shell = pkgs.zsh;
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [

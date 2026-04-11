@@ -3,7 +3,7 @@
 {
   services.spotifyd.enable = true;
 
-  home.packages = with pkgs.userPkgs; [
+  home.packages = with pkgs; [
     spotifyd
   ];
 }

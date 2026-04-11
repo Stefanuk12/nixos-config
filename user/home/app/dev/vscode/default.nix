@@ -39,6 +39,7 @@ in
     mkhl.direnv
     wakatime.vscode-wakatime
 
+    (extFromMarketplace "hverlin" "mise-vscode" "1.7.0" "YKaIjess8JniYvQ/GaLIzNne7+Azi4LdWe0JgWUf920=")
     (extFromMarketplace "icrawl" "discord-vscode" "5.9.2"
       "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k="
     )

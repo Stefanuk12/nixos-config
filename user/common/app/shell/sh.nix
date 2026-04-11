@@ -22,14 +22,7 @@ in
     '';
   };
 
-  programs.bash = {
-    inherit shellAliases;
-
-    enable = true;
-    enableCompletion = true;
-  };
-
-  home.packages = with pkgs.userPkgs; [
+  home.packages = with pkgs; [
     eza
   ];
 }

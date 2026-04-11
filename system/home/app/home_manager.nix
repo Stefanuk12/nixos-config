@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ username, inputs, ... }:
 
 {
   home-manager = {

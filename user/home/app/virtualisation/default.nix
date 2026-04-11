@@ -5,7 +5,7 @@
     ./looking_glass_client.nix
   ];
 
-  home.packages = with pkgs.userPkgs; [
+  home.packages = with pkgs; [
     libvirt
     virt-manager
     qemu

@@ -373,6 +373,7 @@ let
             slot = 0;
             function = 0;
           };
+          alias.name = "hostdev0";
         }
         {
           mode = "subsystem";
@@ -391,6 +392,7 @@ let
             slot = 0;
             function = 0;
           };
+          alias.name = "hostdev1";  # add this
         }
       ];
     };
@@ -406,6 +408,14 @@ let
       (makeValue "{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}")
       (makeValue "-object")
       (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":67108864,\"share\":true}")
+      # (makeValue "-set")
+      # (makeValue "device.hostdev0.edid=on")
+      # (makeValue "-set")
+      # (makeValue "device.hostdev0.xres=1920")
+      # (makeValue "-set")
+      # (makeValue "device.hostdev0.yres=1080")
+      # (makeValue "-set")
+      # (makeValue "device.hostdev0.refresh_rate=165")
     ];
 
     qemu-override.device = {

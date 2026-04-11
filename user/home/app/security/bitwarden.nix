@@ -1,7 +1,7 @@
 { inputs, pkgs, ... }:
 
 {
-  home.packages = with pkgs.userPkgs; [
+  home.packages = with pkgs; [
     bitwarden-cli
     inputs.bwm.packages.${pkgs.stdenv.hostPlatform.system}.default
     pinentry-qt
@@ -9,7 +9,7 @@
 
   xdg.configFile."bwm/config.ini".text = ''
     [dmenu]
-    dmenu_command = fuzzel --dmenu --lines=25 --width=40
+    dmenu_command = rofi
     pinentry = pinentry-qt
 
     [dmenu_passphrase]
