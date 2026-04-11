@@ -29,8 +29,7 @@
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
 
       input {
-        kb_layout = "iso_us"
-        kb_variant = "intl"
+        kb_layout = iso_us
         accel_profile = "flat"
         sensitivity = -0.8
       }
