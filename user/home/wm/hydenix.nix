@@ -3,7 +3,7 @@
 {
   imports = [
     inputs.hydenix.homeModules.default
-  ];  
+  ];
 
   # need this because `network` was disabled
   home.packages = with pkgs; [

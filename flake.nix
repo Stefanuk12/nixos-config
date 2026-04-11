@@ -102,7 +102,10 @@
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [ claude-desktop.overlays.default hydenix.overlays.default ];
+            overlays = [
+              claude-desktop.overlays.default
+              hydenix.overlays.default
+            ];
           };
           modules = [
             ./hosts/home/home.nix

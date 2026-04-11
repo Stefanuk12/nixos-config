@@ -392,7 +392,7 @@ let
             slot = 0;
             function = 0;
           };
-          alias.name = "hostdev1";  # add this
+          alias.name = "hostdev1"; # add this
         }
       ];
     };
