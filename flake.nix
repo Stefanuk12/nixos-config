@@ -42,8 +42,7 @@
     # Other tools
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
-    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
-    claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
+    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
   };
 
   outputs =
@@ -58,6 +57,7 @@
       barely-metal,
       nixos-facter-modules,
       ancs4linux,
+      claude-desktop,
       ...
     }@inputs:
     let
@@ -102,7 +102,7 @@
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [ hydenix.overlays.default ];
+            overlays = [ claude-desktop.overlays.default hydenix.overlays.default ];
           };
           modules = [
             ./hosts/home/home.nix

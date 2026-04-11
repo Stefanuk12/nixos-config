@@ -16,5 +16,7 @@ in
     # ./home_manager.nix
   ];
 
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.login.enableGnomeKeyring = true;
   # nixpkgs.config.allowUnfreePredicate = lib.mkDefault allowUnfreesP;
 }
