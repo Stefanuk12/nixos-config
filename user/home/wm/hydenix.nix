@@ -5,25 +5,27 @@
     inputs.hydenix.homeModules.default
   ];  
 
+  # need this because `network` was disabled
   home.packages = with pkgs; [
     networkmanagerapplet
   ];
 
   hydenix.hm = {
     enable = true;
-    # shell.enable = false;
-    hyde.enable = true;
-    editors.enable = false;
+
+    editors.neovim = false;
+    editors.vscode.enable = false;
+    editors.vim.enable = false;
+    editors.default = "codium";
+
     firefox.enable = false;
     git.enable = false;
     social.enable = false;
-    rofi.enable = true;
-    waybar.enable = true;
   };
 
   hydenix.hm.hyprland = {
     enable = true;
-    nvidia.enable = false;
+    suppressWarnings = true;
     extraConfig = ''
       exec-once = kdeconnect-indicator
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
