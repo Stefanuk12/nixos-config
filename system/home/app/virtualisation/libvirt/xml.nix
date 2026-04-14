@@ -11,7 +11,8 @@ let
 
   # VM configs — single source of truth for domain XML + hooks
   vms = {
-    win11-rbxl = import ./xml/win11-rbxl.nix { inherit inputs pkgs; };
+    win11-base = import ./xml/win11-base.nix { inherit inputs pkgs; };
+    win11-rbxl = import ./xml/win11-rblx.nix { inherit inputs pkgs; };
   };
 
   # ── Domain XML generation ──────────────────────────────

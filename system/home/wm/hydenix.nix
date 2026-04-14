@@ -17,6 +17,7 @@
 
     boot.enable = false;
     network.enable = false;
+    gaming.enable = false;
   };
 
   services.displayManager.sddm.wayland.compositorCommand = "kwin_wayland --drm-device=/dev/dri/card0";

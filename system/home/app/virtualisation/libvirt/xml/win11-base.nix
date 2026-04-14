@@ -1,14 +1,11 @@
 # VM configuration — consumed by mkVM (domain XML) and mkQemuHook (CPU governor).
 # This file is pure data; xml.nix handles the actual building.
 
-# NOTE FOR FUTURE SELF: to base image, consider installing openssh server, then also running the clean qemu script
-# you should install kde connect on this + looking glass host too
-
 { inputs, pkgs }:
 
 {
   name = "win11-base";
-  uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f31";
+  uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f32";
 
   memory = 16;
   hugepages = {
@@ -55,7 +52,7 @@
   };
 
   disks = [{
-    file = /var/lib/libvirt/images/win11-rbxl.qcow2;
+    file = /var/lib/libvirt/images/win11-base.qcow2;
     format = "qcow2";
     serial = "ECFE037C590CE21A24AE";
     boot = 1;
@@ -95,11 +92,11 @@
   # Direct host input passthrough via evdev — lower latency than USB.
   # Only needed on first install / when Looking Glass Host is NOT
   # installed on the guest. Find devices with: ls -l /dev/input/by-id/
-  # evdev = [
-  #   { dev = "/dev/input/event1"; }                                        # keyboard
-  #   { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse
-  #     repeat = true; }
-  # ];
+  evdev = [
+    { dev = "/dev/input/event1"; }                                        # keyboard
+    { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse
+      repeat = true; }
+  ];
 
   # CPU governor settings for the libvirt qemu hook
   governor = {
