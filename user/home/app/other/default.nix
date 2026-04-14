@@ -3,8 +3,10 @@
 {
   imports = [
     ./claude_desktop.nix
-    ./nixfmt.nix
-    ./spotify.nix
     ./kde_connect.nix
+    ./nixfmt.nix
+    ./obs_studio.nix
+    ./spotify.nix
+    ./stremio.nix
   ];
 }

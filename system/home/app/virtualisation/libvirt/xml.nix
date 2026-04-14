@@ -7,433 +7,107 @@
 }:
 
 let
-  makeUnitCount = unit: count: { inherit unit count; };
-  makeVcpupin = vcpu: cpuset: { inherit vcpu cpuset; };
-  makeNameValue = name: value: { inherit name value; };
-  makeFeature = policy: name: { inherit policy name; };
-  makeValue = value: { inherit value; };
-  makeController = type: index: model: {
-    inherit type index model;
-  };
-  makeControllerAddr = type: index: address: {
-    inherit type index address;
+  mkVM = import ./xml/mkVM.nix;
+
+  # VM configs — single source of truth for domain XML + hooks
+  vms = {
+    win11-rbxl = import ./xml/win11-rbxl.nix { inherit inputs pkgs; };
   };
 
-  win11 = {
-    type = "kvm";
-    name = "win11-111";
-    uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f31";
-
-    memory = makeUnitCount "G" 16;
-    currentMemory = makeUnitCount "G" 16;
-
-    iothreads.count = 1;
-
-    vcpu.placement = "static";
-    vcpu.count = 12;
-
-    cputune.emulatorpin = {
-      cpuset = "0-1,8-9";
-    };
-    cputune.iothreadpin = {
-      iothread = 1;
-      cpuset = "0-1,8-9";
-    };
-    cputune.vcpupin = [
-      (makeVcpupin 0 "2")
-      (makeVcpupin 1 "10")
-      (makeVcpupin 2 "3")
-      (makeVcpupin 4 "4")
-      (makeVcpupin 5 "12")
-      (makeVcpupin 6 "5")
-      (makeVcpupin 7 "13")
-      (makeVcpupin 8 "6")
-      (makeVcpupin 9 "6")
-      (makeVcpupin 10 "7")
-      (makeVcpupin 11 "15")
-    ];
-
-    os = {
-      type = "hvm";
-      arch = "x86_64";
-      machine = "q35";
-
-      bootmenu.enable = true;
-
-      loader = {
-        readonly = true;
-        secure = true;
-        type = "pflash";
-        path = "/var/lib/barely-metal/firmware/OVMF_CODE.fd";
-      };
-      nvram = {
-        template = "/var/lib/barely-metal/firmware/OVMF_VARS.fd";
-        path = /var/lib/libvirt/qemu/nvram/win11_VARS.fd;
-      };
-    };
-
-    features = {
-      acpi = { };
-      apic = { };
-      hyperv = {
-        mode = "custom";
-        relaxed.state = false;
-        vapic.state = false;
-        spinlocks.state = false;
-        vpindex.state = false;
-        runtime.state = false;
-        synic.state = false;
-        stimer.state = false;
-        reset.state = false;
-        frequencies.state = false;
-        vendor_id = {
-          state = true;
-          value = "AuthenticAMD";
-        };
-        reenlightenment.state = false;
-        tlbflush.state = false;
-        ipi.state = false;
-        evmcs.state = false;
-        avic.state = false;
-        emsr_bitmap.state = false;
-        xmm_input.state = false;
-      };
-      kvm.hidden.state = true;
-      smm.state = true;
-      pmu.state = false;
-      ioapic.driver = "kvm";
-      msrs.unknown = "fault";
-      vmport.state = false;
-      ps2.state = false;
-    };
-
-    cpu = {
-      mode = "host-passthrough";
-      check = "none";
-      migratable = false;
-
-      topology = {
-        sockets = 1;
-        dies = 1;
-        cores = 6;
-        threads = 2;
-      };
-
-      cache.mode = "passthrough";
-      maxphysaddr.mode = "passthrough";
-
-      feature = [
-        (makeFeature "require" "svm")
-        (makeFeature "require" "topoext")
-        (makeFeature "require" "invtsc")
-        (makeFeature "disable" "vmx-vnmi")
-        (makeFeature "disable" "hypervisor")
-        (makeFeature "disable" "ssbd")
-        (makeFeature "disable" "amd-ssbd")
-        (makeFeature "disable" "virt-ssbd")
-        (makeFeature "disable" "rdpid")
-      ];
-    };
-
-    clock = {
-      offset = "timezone";
-      timezone = "Europe/London";
-
-      timer = [
-        {
-          name = "tsc";
-          present = true;
-          mode = "native";
-          tickpolicy = "discard";
-        }
-        {
-          name = "hpet";
-          present = true;
-        }
-        {
-          name = "rtc";
-          present = false;
-        }
-        {
-          name = "pit";
-          present = false;
-        }
-
-        {
-          name = "kvmclock";
-          present = false;
-        }
-        {
-          name = "hypervclock";
-          present = false;
-        }
-      ];
-    };
-
-    on_poweroff = "destroy";
-    on_reboot = "restart";
-    on_crash = "destroy";
-
-    console = "none";
-    channel = "none";
-
-    pm = {
-      suspend-to-mem.enabled = true;
-      suspend-to-disk.enabled = true;
-    };
-
-    devices = {
-      emulator = /run/libvirt/nix-emulators/qemu-system-x86_64;
-
-      disk = [
-        {
-          type = "file";
-          device = "disk";
-          serial = "ECFE037C590CE21A24AE";
-
-          driver = {
-            name = "qemu";
-            type = "qcow2";
-            cache = "none";
-            io = "native";
-            discard = "unmap";
-          };
-
-          source.file = /var/lib/libvirt/images/win11.qcow2;
-
-          backingStore = { };
-
-          target = {
-            dev = "sda";
-            bus = "sata";
-          };
-
-          boot.order = 1;
-
-          address = {
-            type = "drive";
-            controller = 0;
-            bus = 0;
-            target = 0;
-            unit = 0;
-          };
-        }
-        {
-          type = "file";
-          device = "cdrom";
-          readonly = { };
-
-          driver = {
-            name = "qemu";
-            type = "raw";
-          };
-
-          source.file = "/var/lib/barely-metal/firmware/guest-scripts.iso";
-
-          target = {
-            dev = "sdc";
-            bus = "sata";
-          };
-        }
-      ];
-
-      interface = [
-        {
-          type = "bridge";
-          mac.address = "52:54:3a:20:c8:5d";
-          source.bridge = "br0";
-          model.type = "e1000e";
-          link.state = "up";
-          address = {
-            type = "pci";
-            domain = 0;
-            bus = 10;
-            slot = 0;
-            function = 0;
-          };
-        }
-      ];
-
-      input = [
-        {
-          type = "keyboard";
-          bus = "usb";
-        }
-        {
-          type = "mouse";
-          bus = "usb";
-        }
-        {
-          type = "evdev";
-          source.dev = "/dev/input/event1";
-        }
-        {
-          type = "evdev";
-          source = {
-            dev = "/dev/input/event6";
-            grab = "all";
-            grabToggle = "ctrl-ctrl";
-            repeat = true;
-          };
-        }
-      ];
-
-      tpm = {
-        model = "tpm-crb";
-        backend = {
-          type = "emulator";
-          version = "2.0";
-        };
-      };
-
-      sound = {
-        model = "ich9";
-
-        codec.type = "micro";
-        audio.id = 1;
-        address = {
-          type = "pci";
-          domain = 0;
-          bus = 0;
-          slot = 27;
-          function = 0;
-        };
-      };
-      audio = {
-        id = 1;
-        type = "pipewire";
-        runtimeDir = "/run/user/1000";
-        input.mixingEngine = false;
-        output.mixingEngine = false;
-      };
-
-      redirdev = [
-        {
-          bus = "usb";
-          type = "spicevmc";
-        }
-        {
-          bus = "usb";
-          type = "spicevmc";
-        }
-      ];
-      graphics = {
-        type = "spice";
-        port = "-1";
-        tlsPort = "-1";
-        autoport = true;
-        listen.type = "address";
-      };
-
-      video.model.type = "none";
-
-      watchdog = {
-        model = "itco";
-        action = "reset";
-      };
-
-      memballoon.model = "none";
-
-      controller = [
-        (makeController "usb" 0 "qemu-xhci")
-        (makeController "pci" 0 "pcie-root")
-        (makeController "pci" 1 "pcie-root-port")
-        (makeController "pci" 16 "pcie-to-pci-bridge")
-        (makeControllerAddr "sata" 0 {
-          type = "pci";
-          domain = 0;
-          bus = 0;
-          slot = 31;
-          function = 2;
-        })
-        (makeControllerAddr "virtio-serial" 0 {
-          type = "pci";
-          domain = 0;
-          bus = 3;
-          slot = 0;
-          function = 0;
-        })
-      ];
-
-      hostdev = [
-        {
-          mode = "subsystem";
-          type = "pci";
-          managed = true;
-          source.address = {
-            domain = 0;
-            bus = 3;
-            slot = 0;
-            function = 0;
-          };
-          address = {
-            type = "pci";
-            domain = 0;
-            bus = 4;
-            slot = 0;
-            function = 0;
-          };
-          alias.name = "hostdev0";
-        }
-        {
-          mode = "subsystem";
-          type = "pci";
-          managed = true;
-          source.address = {
-            domain = 0;
-            bus = 3;
-            slot = 0;
-            function = 1;
-          };
-          address = {
-            type = "pci";
-            domain = 0;
-            bus = 5;
-            slot = 0;
-            function = 0;
-          };
-          alias.name = "hostdev1"; # add this
-        }
-      ];
-    };
-
-    qemu-commandline.arg = [
-      (makeValue "-smbios")
-      (makeValue "file=/var/lib/barely-metal/firmware/smbios.bin")
-      (makeValue "-acpitable")
-      (makeValue "file=/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml")
-      # (makeValue "-cpu")
-      # (makeValue "host,kvm-pv-enforce-cpuid=on")
-      (makeValue "-device")
-      (makeValue "{\"driver\":\"ivshmem-plain\",\"id\":\"shmem0\",\"memdev\":\"looking-glass\"}")
-      (makeValue "-object")
-      (makeValue "{\"qom-type\":\"memory-backend-file\",\"id\":\"looking-glass\",\"mem-path\":\"/dev/kvmfr0\",\"size\":67108864,\"share\":true}")
-      # (makeValue "-set")
-      # (makeValue "device.hostdev0.edid=on")
-      # (makeValue "-set")
-      # (makeValue "device.hostdev0.xres=1920")
-      # (makeValue "-set")
-      # (makeValue "device.hostdev0.yres=1080")
-      # (makeValue "-set")
-      # (makeValue "device.hostdev0.refresh_rate=165")
-    ];
-
-    qemu-override.device = {
-      alias = "sata0-0-0";
-      frontend.property = [
-        {
-          name = "rotation_rate";
-          type = "unsigned";
-          value = "1";
-        }
-        {
-          name = "discard_granularity";
-          type = "unsigned";
-          value = "0";
-        }
-      ];
-    };
+  # ── Domain XML generation ──────────────────────────────
+  mkDomain = cfg: {
+    definition = inputs.nixvirt.lib.domain.writeXML (mkVM cfg);
+    active = false;
   };
+
+  # ── QEMU hook generation ────────────────────────────────
+  # Derives CPU core lists and governor settings from the VM config.
+  # Generates a single hook script that handles all configured VMs.
+
+  vmsWithGovernor = lib.filterAttrs
+    (_: cfg: (cfg.governor or {}).enable or false)
+    vms;
+
+  mkCase = _: cfg:
+    let
+      gov = cfg.governor;
+      pinTo = cfg.cpu.pinTo or [];
+      vmCores = builtins.concatStringsSep "," (map toString pinTo);
+      hostCores = cfg.cpu.hostCores or "";
+    in ''
+      ${cfg.name})
+        case "$OPERATION/$SUB_OPERATION" in
+          prepare/begin)
+            set_governor "${vmCores}" "${gov.active or "performance"}"
+            set_governor "${hostCores}" "${gov.active or "performance"}"
+            ;;
+          release/end)
+            set_governor "${vmCores}" "${gov.restore or "schedutil"}"
+            set_governor "${hostCores}" "${gov.restore or "schedutil"}"
+            ;;
+        esac
+        ;;
+    '';
+
+  hookScript = pkgs.writeShellScript "qemu-hook" ''
+    GUEST_NAME="$1"
+    OPERATION="$2"
+    SUB_OPERATION="$3"
+
+    set_governor() {
+      local cores="$1"
+      local governor="$2"
+      for core in ''${cores//,/ }; do
+        echo "$governor" > /sys/devices/system/cpu/cpu''${core}/cpufreq/scaling_governor 2>/dev/null || true
+      done
+    }
+
+    case "$GUEST_NAME" in
+      ${builtins.concatStringsSep "\n      " (lib.attrValues (lib.mapAttrs mkCase vmsWithGovernor))}
+    esac
+  '';
+
+  hasHooks = vmsWithGovernor != {};
+
+  # ── Hugepage host configuration ─────────────────────────
+  # Derives kernel params / sysctl from VM hugepage settings.
+  # 1GB pages: must be allocated at boot (kernel params).
+  # 2MB pages: can use overcommit (sysctl).
+
+  vmsWithHugepages = lib.filterAttrs (_: cfg:
+    let hp = cfg.hugepages or false;
+    in if builtins.isAttrs hp then hp.enable or false else hp
+  ) vms;
+
+  # Convert memory to MB for page count calculation
+  memToMB = cfg:
+    let u = cfg.memoryUnit or "G";
+    in if u == "G" then cfg.memory * 1024 else cfg.memory;
+
+  pageSizeKB = cfg:
+    let
+      hp = cfg.hugepages;
+      sz = if builtins.isAttrs hp then hp.size or null else null;
+      u  = if builtins.isAttrs hp then hp.unit or "G" else "G";
+    in
+      if sz == null then 2048           # default 2MB
+      else if u == "G" then sz * 1048576  # 1G = 1048576 KB
+      else if u == "M" then sz * 1024
+      else sz;
+
+  # Group VMs by page size, sum required pages
+  totalPagesBySize = builtins.foldl' (acc: cfg:
+    let
+      psk = pageSizeKB cfg;
+      memKB = memToMB cfg * 1024;
+      pages = memKB / psk;
+      prev = acc.${toString psk} or 0;
+    in acc // { ${toString psk} = prev + pages; }
+  ) {} (builtins.attrValues vmsWithHugepages);
+
+  needs1G = totalPagesBySize ? "1048576";
+  needs2M = totalPagesBySize ? "2048";
+
 in
 {
   imports = [
@@ -441,10 +115,24 @@ in
   ];
 
   virtualisation.libvirt.enable = true;
-  virtualisation.libvirt.connections."qemu:///system".domains = [
-    {
-      definition = inputs.nixvirt.lib.domain.writeXML win11;
-      active = false;
-    }
+  virtualisation.libvirt.connections."qemu:///system".domains =
+    lib.mapAttrsToList (_: mkDomain) vms;
+
+  # Install qemu hook only if any VM has governor management enabled
+  systemd.services.libvirtd.preStart = lib.mkIf hasHooks ''
+    mkdir -p /var/lib/libvirt/hooks
+    ln -sf ${hookScript} /var/lib/libvirt/hooks/qemu
+  '';
+
+  # 1GB hugepages: must be reserved at boot via kernel command line
+  boot.kernelParams = lib.mkIf needs1G [
+    "default_hugepagesz=1G"
+    "hugepagesz=1G"
+    "hugepages=${toString totalPagesBySize."1048576"}"
   ];
+
+  # 2MB hugepages: can be allocated dynamically via overcommit
+  boot.kernel.sysctl = lib.mkIf needs2M {
+    "vm.nr_overcommit_hugepages" = totalPagesBySize."2048";
+  };
 }

@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 
 {
   imports = [
@@ -9,5 +9,7 @@
     ./dev
     ./virtualisation
     ./other
+
+    inputs.nix-flatpak.homeManagerModules.nix-flatpak
   ];
 }

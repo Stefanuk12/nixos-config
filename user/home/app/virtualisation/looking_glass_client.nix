@@ -32,7 +32,7 @@ in
       };
       input = {
         rawMouse = true;
-        escapeKey = 62;
+        escapeKey = "KEY_INSERT";
       };
       egl = {
         # scale = 1;

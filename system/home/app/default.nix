@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, inputs, pkgs, ... }:
 
 let
   allowUnfreesP =
@@ -13,10 +13,17 @@ in
   imports = [
     ./other
     ./virtualisation
-    # ./home_manager.nix
+
+    inputs.nix-flatpak.nixosModules.nix-flatpak
   ];
 
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.login.enableGnomeKeyring = true;
-  # nixpkgs.config.allowUnfreePredicate = lib.mkDefault allowUnfreesP;
+  services.flatpak = {
+    enable = true;
+    remotes = [
+      {
+        name = "flathub";
+        location = "https://flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+  }; 
 }

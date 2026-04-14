@@ -40,6 +40,7 @@
     nix-minecraft.inputs.nixpkgs.follows = "nixpkgs";
 
     # Other tools
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
     claude-desktop.url = "github:aaddrick/claude-desktop-debian";

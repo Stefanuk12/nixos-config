@@ -26,10 +26,6 @@ in
     options kvm_amd nested=1
     softdep amdgpu pre: vfio-pci
   '';
-  boot.kernel.sysctl = {
-    "vm.nr_hugepages" = 0;
-    "vm.nr_overcommit_hugepages" = 15258;
-  };
   boot.kernelParams = [
     # "amdgpu.dc=0"
     # "radeon.modeset=0"
@@ -37,6 +33,9 @@ in
     "iommu=pt"
     "kvm.ignore_msrs=1"
     "vfio-pci.ids=1002:73a5,1002:ab28"
+    "default_hugepagesz=1G"
+    "hugepagesz=1G"
+    "hugepages=16"
   ];
   boot.initrd.kernelModules = [
     "vfio_pci"
