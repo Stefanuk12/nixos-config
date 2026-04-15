@@ -44,7 +44,7 @@
 
   hardening = {
     enable = true;
-    emulator = "${inputs.barely-metal.packages.${pkgs.system}.qemu-patched}/bin/qemu-system-x86_64";
+    emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";
     smbios = "/var/lib/barely-metal/firmware/smbios.bin";
     acpiTable = "/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml";
     # acpiBattery = "/path/to/SSDT-battery.aml";
