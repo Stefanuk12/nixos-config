@@ -13,7 +13,7 @@
   memory = 16;
   hugepages = {
     enable = true;
-    size = 1;       # 1GB pages (requires boot-time allocation)
+    size = 1;       # 1GB pages (allocated dynamically by qemu hook)
     unit = "G";
   };
 

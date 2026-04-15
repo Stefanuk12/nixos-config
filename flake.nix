@@ -44,6 +44,10 @@
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
     claude-desktop.url = "github:aaddrick/claude-desktop-debian";
+
+    # Gaming
+    nix-reshade.url = "github:LovingMelody/nix-reshade";
+    nix-reshade.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -59,6 +63,7 @@
       nixos-facter-modules,
       ancs4linux,
       claude-desktop,
+      nix-reshade,
       ...
     }@inputs:
     let

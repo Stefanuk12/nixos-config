@@ -106,9 +106,7 @@ let
     in acc // { ${toString psk} = prev + pages; }
   ) {} (builtins.attrValues vmsWithHugepages);
 
-  needs1G = totalPagesBySize ? "1048576";
   needs2M = totalPagesBySize ? "2048";
-
 in
 {
   imports = [
@@ -124,13 +122,6 @@ in
     mkdir -p /var/lib/libvirt/hooks
     ln -sf ${hookScript} /var/lib/libvirt/hooks/qemu
   '';
-
-  # 1GB hugepages: must be reserved at boot via kernel command line
-  boot.kernelParams = lib.mkIf needs1G [
-    "default_hugepagesz=1G"
-    "hugepagesz=1G"
-    "hugepages=${toString totalPagesBySize."1048576"}"
-  ];
 
   # 2MB hugepages: can be allocated dynamically via overcommit
   boot.kernel.sysctl = lib.mkIf needs2M {

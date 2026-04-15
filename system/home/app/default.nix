@@ -11,6 +11,7 @@ let
 in
 {
   imports = [
+    ./gaming
     ./other
     ./virtualisation
 

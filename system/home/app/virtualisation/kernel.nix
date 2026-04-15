@@ -33,9 +33,9 @@ in
     "iommu=pt"
     "kvm.ignore_msrs=1"
     "vfio-pci.ids=1002:73a5,1002:ab28"
+    # Hugepages allocated dynamically by libvirt qemu hook (see qemu/hooks.nix)
     "default_hugepagesz=1G"
     "hugepagesz=1G"
-    "hugepages=16"
   ];
   boot.initrd.kernelModules = [
     "vfio_pci"

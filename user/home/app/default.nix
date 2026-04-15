@@ -9,6 +9,7 @@
     ./dev
     ./virtualisation
     ./other
+    ./gaming
 
     inputs.nix-flatpak.homeManagerModules.nix-flatpak
   ];
