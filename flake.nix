@@ -3,7 +3,7 @@
 
   inputs = {
     # Nixpkgs + HyDE
-    hydenix.url = "github:richen604/hydenix";
+    hydenix.url = "github:Stefanuk12/hydenix";
     # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.follows = "hydenix/nixpkgs";
     nixos-hardware.url = "github:nixos/nixos-hardware/master";

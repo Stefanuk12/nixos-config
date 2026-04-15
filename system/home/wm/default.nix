@@ -38,8 +38,4 @@ in
       };
     '';
   };
-
-  environment.systemPackages = with pkgs; [
-    pwvucontrol
-  ];
 }

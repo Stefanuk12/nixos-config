@@ -11,6 +11,7 @@
 
     ./wm
     ./app
+    ../common/app/sops.nix
     ../common/app/shell/sh.nix
     ../common/app/git.nix
   ];

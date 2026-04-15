@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./claude_desktop.nix
+    # ./claude_desktop.nix
     ./kde_connect.nix
     ./nixfmt.nix
     ./obs_studio.nix
