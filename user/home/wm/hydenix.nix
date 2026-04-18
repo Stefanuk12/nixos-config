@@ -42,9 +42,9 @@
       bind = SUPER, I, exec, pgrep -x bwm || bwm"
     '';
     monitors.overrideConfig = ''
-      # monitor = HDMI-A-2, 1920x1080@165, 3840x0, 1
-      monitor = HDMI-A-2, 1920x1080@75, 0x0, 1, vrr, 1
-      monitor = DP-4, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10
+      monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 1
+      monitor = desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, 1920x1080@165, 1920x0, 1, vrr, 1, bitdepth, 10
+      monitor = , disable
     '';
   };
 }

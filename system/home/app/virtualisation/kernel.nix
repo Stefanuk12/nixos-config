@@ -33,9 +33,15 @@ in
     "iommu=pt"
     "kvm.ignore_msrs=1"
     "vfio-pci.ids=1002:73a5,1002:ab28"
-    # Hugepages allocated dynamically by libvirt qemu hook (see qemu/hooks.nix)
-    "default_hugepagesz=1G"
-    "hugepagesz=1G"
+    # Force dGPU's HDMI-A-2 (dummy plug) as disconnected so Hyprland
+    # doesn't bind to card0 when the dGPU is rebound to amdgpu post-boot.
+    # Verify with: cat /sys/class/drm/card0-HDMI-A-2/status (should read
+    # "disconnected"). If connector names shift after hardware changes,
+    # re-check against /sys/class/drm/.
+    "video=HDMI-A-2:d"
+    # Hugepages: using 2MB pages, allocated on-demand via
+    # vm.nr_overcommit_hugepages (set by xml.nix). 2MB is the
+    # default hugepage size on x86_64, no kernel params needed.
   ];
   boot.initrd.kernelModules = [
     "vfio_pci"

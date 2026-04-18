@@ -13,8 +13,8 @@
   memory = 16;
   hugepages = {
     enable = true;
-    size = 1;       # 1GB pages (allocated dynamically by qemu hook)
-    unit = "G";
+    size = 2;       # 2MB pages (allocated on-demand via vm.nr_overcommit_hugepages)
+    unit = "M";
   };
 
   cpu = {

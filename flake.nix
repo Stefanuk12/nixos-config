@@ -43,7 +43,7 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
-    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
+    claude-desktop.url = "github:aaddrick/claude-desktop-debian/89208a596a3e876a74f865fb5267996f666f4a09";
 
     # Gaming
     nix-reshade.url = "github:LovingMelody/nix-reshade";
