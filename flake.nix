@@ -44,10 +44,16 @@
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
     claude-desktop.url = "github:aaddrick/claude-desktop-debian/89208a596a3e876a74f865fb5267996f666f4a09";
+    winapps.url = "github:winapps-org/winapps";
+    winapps.inputs.nixpkgs.follows = "nixpkgs";
 
     # Gaming
     nix-reshade.url = "github:LovingMelody/nix-reshade";
     nix-reshade.inputs.nixpkgs.follows = "nixpkgs";
+    dbd-tools.url = "./packages/dbd-tools";
+    dbd-tools.inputs.nixpkgs.follows = "nixpkgs";
+    steam-launch-options.url = "./packages/steam-launch-options";
+    steam-launch-options.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

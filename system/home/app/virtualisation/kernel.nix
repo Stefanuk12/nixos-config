@@ -25,6 +25,7 @@ in
     options vfio-pci ids=1002:73a5,1002:ab28
     options kvm_amd nested=1
     softdep amdgpu pre: vfio-pci
+    options v4l2loopback exclusive_caps=1 card_label="OBS Virtual Camera"
   '';
   boot.kernelParams = [
     # "amdgpu.dc=0"

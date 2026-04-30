@@ -19,6 +19,7 @@
   # https://github.com/Vendicated/Vencord/blob/main/src/api/Settings.ts
   programs.vesktop.vencord.settings = {
     plugins = {
+      Experiments.enabled = true;
       CallTimer.enabled = true;
       ClearURLs.enabled = true;
       ExpressionCloner.enabled = true;

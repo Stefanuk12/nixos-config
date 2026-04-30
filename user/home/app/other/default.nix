@@ -8,5 +8,6 @@
     ./obs_studio.nix
     ./spotify.nix
     ./stremio.nix
+    ./winapps
   ];
 }

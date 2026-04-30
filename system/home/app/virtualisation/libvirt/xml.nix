@@ -13,6 +13,7 @@ let
   vms = {
     win11-base = import ./xml/win11-base.nix { inherit inputs pkgs; };
     win11-rbxl = import ./xml/win11-rblx.nix { inherit inputs pkgs; };
+    win11-office = import ./xml/win11-office.nix { inherit inputs pkgs; };
   };
 
   # ── Domain XML generation ──────────────────────────────

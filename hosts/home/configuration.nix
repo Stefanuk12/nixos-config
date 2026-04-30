@@ -52,7 +52,7 @@ in
   users.users.stefan = {
     shell = pkgs.zsh;
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
     openssh.authorizedKeys.keys = [
       systemSettings.sshKeys."stefan@home"
     ];
