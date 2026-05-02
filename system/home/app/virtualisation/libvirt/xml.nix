@@ -16,9 +16,18 @@ let
     win11-office = import ./xml/win11-office.nix { inherit inputs pkgs; };
   };
 
+  # OSX-KVM is built directly as a domain attrset (skips mkVM, which targets
+  # hardened Windows VMs). It has no governor / hugepage / pinning settings.
+  osxKvmDomain = import ./xml/osx-kvm.nix { inherit inputs pkgs; };
+
   # ── Domain XML generation ──────────────────────────────
   mkDomain = cfg: {
     definition = inputs.nixvirt.lib.domain.writeXML (mkVM cfg);
+    active = false;
+  };
+
+  mkRawDomain = domain: {
+    definition = inputs.nixvirt.lib.domain.writeXML domain;
     active = false;
   };
 
@@ -116,7 +125,8 @@ in
 
   virtualisation.libvirt.enable = true;
   virtualisation.libvirt.connections."qemu:///system".domains =
-    lib.mapAttrsToList (_: mkDomain) vms;
+    (lib.mapAttrsToList (_: mkDomain) vms)
+    ++ [ (mkRawDomain osxKvmDomain) ];
 
   # Install qemu hook only if any VM has governor management enabled
   systemd.services.libvirtd.preStart = lib.mkIf hasHooks ''
