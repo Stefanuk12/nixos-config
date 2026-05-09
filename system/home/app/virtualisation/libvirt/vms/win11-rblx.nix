@@ -1,5 +1,5 @@
-# VM configuration — consumed by mkVM (domain XML) and mkQemuHook (CPU governor).
-# This file is pure data; xml.nix handles the actual building.
+# VM configuration — consumed by mkWindowsVM (domain XML) and the qemu hook (CPU governor).
+# This file is pure data; domains.nix handles the actual building.
 
 # NOTE FOR FUTURE SELF: to base image, consider installing openssh server, then also running the clean qemu script
 # you should install kde connect on this + looking glass host too

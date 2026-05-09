@@ -33,6 +33,7 @@ in
     "amdgpu.ppfeaturemask=0xf7fff"
     "iommu=pt"
     "kvm.ignore_msrs=1"
+    "video=efifb:off"
     "vfio-pci.ids=1002:73a5,1002:ab28"
     # Force dGPU's HDMI-A-2 (dummy plug) as disconnected so Hyprland
     # doesn't bind to card0 when the dGPU is rebound to amdgpu post-boot.

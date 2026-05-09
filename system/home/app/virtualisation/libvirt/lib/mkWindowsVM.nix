@@ -1,7 +1,10 @@
-# mkVM.nix — Declarative libvirt domain builder
+# mkWindowsVM.nix — Declarative libvirt domain builder for Windows guests.
 #
 # Generates a full attribute set compatible with nixvirt's domain.writeXML.
 # Supports hardened (anti-detection) and default VM profiles.
+#
+# macOS guests use ./mkMacOSVM.nix instead — its quirks (Apple SMC, Penryn
+# vs Skylake, OSX-KVM OVMF) don't fit through this builder.
 #
 # References:
 #   - https://libvirt.org/formatdomain.html
@@ -9,8 +12,8 @@
 #   - https://docs.kernel.org/virt/kvm/x86/msr.html
 #
 # Usage:
-#   let mkVM = import ./mkVM.nix;
-#   in mkVM { name = "my-vm"; uuid = "..."; memory = 16; ... }
+#   let mkWindowsVM = import ./mkWindowsVM.nix;
+#   in mkWindowsVM { name = "my-vm"; uuid = "..."; memory = 16; ... }
 
 cfg:
 

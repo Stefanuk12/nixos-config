@@ -15,6 +15,7 @@
     bottles
     quickemu
     dosfstools
+    sshfs
   ];
 
   dconf.settings = {

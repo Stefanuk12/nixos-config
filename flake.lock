@@ -919,6 +919,22 @@
         "type": "github"
       }
     },
+    "osx-kvm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./packages/osx-kvm",
+        "type": "path"
+      },
+      "original": {
+        "path": "./packages/osx-kvm",
+        "type": "path"
+      },
+      "parent": []
+    },
     "pre-commit": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -981,6 +997,7 @@
           "nixpkgs"
         ],
         "nixvirt": "nixvirt",
+        "osx-kvm": "osx-kvm",
         "sops-nix": "sops-nix",
         "steam-launch-options": "steam-launch-options",
         "winapps": "winapps"

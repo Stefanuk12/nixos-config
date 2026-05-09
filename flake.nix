@@ -30,6 +30,8 @@
     barely-metal.inputs.nixpkgs.follows = "nixpkgs";
     nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
+    osx-kvm.url = "./packages/osx-kvm";
+    osx-kvm.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
     lanzaboote.url = "github:nix-community/lanzaboote/v1.0.0";

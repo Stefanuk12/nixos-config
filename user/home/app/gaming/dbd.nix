@@ -32,12 +32,15 @@
         };
       };
 
-      "Engine.ini" = {
-        "/Script/Engine.Engine" = {
-          bUseFixedFrameRate = true;
-          FixedFrameRate = 240;
-        };
-      };
+      # "Engine.ini" = {
+      #   "/Script/Engine.Engine" = {
+      #     bUseFixedFrameRate = true;
+      #     FixedFrameRate = 240;
+      #     bSmoothFrameRate = false;
+      #     MinSmoothedFrameRate = 240;
+      #     MaxSmoothedFrameRate = 240;
+      #   };
+      # };
 
       "Input.ini" = {
         "/script/engine.inputsettings" = {

@@ -3,7 +3,7 @@
 {
   imports = [
     ./pkg.nix
-    ./xml.nix
+    ./domains.nix
     ./networking.nix
   ];
 }
