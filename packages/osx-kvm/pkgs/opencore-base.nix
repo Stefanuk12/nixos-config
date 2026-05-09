@@ -39,7 +39,7 @@ let
     };
     darwinOCPkg = {
       ocVersion       = "1.0.4";
-      ocReleaseSha256 = lib.fakeSha256;  # first build prints real hash
+      ocReleaseSha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";  # first build prints real hash
     };
   }.${source};
 
@@ -65,7 +65,7 @@ let
   darwinOcRev = "82a28361b61d4f664fb6e4f34789abce22bc3088";  # main @ 2025-06-03
   darwinOcRelease = fetchzip {
     url = "https://github.com/royalgraphx/DarwinOCPkg/archive/${darwinOcRev}.tar.gz";
-    sha256 = lib.fakeSha256;  # first build prints real hash
+    sha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";  # first build prints real hash
   };
 
   # Resolution order for OpenCore.efi/BOOTx64.efi/Drivers. The
