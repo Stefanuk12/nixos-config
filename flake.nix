@@ -5,7 +5,7 @@
     # Nixpkgs + HyDE
     hydenix.url = "github:Stefanuk12/hydenix";
     # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs.follows = "hydenix/nixpkgs";
+    # nixpkgs.follows = "hydenix/nixpkgs";
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
 
     # Home manager
@@ -56,6 +56,8 @@
     dbd-tools.inputs.nixpkgs.follows = "nixpkgs";
     steam-launch-options.url = "./packages/steam-launch-options";
     steam-launch-options.inputs.nixpkgs.follows = "nixpkgs";
+    osu-collect.url = "./packages/osu-collect";
+    osu-collect.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -119,6 +121,9 @@
             overlays = [
               claude-desktop.overlays.default
               hydenix.overlays.default
+              (final: prev: {
+                openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
+              })
             ];
           };
           modules = [

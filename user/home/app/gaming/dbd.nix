@@ -94,6 +94,7 @@
 
     reshade = {
       enable = true;
+      defaultPreset = "00. STX Stream.ini";
       # Override or add ReShade.ini values here. Module defaults already
       # set up paths and sensible overlay options.
       # settings = {

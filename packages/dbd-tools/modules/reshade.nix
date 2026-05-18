@@ -46,11 +46,17 @@ let
   # Settings: defaults merged with user overrides
   # =====================================================================
 
+  presetPath =
+    if cfg.defaultPreset != null then
+      ".\\reshade-presets\\${cfg.defaultPreset}"
+    else
+      ".\\reshade-presets";
+
   defaultSettings = {
     GENERAL = {
       EffectSearchPaths = ".\\reshade-shaders\\Shaders";
       TextureSearchPaths = ".\\reshade-shaders\\Textures";
-      PresetPath = ".\\reshade-presets";
+      PresetPath = presetPath;
       PresetTransitionDelay = 1000;
       SkipLoadingDisabledEffects = 1;
     };
@@ -315,6 +321,18 @@ in
         Path to DBD's Win64 binaries directory (where the game executable
         lives). Shell expansion is applied at install/uninstall time, so
         $HOME is fine.
+      '';
+    };
+
+    defaultPreset = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "DBD_Joolace.ini";
+      description = ''
+        Filename of a preset under `reshade-presets/` to load on startup.
+        When null, ReShade leaves the preset unselected and you pick one
+        from the overlay's dropdown. Override `settings.GENERAL.PresetPath`
+        directly if you need a path outside `reshade-presets/`.
       '';
     };
 
