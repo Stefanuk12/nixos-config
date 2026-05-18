@@ -2,6 +2,7 @@
 
 {
   home.packages = with pkgs; [
+    rbw
     bitwarden-cli
     inputs.bwm.packages.${pkgs.stdenv.hostPlatform.system}.default
     pinentry-qt

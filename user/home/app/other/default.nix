@@ -3,6 +3,7 @@
 {
   imports = [
     ./claude_desktop.nix
+    ./jdownloader.nix
     ./kde_connect.nix
     ./libreoffice.nix
     ./nixfmt.nix

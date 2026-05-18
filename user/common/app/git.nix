@@ -22,7 +22,7 @@ in
     sopsFile = ../../../secrets/common/gh_pub_read_pat.yaml;
   };
 
-  home.activation.nix-github-token = lib.hm.dag.entryAfter [ "sopsNix" ] ''
+  home.activation.nix-github-token = lib.hm.dag.entryAfter [ "sops-nix" ] ''
     token=$(cat ${config.sops.secrets.gh_pub_read_pat.path})
     echo "access-tokens = github.com=$token" > "$HOME/.config/nix/access-tokens"
     chmod 600 "$HOME/.config/nix/access-tokens"

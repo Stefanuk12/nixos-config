@@ -20,6 +20,8 @@ let
 
     import vdf
 
+    PGREP = "${pkgs.procps}/bin/pgrep"
+
 
     SECTION_RE = re.compile(r'^\s*"([^"]+)"\s*$')
     LAUNCH_OPTIONS_RE = re.compile(
@@ -89,7 +91,7 @@ let
     def steam_running():
         try:
             subprocess.check_output(
-                ["pgrep", "-x", "steam"], stderr=subprocess.DEVNULL
+                [PGREP, "-x", "steam"], stderr=subprocess.DEVNULL
             )
             return True
         except subprocess.CalledProcessError:

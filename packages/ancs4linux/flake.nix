@@ -331,17 +331,24 @@
 
             services.dbus.packages =
               let
+                # dbus-broker (NixOS's DBus implementation) doesn't accept the
+                # `*_prefix` attributes that reference dbus-daemon supports, so
+                # name each ancs4linux service explicitly. Names come from
+                # ancs4linux upstream: advertising/main.py and observer/main.py.
                 dbusConf = pkgs.writeTextDir "share/dbus-1/system.d/ancs4linux.conf" ''
                   <!DOCTYPE busconfig PUBLIC
                     "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
                     "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
                   <busconfig>
                     <policy user="${cfg.user}">
-                      <allow own_prefix="ancs4linux"/>
-                      <allow send_destination_prefix="ancs4linux"/>
+                      <allow own="ancs4linux.Advertising"/>
+                      <allow own="ancs4linux.Observer"/>
+                      <allow send_destination="ancs4linux.Advertising"/>
+                      <allow send_destination="ancs4linux.Observer"/>
                     </policy>
                     <policy context="default">
-                      <allow send_destination_prefix="ancs4linux"/>
+                      <allow send_destination="ancs4linux.Advertising"/>
+                      <allow send_destination="ancs4linux.Observer"/>
                     </policy>
                   </busconfig>
                 '';

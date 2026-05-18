@@ -41,6 +41,14 @@
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
     nix-minecraft.inputs.nixpkgs.follows = "nixpkgs";
 
+    # PIA WireGuard tunnel inside a netns + per-app confinement helpers
+    pia-confinement.url = "./packages/pia-confinement";
+    pia-confinement.inputs.nixpkgs.follows = "nixpkgs";
+
+    # rbw-based "fetch a Bitwarden entry to a tmpfs file" systemd module
+    rbw-fetch.url = "./packages/rbw-fetch";
+    rbw-fetch.inputs.nixpkgs.follows = "nixpkgs";
+
     # Other tools
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
@@ -87,6 +95,14 @@
       ];
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs systems;
+      # openldap 2.6.x syncrepl tests flake on timing — disable here so both
+      # the NixOS config and the home-manager config see a buildable package.
+      homeOverlays = [
+        hydenix.overlays.default
+        (final: prev: {
+          openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
+        })
+      ];
     in
     {
       nixosConfigurations = {
@@ -95,6 +111,13 @@
           modules = [
             ./hosts/home/configuration.nix
             ./secrets
+            {
+              nixpkgs.pkgs = import nixpkgs {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+                overlays = homeOverlays;
+              };
+            }
           ];
           specialArgs = {
             inherit inputs;
@@ -118,13 +141,7 @@
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             config.allowUnfree = true;
-            overlays = [
-              claude-desktop.overlays.default
-              hydenix.overlays.default
-              (final: prev: {
-                openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
-              })
-            ];
+            overlays = [ claude-desktop.overlays.default ] ++ homeOverlays;
           };
           modules = [
             ./hosts/home/home.nix

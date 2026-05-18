@@ -7,5 +7,7 @@
     ./nix_ld.nix
     ./spotify.nix
     ./obs_studio.nix
+    ./pia.nix
+    ./rbw-fetch.nix
   ];
 }

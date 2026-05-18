@@ -1,5 +1,6 @@
 keys:
-  - &vps_stefan age17uewr2tu8humxsgf6l4t97dyt55weyuecf9jajesclxnasakdf4semu6qv 
+  - &vps_stefan age17uewr2tu8humxsgf6l4t97dyt55weyuecf9jajesclxnasakdf4semu6qv
+  - &home_host age1tjyn6lt84ala8dlg9v94kw6cydtfe575mc7uwwg3nraraagx3pyqpn7tjm
 creation_rules:
   - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
     key_groups:
@@ -7,10 +8,13 @@ creation_rules:
         - "EFA59E9166F5CE3F"
       age:
         - *vps_stefan
+        - *home_host
   - path_regex: secrets/home/[^/]+\.(yaml|json|env|ini)$
     key_groups:
     - pgp:
         - "EFA59E9166F5CE3F"
+      age:
+        - *home_host
   - path_regex: secrets/vps/[^/]+\.(yaml|json|env|ini)$
     key_groups:
     - age:
