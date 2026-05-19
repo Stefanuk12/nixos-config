@@ -15,8 +15,6 @@
     # sops
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    bwm.url = "github:firecat53/bitwarden-menu";
-    bwm.inputs.nixpkgs.follows = "nixpkgs";
 
     # Nixvim!!
     Neve.url = "github:redyf/Neve";

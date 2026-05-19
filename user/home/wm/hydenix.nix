@@ -42,7 +42,7 @@
       windowrule = stay_focused on, match:title FreeRDP:.*
     '';
     keybindings.extraConfig = ''
-      bind = SUPER, I, exec, pgrep -x bwm || bwm"
+      bind = SUPER, I, exec, rofi-rbw
     '';
     monitors.overrideConfig = ''
       monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 1

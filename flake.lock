@@ -146,26 +146,6 @@
         "type": "github"
       }
     },
-    "bwm": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1771031113,
-        "narHash": "sha256-BspuuE9sZGr9y0/JI4M1JNFuLhqgNIAWbFFG3mcV/IA=",
-        "owner": "firecat53",
-        "repo": "bitwarden-menu",
-        "rev": "729346340a9c9397ebd64f3439b1c37085433437",
-        "type": "github"
-      },
-      "original": {
-        "owner": "firecat53",
-        "repo": "bitwarden-menu",
-        "type": "github"
-      }
-    },
     "claude-desktop": {
       "inputs": {
         "flake-parts": "flake-parts_2",
@@ -1515,7 +1495,6 @@
         "Neve": "Neve",
         "ancs4linux": "ancs4linux",
         "barely-metal": "barely-metal",
-        "bwm": "bwm",
         "claude-desktop": "claude-desktop",
         "dbd-tools": "dbd-tools",
         "home-manager": "home-manager",
