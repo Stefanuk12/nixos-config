@@ -42,6 +42,15 @@ in
     pinentrySmart
   ];
 
+  # Plain Function keys (no modifier) — Hyprland doesn't grab F1-F12,
+  # rofi 2.0.0's defaults don't use them, and they can't clash with typed
+  # search input. If a specific Fn key fires the wrong thing on your
+  # keyboard's media-key overlay, swap it for another.
+  xdg.configFile."rofi-rbw.rc".text = ''
+    keybindings = F1:type:username:tab:password,F2:type:username,F3:type:password,F4:type:totp,F5:copy:password,F6:copy:username,F7:copy:totp,F8::menu,F9:sync
+    menu-keybindings = F2:type,F5:copy
+  '';
+
   home.activation.rbw-config = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -r /run/secrets/bw/email ]; then
       email=$(cat /run/secrets/bw/email)
