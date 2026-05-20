@@ -30,7 +30,11 @@
     suppressWarnings = true;
     extraConfig = ''
       exec-once = kdeconnect-indicator
+      exec-once = [workspace 2 silent] brave
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
+
+      workspace = 1, monitor:desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, default:true
+      workspace = 2, monitor:desc:Acer Technologies VG240Y, default:true
 
       input {
         kb_layout = iso_us
