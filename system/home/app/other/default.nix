@@ -9,5 +9,6 @@
     ./obs_studio.nix
     ./pia.nix
     ./rbw-fetch.nix
+    ./waydroid.nix
   ];
 }
