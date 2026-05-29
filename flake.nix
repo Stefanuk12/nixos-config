@@ -100,6 +100,15 @@
         (final: prev: {
           openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
         })
+        # Bottles 63.2 shells out to `fvs2`, but nixpkgs still ships the old
+        # python `fvs` 0.3.4 (binary named `fvs`). Mirrors nixpkgs PR #511730;
+        # remove once that PR is merged and pulled into our pin.
+        (final: prev: {
+          fvs2 = final.callPackage ./packages/fvs2 { };
+          bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
+            propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
+          });
+        })
       ];
     in
     {

@@ -49,7 +49,7 @@
       bind = SUPER, I, exec, rofi-rbw
     '';
     monitors.overrideConfig = ''
-      monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 1
+      monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 2
       monitor = desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, 1920x1080@165, 1920x0, 1, vrr, 2, bitdepth, 10
       monitor = , disable
     '';

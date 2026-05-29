@@ -10,7 +10,7 @@
   name = "win11-rblx";
   uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f31";
 
-  memory = 16;
+  memory = 8;
   hugepages = {
     enable = true;
     size = 2;       # 2MB pages (allocated on-demand via vm.nr_overcommit_hugepages)

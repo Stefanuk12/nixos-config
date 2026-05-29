@@ -7,5 +7,6 @@
     ./bluetooth.nix
     ./docker.nix
     ./iphone.nix
+    ./swap.nix
   ];
 }
