@@ -7,6 +7,7 @@
 
     settings = {
       theme = "dark";
+      model = "claude-opus-4-8";
       includeCoAuthoredBy = false;
       permissions = {
         allow = [
