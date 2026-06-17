@@ -1,108 +1,15 @@
-# VM configuration — consumed by mkWindowsVM (domain XML) and the qemu hook (CPU governor).
-# This file is pure data; domains.nix handles the actual building.
+# Roblox gaming VM. Shared config lives in ../lib/mkGamingVM.nix; to enable
+# evdev input passthrough pass an `evdev` list (see win11-base.nix).
 
 # NOTE FOR FUTURE SELF: to base image, consider installing openssh server, then also running the clean qemu script
 # you should install kde connect on this + looking glass host too
 
 { inputs, pkgs }:
 
-{
+import ../lib/mkGamingVM.nix { inherit inputs pkgs; } {
   name = "win11-rblx";
   uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f31";
-
-  memory = 8;
-  hugepages = {
-    enable = true;
-    size = 2;       # 2MB pages (allocated on-demand via vm.nr_overcommit_hugepages)
-    unit = "M";
-  };
-
-  cpu = {
-    cores = 6;
-    threads = 2;
-    clusters = 1;
-    pinTo = [ 2 10 3 11 4 12 5 13 6 14 7 15 ];
-    hostCores = "0-1,8-9";
-    features = {
-      # svm (AMD virt), topoext, invtsc (stable guest TSC).
-      require = [ "svm" "topoext" "invtsc" ];
-      # Concealment: hypervisor bit + spectre-mitigation MSRs that leak
-      # virt context. Add "rdtscp" here if using a patched kernel.
-      disable = [
-        "vmx-vnmi" "hypervisor"
-        "ssbd" "amd-ssbd" "virt-ssbd"
-        "rdpid"
-      ];
-    };
-  };
-
-  firmware = {
-    code = "/var/lib/barely-metal/firmware/OVMF_CODE.fd";
-    varsTemplate = "/var/lib/barely-metal/firmware/OVMF_VARS.fd";
-    varsPath = /var/lib/libvirt/qemu/nvram/win11_VARS.fd;
-    secureBoot = true;
-  };
-
-  hardening = {
-    enable = true;
-    emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";
-    smbios = "/var/lib/barely-metal/firmware/smbios.bin";
-    acpiTable = "/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml";
-    # acpiBattery = "/path/to/SSDT-battery.aml";
-    # enforcePvCpuid = true;  # Closes MSR-probing vector but can crash guests
-  };
-
-  disks = [{
-    file = /var/lib/libvirt/images/win11-rblx.qcow2;
-    format = "qcow2";
-    serial = "ECFE037C590CE21A24AE";
-    boot = 1;
-  }];
-
-  cdroms = [{
-    file = "/var/lib/barely-metal/firmware/guest-scripts.iso";
-  }];
-
-  gpu = {
-    addresses = [
-      { bus = 3; slot = 0; function = 0; }
-      { bus = 3; slot = 0; function = 1; }
-    ];
-  };
-
-  lookingGlass = {
-    enable = true;
-    memSize = 67108864;  # 64MB → 1080p HDR / 1440p SDR
-  };
-
-  network = {
-    bridge = "br0";
-    mac = "52:54:3a:20:c8:5d";
-    model = "e1000e";
-    pciBus = 10;
-  };
-
-  audio = {
-    backend = "pipewire";
-    uid = 1000;
-  };
-
-  tpm = true;
-  spice = true;
-
-  # Direct host input passthrough via evdev — lower latency than USB, only
-  # needed on first install / when Looking Glass Host isn't on the guest
-  # (find devices with: ls -l /dev/input/by-id/).
-  # evdev = [
-  #   { dev = "/dev/input/event1"; }                                        # keyboard
-  #   { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse
-  #     repeat = true; }
-  # ];
-
-  # CPU governor settings for the libvirt qemu hook
-  governor = {
-    enable = true;
-    active = "performance";   # Set on VM start
-    restore = "schedutil";    # Restored on VM stop
-  };
+  diskFile = /var/lib/libvirt/images/win11-rblx.qcow2;
+  serial = "ECFE037C590CE21A24AE";
+  mac = "52:54:3a:20:c8:5d";
 }

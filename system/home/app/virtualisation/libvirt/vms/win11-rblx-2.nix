@@ -1,113 +1,18 @@
-# Clone of win11-rblx.nix — identical settings except the fields that MUST
-# be unique to avoid colliding with the original (name, uuid, MAC, nvram
-# vars path, disk image, disk serial). See win11-rblx.nix for field docs.
+# Second Roblox VM — same shared config as win11-rblx, only the unique
+# fields (uuid, MAC, nvram vars path, disk image, serial) differ.
 #
-# Both VMs share the same CPU pinning and the same Looking Glass /dev/kvmfr0
-# device, so do NOT run them at the same time.
-#
-# Before first boot, create the backing disk, e.g.:
+# Shares the same CPU pinning and Looking Glass /dev/kvmfr0 as win11-rblx,
+# so do NOT run them at the same time. Before first boot, create the disk:
 #   sudo cp --reflink=auto /var/lib/libvirt/images/win11-rblx.qcow2 \
 #                          /var/lib/libvirt/images/win11-rblx-2.qcow2
 
 { inputs, pkgs }:
 
-{
+import ../lib/mkGamingVM.nix { inherit inputs pkgs; } {
   name = "win11-rblx-2";
   uuid = "f2e3f911-de68-4487-ac10-09e30619ad38";
-
-  memory = 8;
-  hugepages = {
-    enable = true;
-    size = 2;       # 2MB pages (allocated on-demand via vm.nr_overcommit_hugepages)
-    unit = "M";
-  };
-
-  cpu = {
-    cores = 6;
-    threads = 2;
-    clusters = 1;
-    pinTo = [ 2 10 3 11 4 12 5 13 6 14 7 15 ];
-    hostCores = "0-1,8-9";
-    features = {
-      # svm (AMD virt), topoext, invtsc (stable guest TSC).
-      require = [ "svm" "topoext" "invtsc" ];
-      # Concealment: hypervisor bit + spectre-mitigation MSRs that leak
-      # virt context. Add "rdtscp" here if using a patched kernel.
-      disable = [
-        "vmx-vnmi" "hypervisor"
-        "ssbd" "amd-ssbd" "virt-ssbd"
-        "rdpid"
-      ];
-    };
-  };
-
-  firmware = {
-    code = "/var/lib/barely-metal/firmware/OVMF_CODE.fd";
-    varsTemplate = "/var/lib/barely-metal/firmware/OVMF_VARS.fd";
-    varsPath = /var/lib/libvirt/qemu/nvram/win11-rblx-2_VARS.fd;
-    secureBoot = true;
-  };
-
-  hardening = {
-    enable = true;
-    emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";
-    smbios = "/var/lib/barely-metal/firmware/smbios.bin";
-    acpiTable = "/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml";
-    # acpiBattery = "/path/to/SSDT-battery.aml";
-    # enforcePvCpuid = true;  # Closes MSR-probing vector but can crash guests
-  };
-
-  disks = [{
-    file = /var/lib/libvirt/images/win11-rblx-2.qcow2;
-    format = "qcow2";
-    serial = "DB6B8A00F99F253DC9B0";
-    boot = 1;
-  }];
-
-  cdroms = [{
-    file = "/var/lib/barely-metal/firmware/guest-scripts.iso";
-  }];
-
-  gpu = {
-    addresses = [
-      { bus = 3; slot = 0; function = 0; }
-      { bus = 3; slot = 0; function = 1; }
-    ];
-  };
-
-  lookingGlass = {
-    enable = true;
-    memSize = 67108864;  # 64MB → 1080p HDR / 1440p SDR
-  };
-
-  network = {
-    bridge = "br0";
-    mac = "52:54:3a:3e:04:b0";
-    model = "e1000e";
-    pciBus = 10;
-  };
-
-  audio = {
-    backend = "pipewire";
-    uid = 1000;
-  };
-
-  tpm = true;
-  spice = true;
-
-  # Direct host input passthrough via evdev — lower latency than USB, only
-  # needed on first install / when Looking Glass Host isn't on the guest
-  # (find devices with: ls -l /dev/input/by-id/).
-  # evdev = [
-  #   { dev = "/dev/input/event1"; }                                        # keyboard
-  #   { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse
-  #     repeat = true; }
-  # ];
-
-  # CPU governor settings for the libvirt qemu hook
-  governor = {
-    enable = true;
-    active = "performance";   # Set on VM start
-    restore = "schedutil";    # Restored on VM stop
-  };
+  varsPath = /var/lib/libvirt/qemu/nvram/win11-rblx-2_VARS.fd;
+  diskFile = /var/lib/libvirt/images/win11-rblx-2.qcow2;
+  serial = "DB6B8A00F99F253DC9B0";
+  mac = "52:54:3a:3e:04:b0";
 }

@@ -214,27 +214,10 @@ let
     };
   };
 
-  # 12 vCPUs pinned 1:1 onto the same cores the Windows VMs use (2-7 +
-  # SMT siblings 10-15); host keeps 0-1,8-9 for the emulator thread.
-  # Hoisted to a top-level attr so domains.nix's qemu hook can read
-  # `m.pin` for governor switching.
-  pin = {
-    vmCores = [
-      2
-      10
-      3
-      11
-      4
-      12
-      5
-      13
-      6
-      14
-      7
-      15
-    ];
-    hostCores = "0-1,8-9";
-  };
+  # 12 vCPUs pinned 1:1 onto the same cores the Windows VMs use; host keeps
+  # 0-1,8-9 for the emulator thread. Hoisted to a top-level attr so
+  # domains.nix's qemu hook can read `m.pin` for governor switching.
+  pin = import ../lib/pinning.nix;
 
   vm = (import ../lib/mkMacOSVM.nix { inherit pkgs osxKvm; }) {
     inherit profile plistOverrides drivers;
