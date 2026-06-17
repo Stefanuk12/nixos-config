@@ -1,6 +1,5 @@
 { pkgs, ... }:
 let
-  virtScripts = ./../../../../system/home/app/virtualisation/scripts;
   shellAliases = {
     ls = "eza --icons -l -T -L=1";
     rb-home = "sudo nixos-rebuild switch --flake ~/.dotfiles#home --option eval-cache false";

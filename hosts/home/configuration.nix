@@ -8,7 +8,6 @@
 let
   timeZone = "Europe/London";
   locale = "en_GB.UTF-8";
-  kbLayout = "us";
   systemSettings = config.systemSettings;
 in
 {

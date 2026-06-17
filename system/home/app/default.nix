@@ -1,14 +1,5 @@
-{ lib, inputs, pkgs, ... }:
+{ inputs, ... }:
 
-let
-  allowUnfreesP =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "corefonts"
-      "vista-fonts"
-      "spotify"
-    ];
-in
 {
   imports = [
     ./gaming

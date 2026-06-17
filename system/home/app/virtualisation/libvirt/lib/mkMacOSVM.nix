@@ -158,8 +158,7 @@ let
   # latency than emulated USB, and grab="all" gives the guest exclusive
   # access (toggle keys release it back to the host).
   mkEvdev = e:
-    let hasGrab = e ? grab || e ? grabToggle || e ? repeat;
-    in {
+    {
       type = "evdev";
       source =
         { inherit (e) dev; }

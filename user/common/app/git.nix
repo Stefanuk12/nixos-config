@@ -7,7 +7,6 @@
 }:
 let
   userSettings = config.userSettings;
-  systemSettings = config.systemSettings;
 in
 {
   home.packages = with pkgs; [

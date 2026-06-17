@@ -35,7 +35,6 @@ let
   # Use realistic memory amounts: 8, 16, 32, 64
   mem         = cfg.memory or 16;
   memUnit     = cfg.memoryUnit or "G";
-  timezone    = cfg.timezone or "Europe/London";
 
   # hugepages: accepts bool (true = default page size) or attrset
   hpCfg       = cfg.hugepages or false;

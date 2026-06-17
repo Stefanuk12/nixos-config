@@ -1,15 +1,5 @@
 { lib, pkgs, ... }:
 
-let
-  isoUsFile = pkgs.writeText "iso_us" ''
-    xkb_symbols "intl" {
-      include "us(basic)"
-
-      key <BKSL> {[ numbersign, asciitilde ]};
-      key <LSGT> {[ backslash, bar ]};
-    };
-  '';
-in
 {
   imports = [
     ./hydenix.nix
