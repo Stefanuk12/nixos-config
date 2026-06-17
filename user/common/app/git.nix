@@ -29,7 +29,7 @@ in
 
   nix.package = pkgs.nix;
   nix.extraOptions = ''
-    !include /home/stefan/.config/nix/access-tokens
+    !include ${config.home.homeDirectory}/.config/nix/access-tokens
   '';
 
   programs.password-store = {
