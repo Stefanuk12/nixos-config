@@ -1,1 +1,3 @@
 result
+# Cloudflare AOP client private key (uploaded to CF, never commit)
+.aop-cert/
