@@ -8,34 +8,7 @@ let
   rbw = "${pkgs.rbw}/bin/rbw";
 
   # Same protocol-aware pinentry as the NixOS module.
-  pinentrySmart = pkgs.writeShellScriptBin "pinentry-smart" ''
-    state="master"
-    echo "OK Greetings"
-    while IFS= read -r line; do
-      cmd="''${line%% *}"
-      rest="''${line#* }"
-      case "$cmd" in
-        SETDESC|SETPROMPT|SETKEYINFO)
-          case "$rest" in
-            *client__id*)     state="client_id" ;;
-            *client__secret*) state="client_secret" ;;
-          esac
-          echo "OK"
-          ;;
-        GETPIN)
-          case "$state" in
-            client_id)     val=$(cat "''${PINENTRY_CLIENT_ID_FILE:?}") ;;
-            client_secret) val=$(cat "''${PINENTRY_CLIENT_SECRET_FILE:?}") ;;
-            *)             val=$(cat "''${PINENTRY_PASSWORD_FILE:?}") ;;
-          esac
-          printf 'D %s\nOK\n' "$val"
-          state="master"
-          ;;
-        BYE) echo "OK"; exit 0 ;;
-        *)   echo "OK" ;;
-      esac
-    done
-  '';
+  pinentrySmart = import ./pinentry-smart.nix { inherit pkgs; };
 
   secretOpts = { name, config, ... }: {
     options = {

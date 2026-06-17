@@ -3,19 +3,7 @@
 let
   cfg = config.programs.dbd;
 
-  # Render a Nix value to its UE-ini string form.
-  formatValue =
-    v:
-    if builtins.isBool v then
-      (if v then "True" else "False")
-    else if builtins.isInt v then
-      toString v
-    else if builtins.isFloat v then
-      toString v
-    else if builtins.isString v then
-      v
-    else
-      throw "programs.dbd.settings: unsupported value type for ${builtins.toJSON v}";
+  formatValue = import ./format-value.nix "programs.dbd.settings";
 
   formattedSettings = builtins.mapAttrs (
     _file: builtins.mapAttrs (_section: builtins.mapAttrs (_key: formatValue))

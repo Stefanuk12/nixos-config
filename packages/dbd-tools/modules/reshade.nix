@@ -74,18 +74,7 @@ let
 
   finalSettings = lib.recursiveUpdate defaultSettings cfg.settings;
 
-  formatValue =
-    v:
-    if builtins.isBool v then
-      (if v then "True" else "False")
-    else if builtins.isInt v then
-      toString v
-    else if builtins.isFloat v then
-      toString v
-    else if builtins.isString v then
-      v
-    else
-      throw "programs.dbd.reshade.settings: unsupported value type for ${builtins.toJSON v}";
+  formatValue = import ./format-value.nix "programs.dbd.reshade.settings";
 
   formattedSettings =
     builtins.mapAttrs (_section: builtins.mapAttrs (_key: formatValue)) finalSettings;
