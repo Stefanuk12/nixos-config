@@ -41,7 +41,8 @@
       "Read(//sys/module/kvm_amd/parameters/**)",
       "Read(//proc/**)",
       "Read(//etc/modprobe.d/**)",
-      "Bash(lsmod)"
+      "Bash(lsmod)",
+      "Bash(git add *)"
     ]
   }
 }
