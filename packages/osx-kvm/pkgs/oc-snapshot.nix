@@ -1,12 +1,9 @@
-# OC Snapshot — corpnewt's stdlib-only CLI port of ProperTree's
-# snapshot reconciler. Build-time pass over the staged EFI tree to
-# align config.plist's ACPI.Add / Kernel.Add / UEFI.Drivers / Misc.Tools
-# with what's actually on disk; also fixes kext load order via
-# OSBundleLibraries dependency walk.
+# OC Snapshot — corpnewt's CLI port of ProperTree's snapshot reconciler.
+# Aligns config.plist's ACPI.Add/Kernel.Add/UEFI.Drivers/Misc.Tools with the
+# staged EFI tree and fixes kext load order via OSBundleLibraries walk.
 #
-# Bundled snapshot.plist tops out at OC 0.8.4 — mk-image.nix passes
-# `-v latest` to side-step the OpenCore.efi MD5 auto-detect lookup
-# (never populated for OC 1.0.x).
+# Bundled snapshot.plist tops out at OC 0.8.4, so mk-image.nix passes
+# `-v latest` to skip the OpenCore.efi MD5 auto-detect (absent for OC 1.0.x).
 
 { fetchFromGitHub, writeShellScriptBin, python3 }:
 

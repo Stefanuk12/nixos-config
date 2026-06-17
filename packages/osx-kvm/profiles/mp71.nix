@@ -1,17 +1,14 @@
-# MacPro7,1 SMBIOS profile.
+# MacPro7,1 SMBIOS profile. Pairs the SMBIOS values with the kext set needed
+# to not panic under this product name:
 #
-# Pairs the SMBIOS values with the kext set required to NOT panic under
-# this product name. Specifically:
-#
-#   * AppleMCEReporterDisabler — without it, AppleIntelMCEReporter loads
-#     against board-id Mac-27AD2F918AE68F61 and panics on the guest's
-#     non-ECC RAM.
+#   * AppleMCEReporterDisabler — else AppleIntelMCEReporter panics on the
+#     guest's non-ECC RAM (board-id Mac-27AD2F918AE68F61).
 #   * AppleTyMCEDriver block — same reason, different driver.
-#   * CryptexFixup (kernel ≥ 22) — Ventura+ refuses to boot under MP7,1
-#     SMBIOS without it (system cryptex stage check).
+#   * CryptexFixup (kernel ≥ 22) — Ventura+ won't boot under MP7,1 SMBIOS
+#     without it (cryptex stage check).
 #
-# Serial / MLB / UUID / ROM are placeholders generated with macserial —
-# replace them per-host so multiple installs don't collide on Apple ID.
+# Serial / MLB / UUID / ROM are macserial placeholders — replace per-host so
+# installs don't collide on Apple ID.
 
 { kexts }:
 

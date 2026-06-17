@@ -8,11 +8,7 @@ let
   rtTable = "200";
 in
 {
-  # Hydenix's 6.18 kernel lacks legacy xtables, but waydroid-net.sh
-  # prefers iptables-legacy and hardcodes nftables off. Flip the flag,
-  # absolute-path the nft calls (wrapper PATH doesn't include nftables),
-  # and scope the host masquerade so it doesn't fire for traffic we're
-  # sending into the pia netns.
+  # Hydenix's 6.18 kernel lacks legacy xtables but waydroid-net.sh defaults to it; flip to nft, absolute-path nft calls, and scope the host masquerade to skip pia-netns traffic.
   nixpkgs.overlays = [
     (final: prev: {
       waydroid = prev.waydroid.overrideAttrs (old: {
@@ -37,15 +33,8 @@ in
     android-tools
   ];
 
-  # Route Android's bridge traffic through the existing pia netns.
-  # waydroid-container stays in the host netns (LXC's Android init is
-  # flaky inside a non-host netns); we cross into pia via the
-  # vpn-confinement transit veth (pia-br <-> veth-pia), source-route
-  # waydroid0's subnet over it, then NAT out pia0 inside the netns.
-  #
-  # The "to <androidNet> lookup main" rule is load-bearing: without
-  # it the host's replies from ${androidGw} match the source-route
-  # too and get sent through PIA, killing dnsmasq/DHCP for Android.
+  # Route Android's bridge traffic through the pia netns: cross via the transit veth, source-route waydroid0's subnet, then NAT out pia0 in the netns.
+  # The "to <androidNet> lookup main" rule is load-bearing: without it the host's replies from ${androidGw} also match the source-route and break dnsmasq/DHCP.
   systemd.services.waydroid-pia-route = {
     description = "Route Android bridge traffic through pia netns";
     after = [ "pia.service" "waydroid-container.service" ];

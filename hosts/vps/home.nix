@@ -14,22 +14,13 @@
     ../../user/${hostName}
   ];
 
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
+  # Identity and paths Home Manager manages.
   home.username = username;
   home.homeDirectory = "/home/" + username;
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "23.05"; # Please read the comment before changing.
+  # Home Manager release this config targets; don't change without checking release notes.
+  home.stateVersion = "23.05";
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
   home.packages = with pkgs; [
     sops
   ];

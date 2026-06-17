@@ -1,23 +1,16 @@
-# Builds OpenCore.qcow2 from a profile (+ optional extras).
+# Builds OpenCore.qcow2 from a profile (+ optional extras). Pure derivation
+# (mkfs.vfat → sgdisk → qemu-img convert; no guestfish or nested KVM).
 #
-# Pure derivation — mkfs.vfat → sgdisk → qemu-img convert; no
-# guestfish or nested KVM.
-#
-# Two build-time gates run after the EFI tree is staged but before
-# it's sealed into FAT:
-#   1. OCSnapshot reconciles config.plist's ACPI/Drivers/Kexts/Tools
-#      arrays against what's on disk (orphans dropped, missing entries
-#      added, kext load order fixed via OSBundleLibraries walk).
-#      Existing entry metadata (MinKernel, Comment, Strategy, Arch, …)
-#      survives — the snapshot only rewrites disk-membership fields.
-#   2. ocvalidate (matched to opencore.ocVersion) runs a full schema +
-#      semantic check. Non-zero exit fails the build.
+# Two build-time gates run after the EFI tree is staged, before it's sealed:
+#   1. OCSnapshot reconciles config.plist's ACPI/Drivers/Kexts/Tools arrays
+#      against disk (only disk-membership fields rewritten; entry metadata survives).
+#   2. ocvalidate (matched to opencore.ocVersion) runs a full schema check;
+#      non-zero exit fails the build.
 #
 # Partition layout mirrors OSX-KVM's opencore-image-ng.sh:
 #   p1 ESP      sectors 2048..300000   (~145 MB FAT32, label=EFI)
 #   p2 OpenCore sectors 302048..end    (~234 MB FAT32, empty)
-# p2 is unused but preserved so existing OVMF_VARS / recovery layouts
-# match.
+# p2 is unused but preserved so existing OVMF_VARS / recovery layouts match.
 
 { lib, runCommand, dosfstools, mtools, gptfdisk, qemu-utils, coreutils
 , opencore, ocSnapshot, mkConfigPlist

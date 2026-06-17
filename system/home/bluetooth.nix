@@ -40,9 +40,7 @@
     };
   };
 
-  # systemd-rfkill persists the adapter's rfkill state across reboots, so a
-  # soft block toggled once (e.g. KDE's Bluetooth toggle) sticks on every boot
-  # and overrides powerOnBoot/AutoEnable. Clear it after rfkill state is restored.
+  # systemd-rfkill persists a soft block across reboots, overriding powerOnBoot/AutoEnable; clear it after rfkill state is restored.
   systemd.services.bt-unblock = {
     description = "Clear persisted Bluetooth rfkill soft block on boot";
     after = [ "systemd-rfkill.service" ];

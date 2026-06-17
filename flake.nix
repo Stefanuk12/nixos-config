@@ -93,16 +93,13 @@
       ];
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs systems;
-      # openldap 2.6.x syncrepl tests flake on timing — disable here so both
-      # the NixOS config and the home-manager config see a buildable package.
+      # openldap 2.6.x syncrepl tests flake on timing; disable so both NixOS and home-manager configs build.
       homeOverlays = [
         hydenix.overlays.default
         (final: prev: {
           openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
         })
-        # Bottles 63.2 shells out to `fvs2`, but nixpkgs still ships the old
-        # python `fvs` 0.3.4 (binary named `fvs`). Mirrors nixpkgs PR #511730;
-        # remove once that PR is merged and pulled into our pin.
+        # Bottles 63.2 needs `fvs2` but nixpkgs still ships old `fvs`; mirrors nixpkgs PR #511730, remove once merged.
         (final: prev: {
           fvs2 = final.callPackage ./packages/fvs2 { };
           bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {

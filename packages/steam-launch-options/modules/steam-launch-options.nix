@@ -216,15 +216,14 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ patch-steam-launch-options ];
 
-    # Try on every `home-manager switch` — usually a no-op because Steam
-    # is running, but catches the rare case where it isn't.
+    # Try on every switch — usually a no-op while Steam runs, but catches
+    # the case where it isn't.
     home.activation.patchSteamLaunchOptions =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD ${patch-steam-launch-options}/bin/patch-steam-launch-options || true
       '';
 
-    # Ensure the path watcher is actually running after a switch. Without
-    # this it stays `inactive (dead)` until next login.
+    # Start the path watcher after a switch; else it stays dead until next login.
     home.activation.startSteamLaunchPath =
       lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
         $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user start \

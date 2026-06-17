@@ -24,12 +24,10 @@
     pinTo = [ 2 10 3 11 4 12 5 13 6 14 7 15 ];
     hostCores = "0-1,8-9";
     features = {
-      # OPTIMIZATION: svm (AMD hardware virt), topoext (topology extensions),
-      #               invtsc (invariant TSC for stable guest timekeeping)
+      # svm (AMD virt), topoext, invtsc (stable guest TSC).
       require = [ "svm" "topoext" "invtsc" ];
-      # CONCEALMENT: hypervisor (CPUID.1:ECX[31]), ssbd/amd-ssbd/virt-ssbd
-      #              (spectre mitigations that leak virt context), rdpid
-      # Add "rdtscp" here if using a patched kernel
+      # Concealment: hypervisor bit + spectre-mitigation MSRs that leak
+      # virt context. Add "rdtscp" here if using a patched kernel.
       disable = [
         "vmx-vnmi" "hypervisor"
         "ssbd" "amd-ssbd" "virt-ssbd"
@@ -92,9 +90,9 @@
   tpm = true;
   spice = true;
 
-  # Direct host input passthrough via evdev — lower latency than USB.
-  # Only needed on first install / when Looking Glass Host is NOT
-  # installed on the guest. Find devices with: ls -l /dev/input/by-id/
+  # Direct host input passthrough via evdev — lower latency than USB, only
+  # needed on first install / when Looking Glass Host isn't on the guest
+  # (find devices with: ls -l /dev/input/by-id/).
   # evdev = [
   #   { dev = "/dev/input/event1"; }                                        # keyboard
   #   { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse

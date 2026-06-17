@@ -51,11 +51,9 @@
   # cdroms = [ { file = "/var/lib/libvirt/images/Win11_24H2_English_x64.iso"; } ];
   cdroms = [ ];
 
-  # No GPU passthrough.
-  # mkVM unconditionally sets `video.model.type = "none"` (needed for
-  # Looking Glass / concealment), which would leave this VM headless.
-  # Override via extraDevices — this is merged last in mkVM and replaces
-  # the top-level `video` key, giving us a normal QXL + SPICE display.
+  # No GPU passthrough. mkVM forces video.model.type = "none" (for Looking
+  # Glass / concealment), so override via extraDevices — merged last, it
+  # replaces the top-level `video` with a normal QXL + SPICE display.
   extraDevices = {
     video.model = {
       type = "qxl";
@@ -87,11 +85,9 @@
   # Governor switching left off — Office isn't perf-critical.
   governor.enable = false;
 
-  # mkVM only emits <vcpu count=...> when CPU pinning is enabled,
-  # but the <topology> still declares sockets*dies*clusters*cores*threads
-  # vCPUs. Without pinning, libvirt defaults <vcpu> to 1 and rejects the
-  # mismatch. Declare the total here so topology and vcpu count agree.
-  # 1 socket × 1 die × 1 cluster × 4 cores × 2 threads = 8 vCPUs.
+  # mkVM only emits <vcpu count> with pinning, but <topology> always
+  # declares cores×threads vCPUs; without pinning libvirt defaults <vcpu>
+  # to 1 and rejects the mismatch. Declare the total (4 cores × 2 = 8).
   extraAttrs = {
     vcpu = { placement = "static"; count = 8; };
   };

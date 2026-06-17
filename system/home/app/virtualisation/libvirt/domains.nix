@@ -153,11 +153,9 @@ in
     (lib.mapAttrsToList (_: mkDomain) vms)
     ++ map (m: mkRawDomain m.domain) (builtins.attrValues osxModules);
 
-  # Inspectable post-snapshot, post-ocvalidate config.plist for each macOS
-  # VM, symlinked into /etc so it's a `cat /etc/osx-kvm/<vm>/config.plist`
-  # (or `plutil -convert xml1 -o - …`) away. Source is the secondary
-  # output of mk-image.nix, so the link target lives in /nix/store and
-  # rotates atomically on every rebuild.
+  # Inspectable post-ocvalidate config.plist per macOS VM, symlinked into
+  # /etc (cat /etc/osx-kvm/<vm>/config.plist). Sourced from mk-image.nix's
+  # secondary output, so it lives in /nix/store and rotates on rebuild.
   environment.etc = lib.mapAttrs'
     (n: m: lib.nameValuePair "osx-kvm/${n}/config.plist" { source = m.configPlist; })
     osxModules;
@@ -168,11 +166,9 @@ in
     ln -sf ${hookScript} /var/lib/libvirt/hooks/qemu
   '';
 
-  # 2MB hugepages: can be allocated dynamically via overcommit.
-  # +512 pages (1 GB) of headroom for non-VM consumers that grab
-  # 2 MB pages opportunistically (e.g. the postgres docker container
-  # with huge_pages=try). Without this, a VM sized to the exact
-  # ceiling fails to start whenever anything else holds even one page.
+  # 2MB hugepages allocated dynamically via overcommit, with +512 pages
+  # (1 GB) headroom for other consumers (e.g. postgres huge_pages=try);
+  # without it a VM sized to the exact ceiling fails to start.
   boot.kernel.sysctl = lib.mkIf needs2M {
     "vm.nr_overcommit_hugepages" = totalPagesBySize."2048" + 512;
   };

@@ -95,8 +95,7 @@
     reshade = {
       enable = true;
       defaultPreset = "00. STX Stream.ini";
-      # Override or add ReShade.ini values here. Module defaults already
-      # set up paths and sensible overlay options.
+      # Override or add ReShade.ini values here; module defaults handle paths and overlay.
       # settings = {
       #   INPUT.KeyOverlay = "45,0,0,0";  # Insert
       # };

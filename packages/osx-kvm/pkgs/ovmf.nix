@@ -1,8 +1,7 @@
 # Patched OVMF for macOS guests.
-#   CODE: kholia/OSX-KVM fork (carries macOS-specific edk2 patches —
-#         SMC OSK leak fix, AppleProtocol stubs, etc.).
-#   VARS: stock 4M VARS from nixpkgs (byte-identical to upstream's;
-#         it's an empty NVRAM template).
+#   CODE: kholia/OSX-KVM fork with macOS-specific edk2 patches (SMC OSK leak
+#         fix, AppleProtocol stubs, etc.).
+#   VARS: stock 4M VARS from nixpkgs (empty NVRAM template).
 
 { fetchurl, OVMF }:
 

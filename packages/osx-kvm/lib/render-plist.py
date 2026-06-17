@@ -2,23 +2,17 @@
 """Render a config.plist by parsing a base plist and applying overrides.
 
 Inputs (positional argv):
-  1. base_plist         — path to a plist file (XML or binary). Default
-                          source: OpenCorePkg's Docs/Sample.plist.
-  2. structured_json    — JSON file with the high-level overrides
-                          interpreted by `apply_*` functions below
-                          (see schema in `apply_*` docstrings).
-  3. plist_overrides    — JSON file with arbitrary nested overrides
-                          deep-merged onto the parsed plist *after*
-                          structured ops. Mirrors the plist tree.
-                          Tagged dicts encode plist scalars JSON can't:
+  1. base_plist         — plist file (XML or binary); default Sample.plist.
+  2. structured_json    — high-level overrides handled by `apply_*` below.
+  3. plist_overrides    — arbitrary nested overrides deep-merged onto the
+                          parsed plist *after* structured ops. Tagged dicts
+                          encode plist scalars JSON can't:
                             {"_type": "data", "value": "<base64>"}
                             {"_type": "date", "value": "<iso8601>"}
   4. output             — destination path for the rendered XML plist.
 
-Both JSON files may be empty (`{}`); structured ops and the deep merge
-are independent so callers can use either or both. Empty `Kernel.Block`
-or `Kernel.Add` are left alone unless the relevant override key is
-present, so the base plist's defaults survive.
+Both JSON files may be empty (`{}`); structured ops and the deep merge are
+independent. Override keys left absent leave the base plist's defaults intact.
 """
 
 import base64
@@ -49,21 +43,14 @@ def apply_smbios(plist: dict, smbios: dict) -> None:
 
 
 def apply_drivers(plist: dict, drivers: list) -> None:
-    """Replace UEFI.Drivers wholesale with one entry per filename.
-    Sample.plist's UEFI.Drivers list usually doesn't match what we ship in
-    EFI/OC/Drivers/, so syncing it avoids OpenCore warnings about
-    missing or extra driver files. Each entry uses upstream defaults
-    (Enabled, no Arguments, LoadEarly off); set non-default LoadEarly /
-    Arguments via plistOverrides if needed.
+    """Replace UEFI.Drivers wholesale (one entry per filename, upstream
+    defaults) so it matches what we ship in EFI/OC/Drivers/ and avoids
+    OpenCore missing/extra-driver warnings.
 
-    Side effect: when OpenCanopy.efi is in the list, force
-    Misc.Boot.PickerMode = "External". OpenCanopy is a UEFI driver that
-    *registers* a graphical picker; OC only routes to that picker when
-    PickerMode is External. Sample.plist defaults to Builtin, which
-    ocvalidate (≥ 1.0.7) flags as a hard error when OpenCanopy is
-    loaded. Users who genuinely want a different mode (e.g. Apple
-    legacy picker) can override via plistOverrides — the deep-merge
-    runs after this and wins."""
+    Side effect: if OpenCanopy.efi is present, force Misc.Boot.PickerMode =
+    "External" — OC only routes to OpenCanopy's graphical picker in that mode,
+    and ocvalidate (≥ 1.0.7) errors on the Builtin default. Override via
+    plistOverrides (deep-merge runs after and wins)."""
     uefi = plist.setdefault("UEFI", {})
     uefi["Drivers"] = [
         {
@@ -80,11 +67,9 @@ def apply_drivers(plist: dict, drivers: list) -> None:
 
 
 def apply_acpi(plist: dict, entries: list) -> None:
-    """Replace ACPI.Add wholesale. Each entry: name (required, file path
-    relative to EFI/OC/ACPI/), comment?. Sample.plist ships with demo
-    ACPI.Add entries pointing at .aml paths that don't exist in our EFI
-    tree — a wholesale replace keeps OpenCore from logging missing-file
-    warnings on boot."""
+    """Replace ACPI.Add wholesale (entry: name relative to EFI/OC/ACPI/,
+    comment?). Sample.plist's demo .aml entries don't exist in our tree, so a
+    wholesale replace avoids OpenCore missing-file warnings on boot."""
     acpi = plist.setdefault("ACPI", {})
     acpi["Add"] = [
         {

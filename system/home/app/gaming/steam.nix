@@ -2,12 +2,11 @@
 
 {
   environment.systemPackages = with pkgs; [
-    mangohud # Performance monitoring overlay for games
-    lutris # Game manager for Linux
+    mangohud
+    lutris
   ];
 
-  # Keep all CPU cores at max clocks while gaming (avoids cores
-  # dropping into powersave mid-game and causing frame drops)
+  # Keep CPU cores at max clocks; powersave mid-game causes frame drops.
   powerManagement.cpuFreqGovernor = "performance";
 
   programs.gamescope = {
@@ -15,9 +14,7 @@
     capSysNice = true;
   };
 
-  # Raises game process priority and pins governor/GPU to max while
-  # a game runs. Won't multithread a single-threaded game, but keeps
-  # the main thread from being interrupted by background work.
+  # Raises game priority and pins governor/GPU to max while a game runs.
   programs.gamemode.enable = true;
 
   programs.steam = {

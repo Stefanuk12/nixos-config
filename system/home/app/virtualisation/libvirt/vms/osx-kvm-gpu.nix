@@ -2,14 +2,10 @@ args@{ pkgs, osxKvm, ... }:
 
 let
   # ── OpenCore source override (DarwinOCPkg) ─────────────────────────────────
-  # Switch this VM's OpenCore image from vanilla acidanthera/OpenCorePkg
-  # to royalgraphx/DarwinOCPkg — a QEMU/KVM-targeted repackaging derived
-  # from OpenCorePkg 1.0.4 (DEBUG), with OpenHfsPlus.efi/OpenPartitionDxe.efi
-  # already curated under Drivers/. Done via overrideScope so mkImage
-  # (callPackage'd inside the toolkit) transparently picks up the new
-  # opencore. Other scope members (kexts/ovmf/profiles) don't depend on
-  # opencore and resolve to byte-identical derivations across the override.
-  # The no-GPU sibling (osx-kvm.nix) is left on the vanilla source.
+  # Switch this VM's OpenCore image to royalgraphx/DarwinOCPkg, a QEMU/KVM
+  # repackaging of OpenCorePkg 1.0.4 with HFS+/partition drivers curated.
+  # Done via overrideScope so mkImage picks it up; other scope members are
+  # unaffected. The no-GPU sibling stays on vanilla OpenCorePkg.
   #
   # Shadows the function-arg `osxKvm` via the @args alias; the rest of the
   # module references `osxKvm` unchanged.
@@ -218,12 +214,10 @@ let
     };
   };
 
-  # 12 vCPUs pinned 1:1 onto the same host cores the Windows VMs use
-  # (cores 2-7 + their SMT siblings 10-15). Cores 0-1,8-9 stay with
-  # the host and run the emulator thread. Hoisted here (rather than
-  # inlined into the mkMacOSVM call) so it's reachable as a top-level
-  # module attr — domains.nix's qemu hook reads `m.pin` to drive the
-  # cpu-governor switching.
+  # 12 vCPUs pinned 1:1 onto the same cores the Windows VMs use (2-7 +
+  # SMT siblings 10-15); host keeps 0-1,8-9 for the emulator thread.
+  # Hoisted to a top-level attr so domains.nix's qemu hook can read
+  # `m.pin` for governor switching.
   pin = {
     vmCores = [
       2
@@ -246,10 +240,9 @@ let
     inherit profile plistOverrides drivers;
     name = "osx-kvm-gpu";
     uuid = "9a8f7c3e-2d4b-4a1c-9e6f-5b0c1d2e3f4b";
-    # Reshape libvirt domain to royalgraphx/DarwinKVM's reference XML
-    # (xmls/examples/DarwinKVM.xml). See darwinKvmStyle's docstring in
-    # mkMacOSVM.nix for the exact diff; CPU model, <loader>/<nvram> and
-    # the prelinked-kernel constraints stay locked to the OSX-KVM lineage.
+    # Reshape the domain to DarwinKVM's reference XML; see darwinKvmStyle
+    # in mkMacOSVM.nix. CPU model, <loader>/<nvram> and the prelinked-
+    # kernel constraints stay locked to the OSX-KVM lineage.
     darwinKvmStyle = true;
     memory = 16384;
     topology = {

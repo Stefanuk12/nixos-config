@@ -1,13 +1,9 @@
 { ... }:
 {
-  # Docker daemon for local integration testing (ScyllaDB, Kafka, etc.
-  # via docker-compose). Running as a system service rather than
-  # rootless so `docker compose` from the default PATH just works for
-  # members of the `docker` group.
+  # Docker daemon for local integration testing; system service (not rootless) so `docker compose` works for the `docker` group.
   virtualisation.docker = {
     enable = true;
-    # Auto-prune unused images/containers weekly so `target/` equivalents
-    # don't accumulate to hundreds of GB.
+    # Auto-prune unused images/containers weekly to avoid disk bloat.
     autoPrune = {
       enable = true;
       dates = "weekly";

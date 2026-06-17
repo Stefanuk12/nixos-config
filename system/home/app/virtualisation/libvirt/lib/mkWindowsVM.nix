@@ -61,9 +61,8 @@ let
 
   hard        = cfg.hardening or {};
   hardened    = hard.enable or false;
-  # kvm-pv-enforce-cpuid can cause guest crashes if the OS or drivers
-  # attempt to use paravirtual MSRs that are no longer advertised.
-  # Off by default — enable once you've confirmed the guest is stable.
+  # kvm-pv-enforce-cpuid can crash the guest if it uses PV MSRs no longer
+  # advertised. Off by default — enable once the guest is confirmed stable.
   enforcePvCpuid = hard.enforcePvCpuid or false;
   emulator    = if hardened && hard ? emulator
                 then hard.emulator
@@ -77,13 +76,8 @@ let
   gpuStartBus = gpuCfg.startBus or 4;
   hasGpu      = gpuAddrs != [];
 
-  # Looking Glass shared memory sizes (KVMFR module):
-  #   Resolution        SDR    HDR
-  #   1080p             32M    64M
-  #   1200p             32M    64M
-  #   1440p             64M    128M
-  #   4K (2160p)        128M   256M
-  # Ref: https://looking-glass.io/docs/B7/install/#ivshmem
+  # Looking Glass KVMFR shmem sizes: 1080p/1200p 32M (64M HDR), 1440p 64M
+  # (128M HDR), 4K 128M (256M HDR). Ref: https://looking-glass.io/docs/B7/install/#ivshmem
   lg          = cfg.lookingGlass or {};
   lgEnabled   = lg.enable or false;
   lgSize      = lg.memSize or 67108864;
@@ -93,21 +87,17 @@ let
   tpmEnabled  = cfg.tpm or false;
   spiceEnabled = cfg.spice or false;
 
-  # evdev: list of input devices for direct host passthrough
-  # Each entry: { dev = "/dev/input/eventN"; } or with grab options:
+  # evdev: input devices for direct host passthrough (lower latency than
+  # USB; only needed when Looking Glass Host isn't on the guest). Each:
   #   { dev = "/dev/input/eventN"; grab = "all"; grabToggle = "ctrl-ctrl"; repeat = true; }
-  # Lower latency than USB passthrough — ideal for Looking Glass setups.
-  # Only needed when Looking Glass Host (LGH) is NOT installed on the guest.
   evdevInputs = cfg.evdev or [];
 
   extraDevices   = cfg.extraDevices or {};
   extraQemuArgs  = cfg.extraQemuArgs or [];
 
   # ── Memory backing ────────────────────────────────────────
-  # Hugepages reduce TLB misses significantly for gaming VMs.
-  # When hpSize is null, libvirt uses the host's default page size
-  # (usually 2MB). For 1GB pages, set size = 1 and add the
-  # corresponding boot.kernelParams on the host.
+  # Hugepages cut TLB misses for gaming VMs. null hpSize uses the host
+  # default (2MB); for 1GB pages set size = 1 plus host boot.kernelParams.
 
   memoryBackingSection = optionalAttrs hpEnabled {
     memoryBacking = {
@@ -179,14 +169,9 @@ let
 
   # ── Clock ─────────────────────────────────────────────────
   # Ref: https://libvirt.org/formatdomain.html#time-keeping
-  #
-  # Hardened: use native TSC, disable all paravirtual clocks.
-  #   - kvmclock: CONCEALMENT — KVM paravirtual clock exposes hypervisor
-  #   - hypervclock: CONCEALMENT — Hyper-V clock exposes hypervisor
-  #   - hpet: kept for timing compatibility
-  #   - rtc/pit: disabled to reduce timer overhead
-  #
-  # Default: standard Windows timers with Hyper-V enlightenments.
+  # Hardened: native TSC, all paravirtual clocks off (kvmclock/hypervclock
+  # leak the hypervisor; hpet kept, rtc/pit off). Default: standard Windows
+  # timers with Hyper-V enlightenments.
 
   clockSection = if hardened then {
     offset = "localtime";
@@ -210,22 +195,19 @@ let
 
   # ── Features ──────────────────────────────────────────────
   # Ref: https://libvirt.org/formatdomain.html#hypervisor-features
+  # Hardened: disable ALL Hyper-V enlightenments — on "bare metal" they're
+  # flagged as suspicious by anti-cheats.
   #
-  # Hardened: disable ALL Hyper-V enlightenments — enlightenments on
-  # "bare-metal" are flagged as extremely suspicious by anti-cheats.
+  # vendor_id: state=on + 12-char string fixes NVIDIA Code 43 on unpatched
+  #   KVM (state=off when patched); it's the hypervisor vendor string, need
+  #   not match the CPU.
   #
-  # vendor_id: when KVM is NOT patched, set state=on with a 12-char
-  #   string to fix NVIDIA Code 43 error. When KVM IS patched, use
-  #   state=off instead. The value does NOT need to match the CPU
-  #   vendor — it's the hypervisor vendor string (CPUID 0x40000000).
-  #
-  # kvm.hidden:   CONCEALMENT — hides KVM from CPUID-based MSR discovery
-  # pmu:          CONCEALMENT — disables Performance Monitoring Unit
-  # vmport:       CONCEALMENT — disables VMware I/O backdoor (port 0x5658)
-  # msrs.unknown: CONCEALMENT — injects #GP(0) on RDMSR/WRMSR to
-  #               unhandled MSRs (prevents fingerprinting via MSR probing)
+  # kvm.hidden:   hides KVM from CPUID-based MSR discovery
+  # pmu:          disables Performance Monitoring Unit
+  # vmport:       disables VMware I/O backdoor (port 0x5658)
+  # msrs.unknown: #GP(0) on unhandled RDMSR/WRMSR (blocks MSR fingerprinting)
   # smm:          required for UEFI Secure Boot (OVMF SMM_REQUIRE)
-  # ps2:          disabled to remove virtual PS/2 controller
+  # ps2:          removes the virtual PS/2 controller
 
   featuresSection = if hardened then {
     acpi = {}; apic = {};
@@ -432,12 +414,9 @@ let
   # ── QEMU command line args ────────────────────────────────
   # Ref: https://www.qemu.org/docs/master/system/qemu-manpage.html
   #
-  # kvm-pv-enforce-cpuid: By default KVM allows the guest to use ALL
-  #   paravirtual MSRs (0x4b564d00–0x4b564d08) even when kvm=off hides
-  #   the CPUID leaves. This flag enforces CPUID: if a PV feature bit
-  #   is absent, RDMSR/WRMSR to that MSR will inject #GP into the guest.
-  #   Without this, anti-cheats can detect KVM via MSR probing even when
-  #   the CPUID signature is hidden.
+  # kvm-pv-enforce-cpuid: by default KVM lets the guest use PV MSRs even
+  #   when kvm=off hides the CPUID leaves; this enforces CPUID so probing an
+  #   absent PV MSR injects #GP, closing an MSR-based KVM detection vector.
   #   Ref: https://docs.kernel.org/virt/kvm/x86/msr.html
 
   mkArg = v: { value = v; };
@@ -485,11 +464,8 @@ let
 
   # ── QEMU overrides (SSD spoofing for anti-detection) ────
   # Ref: https://libvirt.org/drvqemu.html#overriding-properties-of-qemu-devices
-  #
-  # Only needed for SSD-backed virtual storage (.qcow2).
-  # rotation_rate=1: tells guest this is an SSD (non-rotational)
-  # discard_granularity=512: realistic value for a real SSD
-  #   (0 is suspicious — real SSDs always report non-zero)
+  # SSD-backed .qcow2 only. rotation_rate=1 marks it non-rotational;
+  # discard_granularity=512 is a realistic SSD value (0 looks suspicious).
 
   qemuOverrideSection = optionalAttrs hardened {
     qemu-override.device = {

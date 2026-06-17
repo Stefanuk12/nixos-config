@@ -25,8 +25,8 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Setup networking
-  networking.hostName = lib.mkDefault hostName; # Define your hostname.
-  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+  networking.hostName = lib.mkDefault hostName;
+  networking.networkmanager.enable = true;
 
   # Set your time zone.
   time.timeZone = lib.mkDefault timeZone;
@@ -48,7 +48,7 @@ in
     jack.enable = true;
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define a user account; set its password with passwd.
   users.users.stefan = {
     shell = pkgs.zsh;
     isNormalUser = true;

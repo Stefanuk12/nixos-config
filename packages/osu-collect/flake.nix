@@ -44,14 +44,11 @@
             zlib
           ];
 
-          # 1. Force vendored realm-core to link the system OpenSSL/Zlib instead
-          #    of downloading prebuilt blobs from static.realm.io (the build
-          #    sandbox has no network).
-          # 2. cxx_build emits its link directive (`-losu_realm_bridge`) only
-          #    after build.rs has already emitted `-lrealm`, so by the time
-          #    rustc sees osu_realm_bridge's references to realm symbols, it
-          #    has already passed librealm. Re-emit the realm archives after
-          #    the bridge so ld gets a second pass at them.
+          # 1. Force vendored realm-core to link system OpenSSL/Zlib instead of
+          #    fetching prebuilt blobs (build sandbox has no network).
+          # 2. Re-emit the realm archives after the bridge: cxx_build emits its
+          #    link directive after build.rs's `-lrealm`, so ld needs a second
+          #    pass to resolve the bridge's references to realm symbols.
           postPatch = ''
             substituteInPlace build.rs \
               --replace-fail '.define("REALM_BUILD_LIB_ONLY", "ON")' \

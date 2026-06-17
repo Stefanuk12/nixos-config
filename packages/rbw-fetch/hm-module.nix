@@ -144,8 +144,7 @@ let
 
         ${secret.script}
 
-        # outputPath may contain $XDG_RUNTIME_DIR or other expansions; resolve
-        # via the shell for the chmod step.
+        # outputPath may contain $XDG_RUNTIME_DIR etc.; let the shell expand it.
         chmod ${secret.mode} "$OUT"
       '';
     };

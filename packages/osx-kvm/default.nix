@@ -1,12 +1,11 @@
-# Toolkit entry. Wires every component into a single callPackage scope
-# so each module declares its dependencies in its argument list rather
-# than threading `pkgs`/`lib` by hand.
+# Toolkit entry. Wires every component into one callPackage scope so modules
+# declare dependencies via their argument list instead of threading pkgs/lib.
 #
 #   osxKvm = import ./. { inherit pkgs; };
 #   img    = osxKvm.mkImage { profile = osxKvm.profiles.mp71; };
 #
-# Runtime mutable bits (BaseSystem.img, mac_hdd_ng.img, OVMF VARS) stay
-# outside /nix/store. Default lookup root: $HOME/.local/share/osx-kvm.
+# Runtime mutable bits (BaseSystem.img, mac_hdd_ng.img, OVMF VARS) stay outside
+# /nix/store. Default lookup root: $HOME/.local/share/osx-kvm.
 
 { pkgs, lib ? pkgs.lib }:
 

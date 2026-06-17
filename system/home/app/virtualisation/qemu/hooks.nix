@@ -37,15 +37,10 @@
       }
     );
 
-    # Defragment memory immediately before a domain starts. Our 2MB
-    # hugepages are allocated on-demand (vm.nr_overcommit_hugepages, see
-    # domains.nix) rather than reserved at boot, so a large guest (e.g.
-    # win11-rblx wants 8192 contiguous 2MB pages) fails with "unable to
-    # map backing store for guest RAM: Cannot allocate memory" once the
-    # host has run long enough to fragment its free memory. compact_memory
-    # migrates movable pages to rebuild high-order free blocks; the
-    # preceding drop_caches frees reclaimable page cache that would
-    # otherwise pin order-9/10 regions. Both are safe and non-destructive.
+    # Defragment memory before a domain starts. Our on-demand 2MB hugepages
+    # (see domains.nix) otherwise fail to allocate once host memory is
+    # fragmented; compact_memory rebuilds high-order blocks and drop_caches
+    # frees page cache pinning them. Both are safe and non-destructive.
     "hugepage-defrag" = lib.getExe (
       pkgs.writeShellApplication {
         name = "qemu-hugepage-defrag";

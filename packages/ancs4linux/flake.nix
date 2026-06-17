@@ -174,11 +174,9 @@
           pkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
           # ---------------------------------------------------------------
-          # Shared hardening for every user service in the stack.
-          #
-          # All IPC goes through D-Bus (AF_UNIX); BLE is handled by BlueZ
-          # in a separate process, so these services need no direct
-          # hardware or network access.
+          # Shared hardening for every user service in the stack. All IPC is
+          # D-Bus (AF_UNIX) and BLE is handled by BlueZ, so no direct hardware
+          # or network access is needed.
           # ---------------------------------------------------------------
           commonServiceConfig = {
             Restart = "on-failure";
@@ -202,9 +200,8 @@
             # -- Capabilities & syscalls -----------------------------------
             CapabilityBoundingSet = "";
             SystemCallArchitectures = "native";
-            # @system-service is a curated whitelist for typical daemons.
-            # Strip privilege-escalation and resource-control families that
-            # a notification-forwarding service has no use for.
+            # @system-service whitelist minus privilege-escalation and
+            # resource-control families a notification forwarder doesn't need.
             SystemCallFilter = [
               "@system-service"
               "~@privileged"
@@ -212,8 +209,8 @@
             ];
 
             # -- Network ---------------------------------------------------
-            # D-Bus = AF_UNIX.  Add AF_NETLINK or AF_BLUETOOTH here if a
-            # future upstream release opens sockets directly.
+            # D-Bus = AF_UNIX. Add AF_NETLINK/AF_BLUETOOTH if upstream ever
+            # opens sockets directly.
             RestrictAddressFamilies = [ "AF_UNIX" ];
 
             # -- Misc ------------------------------------------------------
@@ -229,12 +226,9 @@
           };
 
           # ---------------------------------------------------------------
-          # Helper: build a systemd *user* service for one component.
-          #
-          # `partOf` ties dependent lifetimes to the root advertising
-          # service so a single `systemctl --user stop` tears everything
-          # down.  Only the root service carries `wantedBy`; dependents
-          # are pulled in via the Wants= chain.
+          # Helper: build a systemd *user* service for one component. `partOf`
+          # ties dependents to the root advertising service so one stop tears
+          # everything down; only the root carries `wantedBy`.
           # ---------------------------------------------------------------
           mkAncsService =
             name:
@@ -331,10 +325,8 @@
 
             services.dbus.packages =
               let
-                # dbus-broker (NixOS's DBus implementation) doesn't accept the
-                # `*_prefix` attributes that reference dbus-daemon supports, so
-                # name each ancs4linux service explicitly. Names come from
-                # ancs4linux upstream: advertising/main.py and observer/main.py.
+                # dbus-broker doesn't accept the `*_prefix` attributes, so name
+                # each service explicitly (from upstream advertising/observer main.py).
                 dbusConf = pkgs.writeTextDir "share/dbus-1/system.d/ancs4linux.conf" ''
                   <!DOCTYPE busconfig PUBLIC
                     "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"

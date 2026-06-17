@@ -4,8 +4,8 @@ let
   cfg = config.rbw-fetch;
   useApiKey = cfg.apiClientIdFile != null && cfg.apiClientSecretFile != null;
 
-  # Module-managed pinentry. Inspects SETDESC / SETPROMPT to figure out which
-  # value rbw is asking for and serves it from the matching file:
+  # Module-managed pinentry. Reads SETDESC/SETPROMPT to tell which value rbw
+  # wants and serves it from the matching file:
   #   "client__id"     → $PINENTRY_CLIENT_ID_FILE     (rbw register)
   #   "client__secret" → $PINENTRY_CLIENT_SECRET_FILE (rbw register)
   #   anything else    → $PINENTRY_PASSWORD_FILE      (rbw login/unlock)
@@ -52,8 +52,7 @@ let
         '';
       };
 
-      # Read-only alias of outputPath, mirroring sops-nix's
-      # `config.sops.secrets.<name>.path`. Use in downstream modules:
+      # Read-only alias of outputPath, mirroring sops-nix's `.path`, e.g.
       #   credentialsFile = config.rbw-fetch.secrets.pia-creds.path;
       path = lib.mkOption {
         type = lib.types.str;

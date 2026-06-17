@@ -271,9 +271,8 @@ let
     fi
 
     # --- Initial ReShade.ini ---
-    # Only write a fresh template if the file doesn't already exist.
-    # If it does, the patcher below merges declared settings non-destructively
-    # so any in-overlay tweaks for keys we don't declare are preserved.
+    # Only write a fresh template if absent; otherwise the patcher below merges
+    # declared settings non-destructively, preserving undeclared in-overlay tweaks.
     echo "[4/4] Writing ReShade.ini..."
     if [ ! -f "$GAME_DIR/ReShade.ini" ]; then
       cp ${reshade-ini} "$GAME_DIR/ReShade.ini"

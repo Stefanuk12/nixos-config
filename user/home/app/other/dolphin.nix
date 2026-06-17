@@ -1,25 +1,19 @@
 { pkgs, ... }:
 
 {
-  # Dolphin extracts/creates archives through Ark, which shells out to CLI
-  # backends for the actual work. Without these on PATH, Ark's cli7z/clirar
-  # plugins are unavailable, so password-protected archives can't be opened or
-  # created (libarchive alone won't prompt for / apply a password):
-  #   p7zip -> 7z: encrypted ZIP (AES) and 7z archives
-  #   unrar      : password-protected RAR archives
-  # ark itself ships the Dolphin context-menu integration and the plugins.
+  # Ark (Dolphin's archive integration) needs these CLI backends on PATH for its
+  # cli7z/clirar plugins, else password-protected 7z/ZIP/RAR archives can't be
+  # opened or created (libarchive alone won't apply a password).
   home.packages = with pkgs; [
     kdePackages.ark
     p7zip
     unrar
   ];
 
-  # Dolphin (Qt 6.11) crashes with a fatal Wayland protocol error
-  # ("wl_display error 0: invalid object", exit 255) when interacting with it
-  # under Hyprland 0.55. Forcing it onto XWayland (QT_QPA_PLATFORM=xcb) avoids
-  # the bad selection/clipboard protocol path. Override only Dolphin's launcher
-  # so every other Qt app keeps running native Wayland.
-  # Both monitors are 1080p @ scale 1, so XWayland has no scaling downside here.
+  # Dolphin (Qt 6.11) crashes with a fatal Wayland protocol error under Hyprland
+  # 0.55; force it onto XWayland (QT_QPA_PLATFORM=xcb) to avoid the bad
+  # selection/clipboard path. Override only Dolphin so other Qt apps stay native;
+  # both monitors are 1080p @ scale 1, so XWayland has no scaling downside.
   xdg.desktopEntries."org.kde.dolphin" = {
     name = "Dolphin";
     genericName = "File Manager";
