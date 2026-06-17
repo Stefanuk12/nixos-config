@@ -16,9 +16,6 @@ in
     enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    initContent = ''
-
-    '';
   };
 
   home.packages = with pkgs; [

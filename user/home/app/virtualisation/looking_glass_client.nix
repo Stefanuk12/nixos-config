@@ -34,9 +34,6 @@ in
         rawMouse = true;
         escapeKey = "KEY_INSERT";
       };
-      egl = {
-        # scale = 1;
-      };
     };
   };
 }
