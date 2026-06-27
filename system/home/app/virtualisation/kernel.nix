@@ -10,26 +10,11 @@ let
       url = "https://raw.githubusercontent.com/Scrut1ny/AutoVirt/refs/heads/main/patches/Kernel/Archive/linux-6.18.8-svm.patch";
       hash = "sha256-zz18xerutulLGzlHhnu26WCY8rVQXApyeoDtCjbejIk=";
     };
-
-    # MT7922 Bluetooth regression on kernel 6.18.30/.31: the bounds check from
-    # 634a4408c061 (Cc: stable, backported into 6.18.30) rejects too-short WMT
-    # FUNC_CTRL events with -EINVAL, so the controller never initializes
-    # ("hci0: Failed to send wmt func ctrl (-22)" -> no default controller).
-    # Upstream fix e3ac0d9f1a20, Tested-by on this exact device (MT7922 0489:e0e2).
-    # Drop this once linuxPackages_6_18 advances to 6.18.32, which carries the fix.
-    mt7922-bt-wmt = pkgs.fetchurl {
-      url = "https://github.com/torvalds/linux/commit/e3ac0d9f1a20.patch";
-      hash = "sha256-ByGMwBkEDv0yf9DfJjwILzmPBJBTcb0art8/lscbwUI=";
-    };
   };
 in
 {
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_18;
   boot.kernelPatches = [
-    {
-      name = "mt7922-bt-wmt-funcctrl";
-      patch = kernelPatches.mt7922-bt-wmt;
-    }
     # Disabled - current patches mess up CPU frequency, purely visual though
     # {
     #   name = "autovirt-svm";

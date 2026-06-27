@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "ancs4linux-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779586942,
+        "narHash": "sha256-Z998P9P7Yu055UwrRjA1uMTG/uJsH6MvlhzDURpG4dM=",
+        "owner": "pzmarzly",
+        "repo": "ancs4linux",
+        "rev": "985b8d07681e41785fc589149fe520f8ba5d325c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pzmarzly",
+        "repo": "ancs4linux",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1781577229,
+        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "ancs4linux-src": "ancs4linux-src",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

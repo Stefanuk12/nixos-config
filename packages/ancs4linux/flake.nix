@@ -39,7 +39,7 @@
 
           src = ancs4linux-src;
 
-          build-system = [ python.pkgs.poetry-core ];
+          build-system = [ python.pkgs.hatchling ];
 
           nativeBuildInputs = with pkgs; [
             gobject-introspection
@@ -51,8 +51,6 @@
 
           dependencies = with python.pkgs; [
             pygobject3
-            dbus-python
-            bleak
             dasbus
             typer
           ];

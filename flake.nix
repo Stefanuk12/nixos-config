@@ -24,7 +24,7 @@
 
     # VM stuff
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
-    barely-metal.url = "github:Stefanuk12/BarelyMetal/lg";
+    barely-metal.url = "github:Stefanuk12/BarelyMetal/update";
     barely-metal.inputs.nixpkgs.follows = "nixpkgs";
     nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
@@ -32,7 +32,7 @@
     osx-kvm.inputs.nixpkgs.follows = "nixpkgs";
 
     # Secure Boot
-    lanzaboote.url = "github:nix-community/lanzaboote/v1.0.0";
+    lanzaboote.url = "github:nix-community/lanzaboote/v1.1.0";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
     # For VPS - Minecraft server
@@ -104,6 +104,22 @@
           fvs2 = final.callPackage ./packages/fvs2 { };
           bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
             propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
+          });
+        })
+        # Spotify: bump ahead of nixpkgs to the latest stable snap. To refresh,
+        # find the newest stable rev/version then prefetch its hash:
+        #   curl -H 'Snap-Device-Series: 16' https://api.snapcraft.io/v2/snaps/info/spotify \
+        #     | jq -r '.["channel-map"][] | select(.channel.name=="stable" and .channel.architecture=="amd64") | "\(.version) \(.revision)"'
+        #   nix store prefetch-file --hash-type sha512 https://api.snapcraft.io/api/v1/snaps/download/pOBIoZ2LrCB3rDohMxoYGnbN14EHOgD7_<rev>.snap
+        (final: prev: {
+          spotify = prev.spotify.overrideAttrs (_: rec {
+            version = "1.2.92.147.g5b8f9367";
+            rev = "97";
+            src = final.fetchurl {
+              name = "spotify-${version}-${rev}.snap";
+              url = "https://api.snapcraft.io/api/v1/snaps/download/pOBIoZ2LrCB3rDohMxoYGnbN14EHOgD7_${rev}.snap";
+              hash = "sha512-Gk0/WjfgJZIG+2w4teaznAk/7evOXUsuCikDvOhmhAQ5ksQV99VeiYnE+OJf7hHnrPaHoueERvIkk7Psed/kwA==";
+            };
           });
         })
       ];
