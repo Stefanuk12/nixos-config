@@ -36,6 +36,11 @@ let
         awk -v v="$v" 'BEGIN { p = v*100; if (p<0) p=0; if (p>100) p=100; printf "%d", p+0.5 }'
       }
 
+      # seconds -> M:SS
+      fmt() {
+        awk -v s="$1" 'BEGIN { s = int(s+0.5); if (s<0) s=0; printf "%d:%02d", int(s/60), s%60 }'
+      }
+
       title=$(playerctl -p spotify,%any metadata title 2>/dev/null) || true
       artist=$(playerctl -p spotify,%any metadata artist 2>/dev/null) || true
 
@@ -65,11 +70,16 @@ let
         playpause)
           if [ "$(playerctl -p spotify,%any status 2>/dev/null)" = Playing ]; then
             playerctl -p spotify,%any pause
-            notify "$title — $artist" "Paused"
+            state=Paused
           else
             playerctl -p spotify,%any play
-            notify "$title — $artist" "Playing"
+            state=Playing
           fi
+          pos=$(playerctl -p spotify,%any position 2>/dev/null) || pos=0
+          len=$(playerctl -p spotify,%any metadata mpris:length 2>/dev/null) || len=0
+          len_s=$(awk -v l="$len" 'BEGIN { printf "%.3f", l/1000000 }')
+          prog=$(awk -v p="$pos" -v l="$len" 'BEGIN { l=l/1000000; if (l<=0) { print 0; exit } r=p/l*100; if (r<0) r=0; if (r>100) r=100; printf "%d", r+0.5 }')
+          notify "$title — $artist" "$state · $(fmt "$pos") / $(fmt "$len_s")" "$prog"
           ;;
       esac
     '';
