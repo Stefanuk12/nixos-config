@@ -18,6 +18,17 @@ in
 
     games = {
       "3364070" = "/home/stefan/Games/The Jackbox Party Pack 11";
+      "2216830" = "/home/stefan/Games/The Jackbox Party Pack 10";
+      "1850960" = "/home/stefan/Games/The Jackbox Party Pack 9";
+      "1552350" = "/home/stefan/Games/The Jackbox Party Pack 8";
+      "1211630" = "/home/stefan/Games/The Jackbox Party Pack 7";
+      "1005300" = "/home/stefan/Games/The Jackbox Party Pack 6";
+      "774461" = "/home/stefan/Games/The Jackbox Party Pack 5";
+      "610180" = "/home/stefan/Games/The Jackbox Party Pack 4";
+      "434170" = "/home/stefan/Games/The Jackbox Party Pack 3";
+      "397460" = "/home/stefan/Games/The Jackbox Party Pack 2";
+      "331670" = "/home/stefan/Games/The Jackbox Party Pack";
+      "2652000" = "/home/stefan/Games/The Jackbox Naughty Pack";
     };
 
     launchArgs = [ ];
