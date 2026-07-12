@@ -84,6 +84,15 @@ let
       esac
     '';
   };
+
+  braveDeferred = pkgs.writeShellApplication {
+    name = "brave-deferred";
+    runtimeInputs = with pkgs; [ glib brave ];
+    text = ''
+      gdbus wait --session --timeout 30 org.freedesktop.portal.Desktop || true
+      exec brave "$@"
+    '';
+  };
 in
 {
   imports = [
@@ -115,7 +124,9 @@ in
     suppressWarnings = true;
     extraConfig = ''
       exec-once = kdeconnect-indicator
-      exec-once = [workspace 2 silent] brave
+      exec-once = [workspace 2 silent] ${braveDeferred}/bin/brave-deferred
+      exec-once = systemctl --user start spotify-notify.service
+      exec-once = systemctl --user start osu-dunst-suppress.service
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
 
       workspace = 1, monitor:desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, default:true
@@ -131,7 +142,8 @@ in
       windowrule = stay_focused on, match:title FreeRDP:.*
     '';
     keybindings.extraConfig = ''
-      bind = SUPER, I, exec, rofi-rbw
+      $d=[Apps]
+      bindd = SUPER, I, $d Bitwarden picker (rofi-rbw), exec, rofi-rbw
 
       # Media keys: bare -> Spotify, SUPER -> the generic "system" player.
       # (HyDE's defaults bind bare `playerctl`, which grabs whatever MPRIS
@@ -141,27 +153,33 @@ in
       unbind = , XF86AudioPause
       unbind = , XF86AudioNext
       unbind = , XF86AudioPrev
-      bindl = , XF86AudioPlay, exec, ${spotifyOsd}/bin/spotify-osd playpause
-      bindl = , XF86AudioPause, exec, ${spotifyOsd}/bin/spotify-osd playpause
-      bindl = , XF86AudioNext, exec, playerctl -p spotify,%any next
-      bindl = , XF86AudioPrev, exec, playerctl -p spotify,%any previous
-      bindl = SUPER, XF86AudioPlay, exec, playerctl play-pause
-      bindl = SUPER, XF86AudioPause, exec, playerctl play-pause
-      bindl = SUPER, XF86AudioNext, exec, playerctl next
-      bindl = SUPER, XF86AudioPrev, exec, playerctl previous
+      $d=[Media|Spotify]
+      binddl = , XF86AudioPlay, $d play / pause, exec, ${spotifyOsd}/bin/spotify-osd playpause
+      binddl = , XF86AudioPause, $d play / pause, exec, ${spotifyOsd}/bin/spotify-osd playpause
+      binddl = , XF86AudioNext, $d next track, exec, playerctl -p spotify,%any next
+      binddl = , XF86AudioPrev, $d previous track, exec, playerctl -p spotify,%any previous
+      $d=[Media|System]
+      binddl = SUPER, XF86AudioPlay, $d play / pause (other player), exec, playerctl play-pause
+      binddl = SUPER, XF86AudioPause, $d play / pause (other player), exec, playerctl play-pause
+      binddl = SUPER, XF86AudioNext, $d next (other player), exec, playerctl next
+      binddl = SUPER, XF86AudioPrev, $d previous (other player), exec, playerctl previous
 
       # Volume: bare knob -> Spotify's MPRIS volume, SUPER -> system sink.
       unbind = , XF86AudioRaiseVolume
       unbind = , XF86AudioLowerVolume
-      bindel = , XF86AudioRaiseVolume, exec, ${spotifyOsd}/bin/spotify-osd up
-      bindel = , XF86AudioLowerVolume, exec, ${spotifyOsd}/bin/spotify-osd down
-      bindel = SUPER, XF86AudioRaiseVolume, exec, hyde-shell volumecontrol -o i
-      bindel = SUPER, XF86AudioLowerVolume, exec, hyde-shell volumecontrol -o d
+      $d=[Media|Spotify]
+      binddel = , XF86AudioRaiseVolume, $d volume up, exec, ${spotifyOsd}/bin/spotify-osd up
+      binddel = , XF86AudioLowerVolume, $d volume down, exec, ${spotifyOsd}/bin/spotify-osd down
+      $d=[Media|System]
+      binddel = SUPER, XF86AudioRaiseVolume, $d system volume up, exec, hyde-shell volumecontrol -o i
+      binddel = SUPER, XF86AudioLowerVolume, $d system volume down, exec, hyde-shell volumecontrol -o d
 
       # Mute: bare -> mute Spotify only, SUPER -> system sink.
       unbind = , XF86AudioMute
-      bindl = , XF86AudioMute, exec, ${spotifyOsd}/bin/spotify-osd mute
-      bindl = SUPER, XF86AudioMute, exec, hyde-shell volumecontrol -o m
+      $d=[Media|Spotify]
+      binddl = , XF86AudioMute, $d mute, exec, ${spotifyOsd}/bin/spotify-osd mute
+      $d=[Media|System]
+      binddl = SUPER, XF86AudioMute, $d mute system output, exec, hyde-shell volumecontrol -o m
     '';
     monitors.overrideConfig = ''
       monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 2

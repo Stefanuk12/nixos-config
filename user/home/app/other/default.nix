@@ -4,6 +4,7 @@
   imports = [
     ./claude_desktop.nix
     ./dolphin.nix
+    ./getmedia.nix
     ./jdownloader.nix
     ./kde_connect.nix
     ./libreoffice.nix

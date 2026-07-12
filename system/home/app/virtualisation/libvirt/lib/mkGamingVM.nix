@@ -79,7 +79,7 @@ in
 
   lookingGlass = {
     enable = true;
-    memSize = 67108864;  # 64MB → 1080p HDR / 1440p SDR
+    memSize = 134217728;  # 128MB → 4K HDR
   };
 
   network = {

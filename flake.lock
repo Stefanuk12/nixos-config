@@ -918,6 +918,26 @@
         "type": "github"
       }
     },
+    "jackbox-megapicker-patcher": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783889659,
+        "narHash": "sha256-s/Xc0cQDOMH92MCGV58rTiafbQw0o+HbF6WLooX+cZQ=",
+        "owner": "Stefanuk12",
+        "repo": "jackbox_megapicker_patcher",
+        "rev": "01d6f9522921c2458088c1c4ca9d6431ae51afb9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Stefanuk12",
+        "repo": "jackbox_megapicker_patcher",
+        "type": "github"
+      }
+    },
     "lanzaboote": {
       "inputs": {
         "crane": "crane",
@@ -1442,6 +1462,7 @@
         "dbd-tools": "dbd-tools",
         "home-manager": "home-manager",
         "hydenix": "hydenix",
+        "jackbox-megapicker-patcher": "jackbox-megapicker-patcher",
         "lanzaboote": "lanzaboote",
         "nix-colors": "nix-colors",
         "nix-flatpak": "nix-flatpak",

@@ -7,6 +7,9 @@ let
     hows-my-gpu = "sh " + ./../../../../system/home/app/virtualisation/scripts/hows-my-gpu.sh;
     dgpu-enable = "sh " + ./../../../../system/home/app/virtualisation/scripts/dgpu-enable.sh;
     dgpu-disable = "sh " + ./../../../../system/home/app/virtualisation/scripts/dgpu-disable.sh;
+
+    yt = "getmedia";
+    ytm = "getmedia -t mp3";
   };
 in
 {

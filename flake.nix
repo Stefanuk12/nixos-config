@@ -64,6 +64,9 @@
     steam-launch-options.inputs.nixpkgs.follows = "nixpkgs";
     osu-collect.url = "./packages/osu-collect";
     osu-collect.inputs.nixpkgs.follows = "nixpkgs";
+    # Patches the Jackbox Megapicker for multi-directory game installs + ASAR integrity bypass.
+    jackbox-megapicker-patcher.url = "github:Stefanuk12/jackbox_megapicker_patcher";
+    jackbox-megapicker-patcher.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

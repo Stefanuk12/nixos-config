@@ -31,7 +31,7 @@
       enable = true;
       user = "stefan";
       group = "kvm";
-      shmSize = 64;
+      shmSize = 128;
       spoofKvmfrIds = false;
     };
   };
