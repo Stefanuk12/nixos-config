@@ -7,7 +7,11 @@
 }:
 
 {
-  networking.interfaces.eth0.useDHCP = true;
+  # eth0 is a bridge port: it must not run DHCP itself, and NetworkManager
+  # must not manage it — its ethernet profile would pull eth0 out of br0,
+  # leaving the bridge with no uplink (VMs then get no DHCP/IP).
+  networking.interfaces.eth0.useDHCP = false;
+  networking.networkmanager.unmanaged = [ "eth0" ];
   networking.interfaces.br0.useDHCP = true;
   networking.bridges = {
     "br0" = {
