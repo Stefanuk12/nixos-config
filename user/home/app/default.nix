@@ -3,7 +3,7 @@
 {
   imports = [
     ./comms/discord.nix
-    ./browser/brave.nix
+    ./browser/helium.nix
     ./security
     ./utils/nixvim
     ./dev

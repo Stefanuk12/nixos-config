@@ -85,12 +85,19 @@ let
     '';
   };
 
-  braveDeferred = pkgs.writeShellApplication {
-    name = "brave-deferred";
-    runtimeInputs = with pkgs; [ glib brave ];
+  heliumDeferred = pkgs.writeShellApplication {
+    name = "helium-deferred";
+    runtimeInputs = with pkgs; [ glib helium systemd ];
     text = ''
+      # The portal has no WantedBy (HyDE never reaches graphical-session.target),
+      # so it's only ever D-Bus-activated by whichever client calls it first. A
+      # bare `gdbus wait` doesn't activate anything, so on boots where no other
+      # client pokes the portal it times out and the browser launches portal-less.
+      # Start it explicitly -- Type=dbus, so this blocks until the name is owned;
+      # the wait stays as a fallback in case the unit start is rejected.
+      systemctl --user start xdg-desktop-portal.service || true
       gdbus wait --session --timeout 30 org.freedesktop.portal.Desktop || true
-      exec brave "$@"
+      exec helium "$@"
     '';
   };
 in
@@ -124,7 +131,7 @@ in
     suppressWarnings = true;
     extraConfig = ''
       exec-once = kdeconnect-indicator
-      exec-once = [workspace 2 silent] ${braveDeferred}/bin/brave-deferred
+      exec-once = [workspace 2 silent] ${heliumDeferred}/bin/helium-deferred
       exec-once = systemctl --user start spotify-notify.service
       exec-once = systemctl --user start osu-dunst-suppress.service
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
@@ -147,7 +154,7 @@ in
 
       # Media keys: bare -> Spotify, SUPER -> the generic "system" player.
       # (HyDE's defaults bind bare `playerctl`, which grabs whatever MPRIS
-      # player is active -- usually a Brave/YouTube tab. Flip it: Spotify is
+      # player is active -- usually a Helium/YouTube tab. Flip it: Spotify is
       # the default, the active/other player moves under SUPER.)
       unbind = , XF86AudioPlay
       unbind = , XF86AudioPause

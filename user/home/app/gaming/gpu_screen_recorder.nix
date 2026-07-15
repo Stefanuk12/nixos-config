@@ -46,17 +46,16 @@ let
           | (map(select(.description | test("GIGABYTE"))) + .)[0].name // empty')
     # Each -a is its own track in the (mkv) clip. GSR can't auto-split every
     # app, so we name them: T1 full desktop mix (catch-all for games and
-    # anything unlisted), T2 Spotify, T3 "Chromium" — both Brave and Vesktop
-    # report this Electron name to PipeWire, so they intentionally share one
-    # track — and T4 the mic. Despite the docs, app names must match the exact
-    # casing PipeWire reports (lowercase "spotify", capitalised "Chromium");
-    # confirm live names with `--list-application-audio` while the app runs.
+    # anything unlisted), T2 Spotify, T3 browser + Vesktop — Vesktop reports
+    # the Electron name "Chromium" but Helium shows up as
+    # "alsa_playback.helium", so the track merges both (`|`) — and T4 the mic.
+    # Confirm live names with `--list-application-audio` while the app runs.
     exec gpu-screen-recorder \
       -w "''${monitor:-screen}" \
       -f 60 \
       -a default_output \
       -a "app:spotify" \
-      -a "app:Chromium" \
+      -a "app:Chromium|app:alsa_playback.helium" \
       -a default_input \
       -k h264 \
       -c mkv \

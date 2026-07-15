@@ -47,6 +47,10 @@
     rbw-fetch.url = "./packages/rbw-fetch";
     rbw-fetch.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Helium browser -- not in nixpkgs yet (PR pending), packaged from the upstream .deb
+    helium.url = "github:oxcl/nix-flake-helium-browser";
+    helium.inputs.nixpkgs.follows = "nixpkgs";
+
     # Other tools
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
@@ -99,6 +103,8 @@
       # openldap 2.6.x syncrepl tests flake on timing; disable so both NixOS and home-manager configs build.
       homeOverlays = [
         hydenix.overlays.default
+        # Exposes pkgs.helium for scripts that exec the browser directly
+        inputs.helium.overlays.default
         (final: prev: {
           openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
         })

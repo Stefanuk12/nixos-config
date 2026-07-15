@@ -58,5 +58,5 @@ Some other notable applications, I will not include them all.
 - [x] Secret Manager: [sops](https://github.com/Mic92/sops-nix)
 - [x] Password dmenu: [Bitwardewn Menu](https://github.com/NixOS/nixpkgs/blob/nixos-23.11/pkgs/applications/misc/bitwarden-menu)
 - [x] [Vesktop](https://mynixos.com/home-manager/options/programs.vesktop.vencord) 
-- [x] [Brave](https://github.com/NixOS/nixpkgs/blob/nixos-23.11/pkgs/applications/networking/browsers/brave/default.nix)
+- [x] [Helium](https://github.com/oxcl/nix-flake-helium-browser)
 - [x] [KDE Connect](https://wiki.nixos.org/wiki/KDE_Connect)
