@@ -21,10 +21,14 @@ in
 , memory ? 8
 , hugepages ? { enable = true; size = 2; unit = "M"; }   # 2MB on-demand pages
 , evdev ? [ ]                                             # direct host input passthrough; see win11-base for the shape
+, hardened ? true                                        # false = VR/perf profile: Hyper-V enlightenments ON,
+                                                          # hypervisor not hidden, stock qemu (better SteamVR compat)
+, usb ? [ ]                                               # USB passthrough by id, e.g. [ { vendor = 1356; product = 3294; } ]
 }:
 
 {
   inherit name uuid memory hugepages evdev;
+  usb = { devices = usb; };
 
   cpu = {
     cores = 6;
@@ -36,12 +40,15 @@ in
       # svm (AMD virt), topoext, invtsc (stable guest TSC).
       require = [ "svm" "topoext" "invtsc" ];
       # Concealment: hypervisor bit + spectre-mitigation MSRs that leak
-      # virt context. Add "rdtscp" here if using a patched kernel.
-      disable = [
+      # virt context. Add "rdtscp" here if using a patched kernel. Only for
+      # the hardened profile — the VR profile keeps the hypervisor bit visible
+      # so Windows enables its Hyper-V enlightenments (disabling it while
+      # advertising <hyperv> is contradictory and hurts guest performance).
+      disable = if hardened then [
         "vmx-vnmi" "hypervisor"
         "ssbd" "amd-ssbd" "virt-ssbd"
         "rdpid"
-      ];
+      ] else [ ];
     };
   };
 
@@ -52,8 +59,10 @@ in
     secureBoot = true;
   };
 
+  # When hardened = false (VR/perf profile) mkWindowsVM ignores emulator/smbios/
+  # acpiTable and falls back to the stock qemu with Hyper-V enlightenments on.
   hardening = {
-    enable = true;
+    enable = hardened;
     emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";
     smbios = "/var/lib/barely-metal/firmware/smbios.bin";
     acpiTable = "/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml";

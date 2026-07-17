@@ -15,6 +15,7 @@ let
     win11-rbxl   = import ./vms/win11-rblx.nix     { inherit inputs pkgs; };
     win11-rbxl-2 = import ./vms/win11-rblx-2.nix   { inherit inputs pkgs; };
     win11-office = import ./vms/win11-office.nix   { inherit inputs pkgs; };
+    gaming       = import ./vms/gaming.nix         { inherit inputs pkgs; };
   };
 
   # macOS variants — share ./lib/mkMacOSVM.nix as a domain builder.

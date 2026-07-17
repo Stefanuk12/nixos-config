@@ -75,6 +75,16 @@ let
   gpuStartBus = gpuCfg.startBus or 4;
   hasGpu      = gpuAddrs != [];
 
+  # USB device passthrough by vendor:product (e.g. a VR headset). Each entry:
+  #   { vendor = 1356; product = 3294; }   # ints — libvirt reads them base-0,
+  #                                          # so 1356/3294 → 0x054c/0x0cde
+  # NOTE: nixvirt's hostdev source has no startupPolicy, so the device must be
+  # present when the VM starts (turn a headset on first) or hotplug it later
+  # with `virsh attach-device`.
+  usbCfg      = cfg.usb or {};
+  usbDevices  = usbCfg.devices or [];
+  hasUsb      = usbDevices != [];
+
   # Looking Glass KVMFR shmem sizes: 1080p/1200p 32M (64M HDR), 1440p 64M
   # (128M HDR), 4K 128M (256M HDR). Ref: https://looking-glass.io/docs/B7/install/#ivshmem
   lg          = cfg.lookingGlass or {};
@@ -322,6 +332,19 @@ let
     alias.name = "hostdev${toString idx}";
   };
 
+  # USB hostdev: libvirt detaches the device from its host driver on start
+  # (managed) and reattaches on stop. No guest PCI address — it lands on the
+  # emulated xHCI bus.
+  mkUsbHostdev = u: {
+    mode = "subsystem";
+    type = "usb";
+    managed = u.managed or true;
+    source = {
+      vendor.id = u.vendor;
+      product.id = u.product;
+    };
+  };
+
   # ── Devices (assembled) ───────────────────────────────────
 
   mkEvdev = e:
@@ -406,8 +429,9 @@ let
       type = "spice"; port = "-1"; tlsPort = "-1";
       autoport = true; listen.type = "address";
     };
-  } // optionalAttrs hasGpu {
-    hostdev = indexed mkHostdev gpuAddrs;
+  } // optionalAttrs (hasGpu || hasUsb) {
+    hostdev = (optionals hasGpu (indexed mkHostdev gpuAddrs))
+              ++ (optionals hasUsb (map mkUsbHostdev usbDevices));
   } // extraDevices;
 
   # ── QEMU command line args ────────────────────────────────
