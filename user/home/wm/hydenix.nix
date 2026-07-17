@@ -1,6 +1,23 @@
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, lib, ... }:
 
 let
+  # Waybar: add live CPU-usage and RAM-usage modules to the right-hand pill.
+  # HyDE regenerates ~/.config/waybar/config.jsonc from the *active layout* on
+  # every waybar start (waybar.py copies the layout over config.jsonc when their
+  # hashes differ), so editing config.jsonc directly never survives a restart --
+  # the durable source is the layout file itself. hydenix links the layouts dir
+  # read-only from the hyde package; we rebuild that tree with the active layout
+  # (hyprdots/17) patched to insert the `cpu` and `memory` modules, then force
+  # hydenix's layouts symlink to point at the patched copy. The module
+  # *definitions* already resolve via includes.json (-> ~/.local/share/waybar/
+  # modules/{cpu,memory}.jsonc), so only the module names need adding.
+  waybarLayouts = pkgs.runCommandLocal "hyde-waybar-layouts-stats" { } ''
+    cp -r ${pkgs.hyde}/Configs/.local/share/waybar/layouts $out
+    chmod -R u+w $out
+    sed -i 's|"battery",|"battery",\n            "cpu",\n            "memory",|' \
+      $out/hyprdots/17.jsonc
+  '';
+
   # On-screen feedback for Spotify media keys -- playerctl itself is silent and
   # the desktop client never notifies. Subcommands: up/down (volume + progress
   # bar), mute (toggle, emulated via MPRIS volume since Spotify has no mute),
@@ -110,6 +127,9 @@ in
   home.packages = with pkgs; [
     networkmanagerapplet
   ];
+
+  # Point hydenix's read-only waybar layouts at our cpu/memory-patched copy.
+  home.file.".local/share/waybar/layouts".source = lib.mkForce waybarLayouts;
 
   xdg.userDirs.setSessionVariables = true;
 
