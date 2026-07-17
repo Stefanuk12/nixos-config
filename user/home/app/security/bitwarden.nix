@@ -1,9 +1,7 @@
 { pkgs, lib, ... }:
 
 let
-  # Pinentry that serves the rbw master password from a sops-decrypted file so
-  # `rbw unlock`/`rofi-rbw` never prompt. Refuses to serve it to rbw register
-  # prompts (client__id/client__secret) — use pinentry-qt for those instead.
+  # Pinentry that serves the rbw master password from a sops-decrypted file so `rbw unlock`/`rofi-rbw` never prompt, but refuses rbw register prompts (client__id/client__secret) — use pinentry-qt for those.
   pinentrySmart = pkgs.writeShellScriptBin "pinentry-smart" ''
     pw_file=/run/secrets/bw/master_password
     state="master"
@@ -40,8 +38,7 @@ in
     pinentrySmart
   ];
 
-  # Plain F1-F12 (no modifier): Hyprland doesn't grab them, rofi's defaults don't
-  # use them, and they can't clash with typed search input.
+  # Plain F1-F12 (no modifier): Hyprland doesn't grab them, rofi's defaults don't use them, and they can't clash with typed search input.
   xdg.configFile."rofi-rbw.rc".text = ''
     keybindings = F1:type:username:tab:password,F2:type:username,F3:type:password,F4:type:totp,F5:copy:password,F6:copy:username,F7:copy:totp,F8::menu,F9:sync
     menu-keybindings = F2:type,F5:copy

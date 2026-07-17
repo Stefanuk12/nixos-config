@@ -1,19 +1,4 @@
-# mkWindowsVM.nix — Declarative libvirt domain builder for Windows guests.
-#
-# Generates a full attribute set compatible with nixvirt's domain.writeXML.
-# Supports hardened (anti-detection) and default VM profiles.
-#
-# macOS guests use ./mkMacOSVM.nix instead — its quirks (Apple SMC, Penryn
-# vs Skylake, OSX-KVM OVMF) don't fit through this builder.
-#
-# References:
-#   - https://libvirt.org/formatdomain.html
-#   - https://github.com/Scrut1ny/AutoVirt/blob/main/modules/README.md
-#   - https://docs.kernel.org/virt/kvm/x86/msr.html
-#
-# Usage:
-#   let mkWindowsVM = import ./mkWindowsVM.nix;
-#   in mkWindowsVM { name = "my-vm"; uuid = "..."; memory = 16; ... }
+# Declarative libvirt domain builder for Windows guests, with hardened (anti-detection) and default profiles; macOS uses ./mkMacOSVM.nix.
 
 cfg:
 
@@ -60,8 +45,7 @@ let
 
   hard        = cfg.hardening or {};
   hardened    = hard.enable or false;
-  # kvm-pv-enforce-cpuid can crash the guest if it uses PV MSRs no longer
-  # advertised. Off by default — enable once the guest is confirmed stable.
+  # kvm-pv-enforce-cpuid can crash the guest on unadvertised PV MSRs, so it stays off until the guest is confirmed stable.
   enforcePvCpuid = hard.enforcePvCpuid or false;
   emulator    = if hardened && hard ? emulator
                 then hard.emulator
@@ -75,18 +59,12 @@ let
   gpuStartBus = gpuCfg.startBus or 4;
   hasGpu      = gpuAddrs != [];
 
-  # USB device passthrough by vendor:product (e.g. a VR headset). Each entry:
-  #   { vendor = 1356; product = 3294; }   # ints — libvirt reads them base-0,
-  #                                          # so 1356/3294 → 0x054c/0x0cde
-  # NOTE: nixvirt's hostdev source has no startupPolicy, so the device must be
-  # present when the VM starts (turn a headset on first) or hotplug it later
-  # with `virsh attach-device`.
+  # USB passthrough by integer vendor:product (libvirt reads base-0); the device must be present at VM start since nixvirt's hostdev has no startupPolicy.
   usbCfg      = cfg.usb or {};
   usbDevices  = usbCfg.devices or [];
   hasUsb      = usbDevices != [];
 
-  # Looking Glass KVMFR shmem sizes: 1080p/1200p 32M (64M HDR), 1440p 64M
-  # (128M HDR), 4K 128M (256M HDR). Ref: https://looking-glass.io/docs/B7/install/#ivshmem
+  # Looking Glass KVMFR shmem: 32M for 1080p/1200p, 64M for 1440p, 128M for 4K (double each for HDR).
   lg          = cfg.lookingGlass or {};
   lgEnabled   = lg.enable or false;
   lgSize      = lg.memSize or 67108864;
@@ -96,17 +74,14 @@ let
   tpmEnabled  = cfg.tpm or false;
   spiceEnabled = cfg.spice or false;
 
-  # evdev: input devices for direct host passthrough (lower latency than
-  # USB; only needed when Looking Glass Host isn't on the guest). Each:
-  #   { dev = "/dev/input/eventN"; grab = "all"; grabToggle = "ctrl-ctrl"; repeat = true; }
+  # evdev input devices passed straight through to the host for lower latency than USB.
   evdevInputs = cfg.evdev or [];
 
   extraDevices   = cfg.extraDevices or {};
   extraQemuArgs  = cfg.extraQemuArgs or [];
 
   # ── Memory backing ────────────────────────────────────────
-  # Hugepages cut TLB misses for gaming VMs. null hpSize uses the host
-  # default (2MB); for 1GB pages set size = 1 plus host boot.kernelParams.
+  # Hugepages cut TLB misses; null hpSize uses the host default (2MB), while 1GB pages need size = 1 plus host boot.kernelParams.
 
   memoryBackingSection = optionalAttrs hpEnabled {
     memoryBacking = {
@@ -119,9 +94,7 @@ let
   };
 
   # ── CPU pinning ──────────────────────────────────────────
-  # pinTo maps vCPUs to host cores in order:
-  #   pinTo = [ 2 10 3 11 ] → vCPU0→core2, vCPU1→core10, ...
-  # hostCores are reserved for emulator + iothread overhead.
+  # pinTo maps vCPUs to host cores in order; hostCores are reserved for emulator + iothread overhead.
 
   pinningSection = optionalAttrs hasPinning {
     vcpu = { placement = "static"; count = vcpuCount; };
@@ -136,9 +109,7 @@ let
   };
 
   # ── OS / firmware ─────────────────────────────────────────
-  # Ref: https://libvirt.org/formatdomain.html#operating-system-booting
-  # Note: domain UUID is NOT the guest SMBIOS UUID — spoof SMBIOS
-  #       separately via qemu:commandline -smbios type=1,uuid=...
+  # Domain UUID is NOT the guest SMBIOS UUID — spoof SMBIOS separately via qemu:commandline -smbios type=1,uuid=...
 
   osSection = {
     type = "hvm";
@@ -160,7 +131,6 @@ let
   };
 
   # ── CPU topology + features ──────────────────────────────
-  # Ref: https://libvirt.org/formatdomain.html#cpu-model-and-topology
 
   cpuSection = {
     mode = "host-passthrough";
@@ -177,10 +147,7 @@ let
   };
 
   # ── Clock ─────────────────────────────────────────────────
-  # Ref: https://libvirt.org/formatdomain.html#time-keeping
-  # Hardened: native TSC, all paravirtual clocks off (kvmclock/hypervclock
-  # leak the hypervisor; hpet kept, rtc/pit off). Default: standard Windows
-  # timers with Hyper-V enlightenments.
+  # Hardened uses native TSC with paravirtual clocks off (kvmclock/hypervclock leak the hypervisor); default uses standard Windows timers with Hyper-V enlightenments.
 
   clockSection = if hardened then {
     offset = "localtime";
@@ -203,20 +170,7 @@ let
   };
 
   # ── Features ──────────────────────────────────────────────
-  # Ref: https://libvirt.org/formatdomain.html#hypervisor-features
-  # Hardened: disable ALL Hyper-V enlightenments — on "bare metal" they're
-  # flagged as suspicious by anti-cheats.
-  #
-  # vendor_id: state=on + 12-char string fixes NVIDIA Code 43 on unpatched
-  #   KVM (state=off when patched); it's the hypervisor vendor string, need
-  #   not match the CPU.
-  #
-  # kvm.hidden:   hides KVM from CPUID-based MSR discovery
-  # pmu:          disables Performance Monitoring Unit
-  # vmport:       disables VMware I/O backdoor (port 0x5658)
-  # msrs.unknown: #GP(0) on unhandled RDMSR/WRMSR (blocks MSR fingerprinting)
-  # smm:          required for UEFI Secure Boot (OVMF SMM_REQUIRE)
-  # ps2:          removes the virtual PS/2 controller
+  # Hardened disables all Hyper-V enlightenments and hides KVM/PMU/vmport/PS2 to dodge anti-cheat fingerprinting, while vendor_id state=on fixes NVIDIA Code 43 on unpatched KVM.
 
   featuresSection = if hardened then {
     acpi = {}; apic = {};
@@ -265,18 +219,11 @@ let
       frequencies.state = true;
     };
     vmport.state = false;
+    smm.state = secureBoot;
   };
 
   # ── Device builders ───────────────────────────────────────
-  # Ref: https://libvirt.org/formatdomain.html#hard-drives-floppy-disks-cdroms
-  #
-  # Disk bus options for anti-detection:
-  #   "sata"  — safest, no virtio fingerprint
-  #   "nvme"  — more realistic for modern systems
-  #   "virtio" — best performance, but detectable
-  #
-  # io options: "io_uring" (modern, best async), "native" (libaio),
-  #             "threads" (for block devices)
+  # Disk bus for anti-detection: sata (safest, no virtio fingerprint), nvme (realistic), or virtio (fastest but detectable).
 
   mkDisk = idx: d: {
     type = "file";
@@ -332,9 +279,7 @@ let
     alias.name = "hostdev${toString idx}";
   };
 
-  # USB hostdev: libvirt detaches the device from its host driver on start
-  # (managed) and reattaches on stop. No guest PCI address — it lands on the
-  # emulated xHCI bus.
+  # USB hostdev lands on the emulated xHCI bus; managed=true detaches it from the host driver on start and reattaches on stop.
   mkUsbHostdev = u: {
     mode = "subsystem";
     type = "usb";
@@ -380,13 +325,12 @@ let
         address = { type = "pci"; domain = 0; bus = 3; slot = 0; function = 0; }; }
     ];
 
-    # CONCEALMENT: no virtual video device — prevents hypervisor detection
-    # via virtualised GPU vendor IDs. Required for Looking Glass.
+    # No virtual video device — avoids virtualised-GPU vendor IDs and is required for Looking Glass.
     video.model.type = "none";
 
     watchdog = { model = "itco"; action = "reset"; };
 
-    # CONCEALMENT: disable virtio balloon — no dynamic RAM / no virtio fingerprint
+    # No virtio balloon — no dynamic RAM and no virtio fingerprint.
     memballoon.model = "none";
 
   } // optionalAttrs (net != null) {
@@ -435,23 +379,17 @@ let
   } // extraDevices;
 
   # ── QEMU command line args ────────────────────────────────
-  # Ref: https://www.qemu.org/docs/master/system/qemu-manpage.html
-  #
-  # kvm-pv-enforce-cpuid: by default KVM lets the guest use PV MSRs even
-  #   when kvm=off hides the CPUID leaves; this enforces CPUID so probing an
-  #   absent PV MSR injects #GP, closing an MSR-based KVM detection vector.
-  #   Ref: https://docs.kernel.org/virt/kvm/x86/msr.html
+  # kvm-pv-enforce-cpuid makes probing an absent PV MSR inject #GP even when kvm=off, closing an MSR-based KVM detection vector.
 
   mkArg = v: { value = v; };
 
-  # CONCEALMENT: enforce CPUID-gated PV MSR access (opt-in, can cause crashes)
+  # Enforce CPUID-gated PV MSR access (opt-in, can crash the guest).
   kvmEnforceArgs = optionals (hardened && enforcePvCpuid) [
     (mkArg "-cpu")
     (mkArg "host,kvm-pv-enforce-cpuid=on")
   ];
 
-  # Spoof SMBIOS (entire binary dump from host hardware)
-  # Ref: https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.9.0.pdf
+  # Spoof SMBIOS from a binary dump of the host hardware.
   smbiosArgs = optionals (hardened && hard ? smbios) [
     (mkArg "-smbios")
     (mkArg "file=${hard.smbios}")
@@ -468,9 +406,7 @@ let
       (mkArg "file=${hard.acpiBattery}")
     ];
 
-  # IVSHMEM for Looking Glass (KVMFR kernel module)
-  # The kernel module provides DMA GPU transfers via shared memory.
-  # Ref: https://looking-glass.io/docs/B7/install/#ivshmem
+  # IVSHMEM for Looking Glass — the KVMFR kernel module provides DMA GPU transfers via shared memory.
   lgArgs = optionals lgEnabled [
     (mkArg "-device")
     (mkArg ''{"driver":"ivshmem-plain","id":"shmem0","memdev":"looking-glass"}'')
@@ -486,9 +422,7 @@ let
   };
 
   # ── QEMU overrides (SSD spoofing for anti-detection) ────
-  # Ref: https://libvirt.org/drvqemu.html#overriding-properties-of-qemu-devices
-  # SSD-backed .qcow2 only. rotation_rate=1 marks it non-rotational;
-  # discard_granularity=512 is a realistic SSD value (0 looks suspicious).
+  # SSD-backed qcow2 only: rotation_rate=1 marks it non-rotational and discard_granularity=512 is a realistic value.
 
   qemuOverrideSection = optionalAttrs hardened {
     qemu-override.device = {
@@ -501,10 +435,7 @@ let
   };
 
   # ── Misc (lifecycle, power management) ───────────────────
-  # Ref: https://libvirt.org/formatdomain.html#power-management
-  #
-  # CONCEALMENT: S3/S4 sleep states — real hardware supports these;
-  # their absence can be a detection vector.
+  # S3/S4 sleep states are advertised because real hardware supports them and their absence is a detection vector.
 
   miscSection = {
     on_poweroff = "destroy";

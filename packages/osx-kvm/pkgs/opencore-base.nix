@@ -1,13 +1,4 @@
-# OpenCore artefacts from a single upstream release. `mkEfi { drivers = [...]; }`
-# builds an EFI/{BOOT,OC} tree; mk-config-plist.nix mirrors the same list into
-# UEFI.Drivers so EFI/OC/Drivers/ and the plist can't drift. `ocvalidate` is
-# version-pinned in lockstep since a mismatched checker silently misses issues.
-#
-# source = "opencore" (default) uses vanilla acidanthera/OpenCorePkg;
-# source = "darwinOCPkg" uses royalgraphx's QEMU/KVM repackaging, but its
-# Tools/Resources are placeholders and it lacks AudioDxe.efi, so those still
-# come from the matching upstream release + OcBinaryData (resolver falls through).
-# Opt in per scope with `self.opencore.override { source = "..."; }`.
+# OpenCore artefacts from a single upstream release (mkEfi builds the EFI/{BOOT,OC} tree, mk-config-plist.nix mirrors the driver list into UEFI.Drivers), where source = "opencore" is vanilla OpenCorePkg and "darwinOCPkg" is royalgraphx's repackaging that falls through to upstream + OcBinaryData for its missing bits.
 
 { lib, fetchzip, runCommand
 , source ? "opencore"
@@ -16,9 +7,7 @@
 assert lib.elem source [ "opencore" "darwinOCPkg" ];
 
 let
-  # Each source pins its own ocVersion + matching sha so ocvalidate, Tools/ and
-  # the fallback stay in lockstep. For darwinOCPkg, its `version` file ("Derived
-  # from OpenCorePkg X.Y.Z") is the source of truth — bump with darwinOcRev below.
+  # Each source pins its own ocVersion + matching sha so ocvalidate, Tools/ and the fallback stay in lockstep; for darwinOCPkg the `version` file ("Derived from OpenCorePkg X.Y.Z") is the source of truth, bumped with darwinOcRev below.
   pinned = {
     opencore = {
       ocVersion       = "1.0.7";
@@ -44,16 +33,14 @@ let
     sha256 = "1dj3mzcbch8m6h88w872bp5anjv95sdz7x8fpcax1n8qkl381407";
   };
 
-  # DarwinOCPkg — pinned by commit; bump with pinned.darwinOCPkg.ocVersion above.
-  # Only fetched when source = "darwinOCPkg".
+  # DarwinOCPkg pinned by commit (bump with pinned.darwinOCPkg.ocVersion above), only fetched when source = "darwinOCPkg".
   darwinOcRev = "82a28361b61d4f664fb6e4f34789abce22bc3088";  # main @ 2025-06-03
   darwinOcRelease = fetchzip {
     url = "https://github.com/royalgraphx/DarwinOCPkg/archive/${darwinOcRev}.tar.gz";
     sha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";  # first build prints real hash
   };
 
-  # Resolution order for EFI files/Drivers: primary, then OpenCorePkg release
-  # as fallback (e.g. AudioDxe.efi isn't in DarwinOCPkg's Drivers/).
+  # Resolution order for EFI files/Drivers: primary, then OpenCorePkg release as fallback (e.g. AudioDxe.efi isn't in DarwinOCPkg's Drivers/).
   primaryEfi  = if source == "darwinOCPkg"
                 then "${darwinOcRelease}/X64/EFI"
                 else "${ocRelease}/X64/EFI";
@@ -107,8 +94,7 @@ let
       $out/bin/ocvalidate
   '';
 
-  # DarwinOCPkg ships its own QEMU-targeted Sample.plist; upstream's lives at
-  # the same path inside the OpenCorePkg release zip.
+  # DarwinOCPkg ships its own QEMU-targeted Sample.plist; upstream's lives at the same path inside the OpenCorePkg release zip.
   samplePlist =
     if source == "darwinOCPkg"
     then "${darwinOcRelease}/Docs/Sample.plist"

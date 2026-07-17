@@ -1,6 +1,4 @@
-# Builder for Acidanthera kexts (Lilu plugins, VirtualSMC, …).
-# Each release zip ships the bundle at the root, or under `Kexts/` for
-# multi-kext releases (VirtualSMC + SMC plugins).
+# Builder for Acidanthera kexts (Lilu plugins, VirtualSMC, …); each release zip ships the bundle at the root, or under `Kexts/` for multi-kext releases (VirtualSMC + SMC plugins).
 
 { fetchzip, runCommand }:
 

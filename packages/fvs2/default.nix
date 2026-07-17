@@ -1,5 +1,4 @@
-# Mirrors nixpkgs PR #511730 (https://github.com/NixOS/nixpkgs/pull/511730).
-# Drop this directory once that PR lands in our nixpkgs pin.
+# Mirrors nixpkgs PR #511730; drop this directory once it lands in our nixpkgs pin.
 {
   lib,
   buildGoModule,

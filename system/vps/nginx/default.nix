@@ -1,17 +1,7 @@
 { lib, config, ... }:
 
 let
-  # Enforce that connections are genuinely proxied through *our* Cloudflare zone.
-  #
-  # Cloudflare per-hostname Authenticated Origin Pulls (mTLS): Cloudflare presents
-  # our custom client certificate (./cf-aop-ca.pem, uploaded to the zone) on every
-  # origin pull. The firewall already limits 80/443 to Cloudflare IPs, but those IPs
-  # are shared by *all* tenants — including arbitrary Workers — so the cert is what
-  # actually proves the traffic came through our zone and not someone else's.
-  #
-  # ssl_verify_client = on  -> reject any TLS connection without our client cert.
-  # The Cf-Worker block is defence-in-depth: Cloudflare sets this header when a
-  # Worker issues the subrequest, so we 403 those outright.
+  # Cloudflare per-hostname Authenticated Origin Pull (mTLS): reject any origin-pull without our client cert (./cf-aop-ca.pem), since the CF-IP firewall allowlist is shared by all tenants; the Cf-Worker 403 is defence-in-depth.
   mtlsOriginPull = ''
     ssl_client_certificate ${./cf-aop-ca.pem};
     ssl_verify_client on;
@@ -55,7 +45,7 @@ in
     "donate.petrovic.foo" = {
       root = "/var/www/donate.petrovic.foo";
       forceSSL = true;
-      enableACME = true;
+      useACMEHost = "petrovic.foo";
       extraConfig = mtlsOriginPull;
     };
   };

@@ -3,9 +3,7 @@
 let
   cfg = config.programs.dbd.reshade;
 
-  # =====================================================================
   # Source pins
-  # =====================================================================
 
   reshade-version = "6.3.3";
 
@@ -42,9 +40,7 @@ let
     hash = "sha256-NXirUblL5gs7hN+0ZpYo7C+ItUVgNDK25+nSj1eMaN8=";
   };
 
-  # =====================================================================
   # Settings: defaults merged with user overrides
-  # =====================================================================
 
   presetPath =
     if cfg.defaultPreset != null then
@@ -102,9 +98,7 @@ let
     lib.types.str
   ];
 
-  # =====================================================================
   # Patcher: merges declared settings into an existing ReShade.ini
-  # =====================================================================
 
   patcher-py = pkgs.writeText "patch-reshade-ini.py" ''
     """Merge declared settings into an existing ReShade.ini.
@@ -199,9 +193,7 @@ let
     exec ${pkgs.python3}/bin/python3 ${patcher-py} "$INI_PATH" ${overrides-json}
   '';
 
-  # =====================================================================
   # Install / uninstall scripts
-  # =====================================================================
 
   install-reshade-dbd = pkgs.writeShellScriptBin "install-reshade-dbd" ''
     set -euo pipefail
@@ -357,8 +349,7 @@ in
       patch-reshade-ini
     ];
 
-    # Re-apply declared ReShade settings on every switch. No-op if
-    # ReShade isn't installed yet (the patcher prints a hint and exits 0).
+    # Re-apply declared ReShade settings on every switch; no-op if ReShade isn't installed yet (the patcher prints a hint and exits 0).
     home.activation.patchReshadeIni = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD ${patch-reshade-ini}/bin/patch-reshade-ini || true
     '';

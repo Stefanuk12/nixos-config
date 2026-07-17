@@ -216,8 +216,7 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ patch-steam-launch-options ];
 
-    # Try on every switch — usually a no-op while Steam runs, but catches
-    # the case where it isn't.
+    # Try on every switch — usually a no-op while Steam runs, but catches the case where it isn't.
     home.activation.patchSteamLaunchOptions =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD ${patch-steam-launch-options}/bin/patch-steam-launch-options || true
@@ -234,8 +233,7 @@ in
       Unit.Description = "Apply declarative Steam launch options";
       Service = {
         Type = "oneshot";
-        # The patcher itself blocks until Steam has been gone for 5
-        # stable seconds (or 3-minute hard timeout).
+        # The patcher itself blocks until Steam has been gone for 5 stable seconds (or 3-minute hard timeout).
         TimeoutStartSec = "300s";
         ExecStart =
           "${patch-steam-launch-options}/bin/patch-steam-launch-options";

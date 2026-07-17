@@ -1,6 +1,4 @@
-# Plist-only kext (RehabMan, GPLv2). Its IOKitPersonalities steal Apple's MCE
-# matching to keep AppleIntelMCEReporter off non-ECC guest RAM. Generated
-# inline to avoid depending on third-party hosts.
+# Plist-only kext (RehabMan, GPLv2) whose IOKitPersonalities steal Apple's MCE matching to keep AppleIntelMCEReporter off non-ECC guest RAM, generated inline to avoid depending on third-party hosts.
 
 { writeText, runCommand }:
 

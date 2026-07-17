@@ -44,11 +44,7 @@
             zlib
           ];
 
-          # 1. Force vendored realm-core to link system OpenSSL/Zlib instead of
-          #    fetching prebuilt blobs (build sandbox has no network).
-          # 2. Re-emit the realm archives after the bridge: cxx_build emits its
-          #    link directive after build.rs's `-lrealm`, so ld needs a second
-          #    pass to resolve the bridge's references to realm symbols.
+          # Force vendored realm-core to link system OpenSSL/Zlib instead of fetching prebuilt blobs (sandbox has no network); re-emit the realm archives after the bridge so ld can resolve its references to realm symbols on a second pass.
           postPatch = ''
             substituteInPlace build.rs \
               --replace-fail '.define("REALM_BUILD_LIB_ONLY", "ON")' \
@@ -57,12 +53,10 @@
                 'cxx_builder.compile("osu_realm_bridge"); println!("cargo:rustc-link-lib=static=realm"); println!("cargo:rustc-link-lib=static=realm-parser");'
           '';
 
-          # buildRustPackage's default configurePhase calls cmake on the workspace
-          # root; realm-core is configured by the Rust build.rs via the cmake crate.
+          # buildRustPackage's default configurePhase calls cmake on the workspace root; realm-core is configured by the Rust build.rs via the cmake crate.
           dontUseCmakeConfigure = true;
 
-          # No tests run during package build (the realm bridge needs a writable
-          # filesystem layout that the sandbox doesn't expose the same way).
+          # No tests run during package build (the realm bridge needs a writable filesystem layout the sandbox doesn't expose the same way).
           doCheck = false;
 
           meta = {

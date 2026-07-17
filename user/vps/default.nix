@@ -8,6 +8,7 @@
 {
   imports = [
     ../common/app/shell/sh.nix
+    ../common/app/sops.nix
     ../common/app/git.nix
   ];
 

@@ -1,12 +1,4 @@
-# VM configuration — consumed by mkWindowsVM (domain XML) and the qemu hook (CPU governor).
-# This file is pure data; domains.nix handles the actual building.
-#
-# Plain Office workload VM:
-#   - no hardening (no SMBIOS/ACPI/CPU concealment, stock qemu)
-#   - no GPU passthrough (display via SPICE + virtual QXL)
-#   - no CPU pinning / hugepages / governor switching
-# inputs/pkgs are kept in the signature for consistency with other VM
-# configs even though this file no longer uses them.
+# Plain Office workload VM (no hardening, no GPU passthrough, no pinning/hugepages/governor) — pure data consumed by mkWindowsVM; inputs/pkgs stay in the signature for consistency though unused.
 
 { inputs, pkgs }:
 
@@ -36,8 +28,7 @@
     secureBoot = true;   # Windows 11 requirement
   };
 
-  # Hardening fully disabled — mkVM will use the default nixpkgs qemu
-  # emulator and skip SMBIOS / ACPI / MSR / clock concealment.
+  # Hardening fully disabled — mkVM uses the default nixpkgs qemu and skips SMBIOS/ACPI/MSR/clock concealment.
   hardening.enable = false;
 
   disks = [{
@@ -47,13 +38,10 @@
     boot = 1;
   }];
 
-  # Attach a Windows ISO here on first install, e.g.
-  # cdroms = [ { file = "/var/lib/libvirt/images/Win11_24H2_English_x64.iso"; } ];
+  # Attach a Windows ISO here on first install (cdroms = [ { file = ".../Win11_24H2_English_x64.iso"; } ]).
   cdroms = [ ];
 
-  # No GPU passthrough. mkVM forces video.model.type = "none" (for Looking
-  # Glass / concealment), so override via extraDevices — merged last, it
-  # replaces the top-level `video` with a normal QXL + SPICE display.
+  # No GPU passthrough; mkVM forces video.model.type = "none", so extraDevices (merged last) restores a normal QXL + SPICE display.
   extraDevices = {
     video.model = {
       type = "qxl";
@@ -85,9 +73,7 @@
   # Governor switching left off — Office isn't perf-critical.
   governor.enable = false;
 
-  # mkVM only emits <vcpu count> with pinning, but <topology> always
-  # declares cores×threads vCPUs; without pinning libvirt defaults <vcpu>
-  # to 1 and rejects the mismatch. Declare the total (4 cores × 2 = 8).
+  # mkVM only emits <vcpu count> with pinning, but <topology> always declares cores×threads, so declare the total (4×2=8) or libvirt rejects the mismatch.
   extraAttrs = {
     vcpu = { placement = "static"; count = 8; };
   };

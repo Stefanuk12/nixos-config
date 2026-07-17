@@ -1,5 +1,4 @@
-# Render a Nix value to its UE-ini string form. `context` prefixes the
-# error thrown on an unsupported type.
+# Render a Nix value to its UE-ini string form; `context` prefixes the error thrown on an unsupported type.
 context: v:
 if builtins.isBool v then
   (if v then "True" else "False")

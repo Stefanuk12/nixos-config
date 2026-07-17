@@ -115,11 +115,7 @@
             propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
           });
         })
-        # Spotify: bump ahead of nixpkgs to the latest stable snap. To refresh,
-        # find the newest stable rev/version then prefetch its hash:
-        #   curl -H 'Snap-Device-Series: 16' https://api.snapcraft.io/v2/snaps/info/spotify \
-        #     | jq -r '.["channel-map"][] | select(.channel.name=="stable" and .channel.architecture=="amd64") | "\(.version) \(.revision)"'
-        #   nix store prefetch-file --hash-type sha512 https://api.snapcraft.io/api/v1/snaps/download/pOBIoZ2LrCB3rDohMxoYGnbN14EHOgD7_<rev>.snap
+        # Spotify bumped ahead of nixpkgs to the latest stable snap (refresh via the snapcraft info API + nix store prefetch-file).
         (final: prev: {
           spotify = prev.spotify.overrideAttrs (_: rec {
             version = "1.2.92.147.g5b8f9367";

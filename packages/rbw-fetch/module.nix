@@ -27,8 +27,7 @@ let
         description = "Alias for `outputPath` (mirrors sops-nix's `.path`).";
       };
 
-      # Read-only name of the systemd unit that produces this secret. Use to
-      # wire downstream Requires=/After= without hardcoding "rbw-fetch-<name>.service".
+      # Read-only name of the systemd unit that produces this secret, for wiring downstream Requires=/After= without hardcoding "rbw-fetch-<name>.service".
       serviceName = lib.mkOption {
         type = lib.types.str;
         readOnly = true;

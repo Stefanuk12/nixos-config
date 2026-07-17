@@ -1,8 +1,7 @@
 { pkgs, ... }:
 
 let
-  # Spotify's Linux client never emits "now playing" notifications, so watch
-  # its MPRIS interface and post one ourselves on each track change.
+  # Spotify's Linux client never emits "now playing" notifications, so watch its MPRIS interface and post one ourselves on each track change.
   spotifyNotify = pkgs.writeShellApplication {
     name = "spotify-notify";
     runtimeInputs = with pkgs; [
@@ -17,8 +16,7 @@ let
       cover="$cache/cover.jpg"
       last=""
 
-      # trackid only changes per song, so play/pause toggles collapse into the
-      # dedupe below and never re-notify.
+      # trackid only changes per song, so play/pause toggles collapse into the dedupe below and never re-notify.
       playerctl -p spotify --follow metadata --format '{{mpris:trackid}}' 2>/dev/null \
         | while read -r trackid; do
             [ -z "$trackid" ] && continue

@@ -11,10 +11,7 @@
   ];
 
   home.packages = [
-    # nixpkgs pins Vinegar 1.9.3, which mangles "Edit in Studio"
-    # (roblox-studio:1…) deeplinks. 1.9.4 ships the upstream fix, so bump to it
-    # instead of carrying a local patch. Drop this override once nixpkgs ships
-    # 1.9.4+.
+    # nixpkgs pins Vinegar 1.9.3 which mangles "Edit in Studio" deeplinks; bump to 1.9.4 for the upstream fix and drop this override once nixpkgs ships 1.9.4+.
     (pkgs.vinegar.overrideAttrs (old: rec {
       version = "1.9.4";
       src = pkgs.fetchFromGitHub {
@@ -25,10 +22,7 @@
       };
       vendorHash = "sha256-kS8awIGI5xHY4i7hvKMLcZKdMiFaoirokd3TSpMbC8c=";
 
-      # 1.9.4 moved the default wine-root pin from internal/config/values.go to
-      # internal/config/config.go, so the nixpkgs postPatch no longer applies.
-      # Re-bake the same packaged wine (recovered from buildInputs) into the new
-      # location; keep the dirs import since config.go still uses it elsewhere.
+      # 1.9.4 moved the wine-root pin to internal/config/config.go, so re-bake the packaged wine (from buildInputs) into the new location since the nixpkgs postPatch no longer applies.
       postPatch =
         let
           wine = pkgs.lib.findFirst (p: pkgs.lib.hasPrefix "wine64-" (p.name or "")) (

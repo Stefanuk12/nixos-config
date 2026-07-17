@@ -1,8 +1,6 @@
-# iMac19,1 SMBIOS profile. Conservative fallback without the MP7,1 MCE/Cryptex
-# baggage; useful for bisecting whether a problem is SMBIOS-driven.
+# iMac19,1 SMBIOS profile: conservative fallback without the MP7,1 MCE/Cryptex baggage, useful for bisecting whether a problem is SMBIOS-driven.
 #
-# No AppleMCEReporterDisabler: iMac19,1's board-id isn't in
-# AppleIntelMCEReporter's match list, so the disabler would be a no-op.
+# No AppleMCEReporterDisabler: iMac19,1's board-id isn't in AppleIntelMCEReporter's match list, so the disabler would be a no-op.
 
 { kexts }:
 

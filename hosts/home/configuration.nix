@@ -27,12 +27,7 @@ in
   networking.hostName = lib.mkDefault hostName;
   networking.networkmanager.enable = true;
 
-  # All real interfaces here are externally-managed bridges (br0/docker0/virbr/
-  # pia-br), so NetworkManager can't infer internet reachability on its own and
-  # parks connectivity at "limited" (connected, local only). Apps that trust
-  # NM's verdict (e.g. the Spotify desktop client) then force themselves
-  # offline despite working internet. Give NM a reachable connectivity-check
-  # URI so it actually probes and reports "full".
+  # All real interfaces are externally-managed bridges, so NetworkManager parks connectivity at "limited" and apps like Spotify go offline; give it a reachable connectivity-check URI so it probes and reports "full".
   environment.etc."NetworkManager/conf.d/connectivity.conf".text = ''
     [connectivity]
     uri=http://nmcheck.gnome.org/check_network_status.txt

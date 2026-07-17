@@ -33,8 +33,7 @@ in
     android-tools
   ];
 
-  # Route Android's bridge traffic through the pia netns: cross via the transit veth, source-route waydroid0's subnet, then NAT out pia0 in the netns.
-  # The "to <androidNet> lookup main" rule is load-bearing: without it the host's replies from ${androidGw} also match the source-route and break dnsmasq/DHCP.
+  # Route Android's bridge traffic through the pia netns (transit veth, source-route waydroid0's subnet, NAT out pia0); the "to <androidNet> lookup main" rule is load-bearing or the host's ${androidGw} replies match the source-route and break dnsmasq/DHCP.
   systemd.services.waydroid-pia-route = {
     description = "Route Android bridge traffic through pia netns";
     after = [ "pia.service" "waydroid-container.service" ];

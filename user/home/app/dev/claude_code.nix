@@ -1,10 +1,7 @@
 { pkgs, lib, config, ... }:
 
 let
-  # Declarative defaults. These are installed as a *writable* copy (see the
-  # activation script below) so Claude Code can mutate settings.json at runtime
-  # (e.g. `/model`). If home-manager owned the file directly it would be a
-  # read-only Nix store symlink and runtime changes would fail with EROFS.
+  # Declarative defaults installed as a *writable* copy (see the activation script) so Claude Code can mutate settings.json at runtime, which a read-only Nix store symlink would break with EROFS.
   defaultSettings = {
     theme = "dark";
     model = "claude-opus-4-8";
@@ -36,9 +33,7 @@ in
     enable = true;
     package = pkgs.claude-code;
 
-    # Intentionally NOT setting `settings` here: that would make
-    # ~/.claude/settings.json a read-only store symlink and break runtime
-    # changes like `/model`. We seed a writable copy below instead.
+    # Intentionally NOT setting `settings` here (that would make settings.json a read-only store symlink); we seed a writable copy below instead.
 
     # memory.text = ''
     #   # Personal coding preferences
@@ -54,10 +49,7 @@ in
     # };
   };
 
-  # Seed a writable settings.json with our defaults, but only if one does not
-  # already exist. After that, Claude Code owns the file and runtime edits
-  # (model, theme, etc.) persist. To re-apply changed defaults from Nix, delete
-  # ~/.claude/settings.json and rebuild.
+  # Seed a writable settings.json only if none exists; after that Claude Code owns it, so delete ~/.claude/settings.json and rebuild to re-apply changed Nix defaults.
   home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     _claudeSettings="${config.home.homeDirectory}/.claude/settings.json"
     if [ ! -e "$_claudeSettings" ]; then

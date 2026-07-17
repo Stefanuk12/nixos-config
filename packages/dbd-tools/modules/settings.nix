@@ -467,8 +467,7 @@ in
       dbd-launch
     ];
 
-    # Re-apply on every switch. DBD overwrites these on save, so you can also
-    # run `patch-dbd-settings` manually after closing the game.
+    # Re-apply on every switch; DBD overwrites these on save, so you can also run `patch-dbd-settings` manually after closing the game.
     home.activation.patchDbdSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD ${patch-dbd-settings}/bin/patch-dbd-settings || true
     '';

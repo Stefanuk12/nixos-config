@@ -42,8 +42,7 @@
 
   environment.systemPackages = with pkgs; [
     python313Packages.virt-firmware
-    # Wraps fetch-macOS-v2.py + qemu-img init so a fresh OSX-KVM dir
-    # can be bootstrapped declaratively. From the osx-kvm flake.
+    # Wraps fetch-macOS-v2.py + qemu-img init (from the osx-kvm flake) to bootstrap a fresh OSX-KVM dir declaratively.
     inputs.osx-kvm.packages.${pkgs.stdenv.hostPlatform.system}.fetch-basesystem
   ];
 }

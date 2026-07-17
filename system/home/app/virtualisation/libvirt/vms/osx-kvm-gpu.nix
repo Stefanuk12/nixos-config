@@ -2,23 +2,13 @@ args@{ pkgs, osxKvm, ... }:
 
 let
   # ── OpenCore source override (DarwinOCPkg) ─────────────────────────────────
-  # Switch this VM's OpenCore image to royalgraphx/DarwinOCPkg, a QEMU/KVM
-  # repackaging of OpenCorePkg 1.0.4 with HFS+/partition drivers curated.
-  # Done via overrideScope so mkImage picks it up; other scope members are
-  # unaffected. The no-GPU sibling stays on vanilla OpenCorePkg.
-  #
-  # Shadows the function-arg `osxKvm` via the @args alias; the rest of the
-  # module references `osxKvm` unchanged.
+  # Switch this VM's OpenCore image to royalgraphx/DarwinOCPkg (OpenCorePkg 1.0.4 repackaged with curated HFS+/partition drivers) via overrideScope, shadowing the function-arg osxKvm.
   osxKvm = args.osxKvm.overrideScope (final: prev: {
     opencore = prev.opencore.override { source = "darwinOCPkg"; };
   });
 
-  # ===========================================================================
-  # OpenCore / config.plist
-  # ===========================================================================
-
-  # mkMacOSVM/mkImage expect `drivers` as a sibling arg, not on the profile
-  # — pull it back out so the call site can pass it via plain `inherit`.
+  # ── OpenCore / config.plist ──
+  # mkMacOSVM/mkImage expect `drivers` as a sibling arg, so pull it back out of the profile for a plain `inherit`.
   inherit (profile) drivers;
 
   # --- ACPI table sources --------------------------------------------------
@@ -214,18 +204,14 @@ let
     };
   };
 
-  # 12 vCPUs pinned 1:1 onto the same cores the Windows VMs use; host keeps
-  # 0-1,8-9 for the emulator thread. Hoisted to a top-level attr so
-  # domains.nix's qemu hook can read `m.pin` for governor switching.
+  # 12 vCPUs pinned onto the same cores as the Windows VMs, hoisted to a top-level attr so domains.nix's qemu hook can read `m.pin` for governor switching.
   pin = import ../lib/pinning.nix;
 
   vm = (import ../lib/mkMacOSVM.nix { inherit pkgs osxKvm; }) {
     inherit profile plistOverrides drivers;
     name = "osx-kvm-gpu";
     uuid = "9a8f7c3e-2d4b-4a1c-9e6f-5b0c1d2e3f4b";
-    # Reshape the domain to DarwinKVM's reference XML; see darwinKvmStyle
-    # in mkMacOSVM.nix. CPU model, <loader>/<nvram> and the prelinked-
-    # kernel constraints stay locked to the OSX-KVM lineage.
+    # Reshape the domain to DarwinKVM's reference XML (see darwinKvmStyle in mkMacOSVM.nix); CPU model and <loader>/<nvram> stay OSX-KVM.
     darwinKvmStyle = true;
     memory = 16384;
     topology = {

@@ -1,10 +1,4 @@
-# Shared config builder for the hardened GPU-passthrough Windows gaming VMs
-# (win11-base/rblx/rblx-2). Returns the pure-data attrset that mkWindowsVM
-# and the qemu hook consume; callers pass only the per-VM identity and the
-# few fields that actually differ.
-#
-# Each VM shares the same CPU pinning, GPU, Looking Glass /dev/kvmfr0 and (by
-# default) nvram/disk paths, so do NOT run two at once.
+# Shared config builder for the hardened GPU-passthrough Windows gaming VMs (win11-base/rblx/rblx-2); they share CPU pinning, GPU, Looking Glass /dev/kvmfr0 and default nvram/disk paths, so never run two at once.
 
 { inputs, pkgs }:
 
@@ -21,8 +15,7 @@ in
 , memory ? 8
 , hugepages ? { enable = true; size = 2; unit = "M"; }   # 2MB on-demand pages
 , evdev ? [ ]                                             # direct host input passthrough; see win11-base for the shape
-, hardened ? true                                        # false = VR/perf profile: Hyper-V enlightenments ON,
-                                                          # hypervisor not hidden, stock qemu (better SteamVR compat)
+, hardened ? true                                        # false = VR/perf profile (Hyper-V on, hypervisor visible, stock qemu for SteamVR)
 , usb ? [ ]                                               # USB passthrough by id, e.g. [ { vendor = 1356; product = 3294; } ]
 }:
 
@@ -39,11 +32,7 @@ in
     features = {
       # svm (AMD virt), topoext, invtsc (stable guest TSC).
       require = [ "svm" "topoext" "invtsc" ];
-      # Concealment: hypervisor bit + spectre-mitigation MSRs that leak
-      # virt context. Add "rdtscp" here if using a patched kernel. Only for
-      # the hardened profile — the VR profile keeps the hypervisor bit visible
-      # so Windows enables its Hyper-V enlightenments (disabling it while
-      # advertising <hyperv> is contradictory and hurts guest performance).
+      # Concealment (hardened only): hide the hypervisor bit + spectre MSRs that leak virt context, since the VR profile keeps them visible for Hyper-V enlightenments.
       disable = if hardened then [
         "vmx-vnmi" "hypervisor"
         "ssbd" "amd-ssbd" "virt-ssbd"
@@ -59,8 +48,7 @@ in
     secureBoot = true;
   };
 
-  # When hardened = false (VR/perf profile) mkWindowsVM ignores emulator/smbios/
-  # acpiTable and falls back to the stock qemu with Hyper-V enlightenments on.
+  # When hardened = false, mkWindowsVM ignores emulator/smbios/acpiTable and falls back to stock qemu with Hyper-V enlightenments on.
   hardening = {
     enable = hardened;
     emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";

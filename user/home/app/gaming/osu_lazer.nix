@@ -1,8 +1,7 @@
 { inputs, pkgs, ... }:
 
 let
-  # Pause dunst on workspaces with an osu! window so notifications can't trigger
-  # compositor repaint stalls mid-gameplay; they queue and pop after we leave.
+  # Pause dunst on workspaces with an osu! window so notifications can't trigger compositor repaint stalls mid-gameplay; they queue and pop after we leave.
   osuDunstSuppress = pkgs.writeShellApplication {
     name = "osu-dunst-suppress";
     runtimeInputs = with pkgs; [

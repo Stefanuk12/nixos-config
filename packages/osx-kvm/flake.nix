@@ -42,8 +42,7 @@
           fetch-basesystem = mkApp s.fetchers.default;
         } // lib.mapAttrs' mkA s.versions);
 
-      # End-to-end image build per bundled profile — exercises mkEfi,
-      # config-plist render, OCSnapshot, ocvalidate and the FAT/GPT path.
+      # End-to-end image build per bundled profile — exercises mkEfi, config-plist render, OCSnapshot, ocvalidate and the FAT/GPT path.
       checks.x86_64-linux =
         let osxKvm = mkOsxKvm { pkgs = nixpkgs.legacyPackages.x86_64-linux; };
         in lib.mapAttrs'

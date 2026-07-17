@@ -17,8 +17,7 @@ in
     sha256 = "1yg3xawvkb18334xb7r8sncw5f2jv51ix10q0jgpkwqzzqcxc8nv";
   };
 
-  # Only the core kext is pulled (it lives under Kexts/ in the zip). For SMC
-  # plugins, re-call mkAcidantheraKext with the same version + a bundleName.
+  # Only the core kext is pulled (it lives under Kexts/ in the zip); for SMC plugins, re-call mkAcidantheraKext with the same version + a bundleName.
   VirtualSMC = mkAcidantheraKext {
     name = "VirtualSMC";
     version = "1.3.3";

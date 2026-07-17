@@ -18,13 +18,7 @@ let
     gaming       = import ./vms/gaming.nix         { inherit inputs pkgs; };
   };
 
-  # macOS variants — share ./lib/mkMacOSVM.nix as a domain builder.
-  # Each module exports { domain, pin?, governor? }; mkWindowsVM is bypassed
-  # since its hardening defaults don't fit a macOS guest.
-  #
-  # The osx-kvm toolkit (OVMF, OpenCore image, kexts, profiles) comes from
-  # its own flake; evaluate it once here and thread it through to the VM
-  # builders so each VM file doesn't re-import the whole tree.
+  # macOS variants share ./lib/mkMacOSVM.nix (bypassing mkWindowsVM's Windows hardening); each exports { domain, pin?, governor? } and the osx-kvm toolkit is evaluated once here and threaded through.
   osxKvm = inputs.osx-kvm.lib.mkOsxKvm { inherit pkgs; };
   osxModules = {
     osx-kvm     = import ./vms/osx-kvm.nix     { inherit pkgs osxKvm; };
@@ -43,9 +37,7 @@ let
   };
 
   # ── QEMU hook generation ────────────────────────────────
-  # Single hook script handling every VM (windows + osx) whose config
-  # asks for governor management. mkCase is shape-agnostic — it takes a
-  # flat record so windows configs and osx modules feed in the same way.
+  # One hook script for every VM (windows + osx) that asks for governor management; mkCase takes a flat record so both config shapes feed in the same way.
 
   mkCase = { name, active, restore, vmCores, hostCores }: ''
     ${name})
@@ -107,9 +99,7 @@ let
   hasHooks = allCases != [];
 
   # ── Hugepage host configuration ─────────────────────────
-  # Derives kernel params / sysctl from VM hugepage settings.
-  # 1GB pages: must be allocated at boot (kernel params).
-  # 2MB pages: can use overcommit (sysctl).
+  # Derives sysctl from VM hugepage settings — 2MB pages use overcommit, 1GB pages must be allocated at boot.
 
   vmsWithHugepages = lib.filterAttrs (_: cfg:
     let hp = cfg.hugepages or false;
@@ -154,9 +144,7 @@ in
     (lib.mapAttrsToList (_: mkDomain) vms)
     ++ map (m: mkRawDomain m.domain) (builtins.attrValues osxModules);
 
-  # Inspectable post-ocvalidate config.plist per macOS VM, symlinked into
-  # /etc (cat /etc/osx-kvm/<vm>/config.plist). Sourced from mk-image.nix's
-  # secondary output, so it lives in /nix/store and rotates on rebuild.
+  # Post-ocvalidate config.plist per macOS VM, symlinked into /etc (cat /etc/osx-kvm/<vm>/config.plist) from mk-image.nix's /nix/store output.
   environment.etc = lib.mapAttrs'
     (n: m: lib.nameValuePair "osx-kvm/${n}/config.plist" { source = m.configPlist; })
     osxModules;
@@ -167,9 +155,7 @@ in
     ln -sf ${hookScript} /var/lib/libvirt/hooks/qemu
   '';
 
-  # 2MB hugepages allocated dynamically via overcommit, with +512 pages
-  # (1 GB) headroom for other consumers (e.g. postgres huge_pages=try);
-  # without it a VM sized to the exact ceiling fails to start.
+  # 2MB hugepages via overcommit, +512 pages (1 GB) headroom for other consumers (e.g. postgres) so a VM at the exact ceiling still starts.
   boot.kernel.sysctl = lib.mkIf needs2M {
     "vm.nr_overcommit_hugepages" = totalPagesBySize."2048" + 512;
   };

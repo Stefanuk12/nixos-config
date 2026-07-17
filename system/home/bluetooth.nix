@@ -7,11 +7,7 @@
     settings = {
       General = {
         Name = "stefan_pc";
-        # Advertise as a loudspeaker (Audio/Video major class, Loudspeaker minor,
-        # Audio+Rendering services) so iOS/Android list this PC in their audio
-        # output picker and will stream A2DP to it (PC as Bluetooth speaker).
-        # A "Computer" major class (the old 0x6C0104) is filtered out of iOS's
-        # output picker, so the iPhone never opens the A2DP sink profile.
+        # Advertise as a loudspeaker (0x240414) so iOS/Android list this PC in their audio output picker and stream A2DP to it; a "Computer" major class is filtered out of iOS's picker.
         Class = "0x240414";
         Experimental = true;
         Discoverable = false;

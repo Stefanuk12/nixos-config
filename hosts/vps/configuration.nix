@@ -137,7 +137,7 @@ in
   system.autoUpgrade = {
     enable = true;
     allowReboot = false;
-    flake = null;
+    flake = "github:Stefanuk12/nixos-config#vps";
   };
 
   # Misc

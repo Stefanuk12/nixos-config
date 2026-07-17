@@ -1,16 +1,7 @@
 { inputs, pkgs, lib, ... }:
 
 let
-  # Waybar: add live CPU-usage and RAM-usage modules to the right-hand pill.
-  # HyDE regenerates ~/.config/waybar/config.jsonc from the *active layout* on
-  # every waybar start (waybar.py copies the layout over config.jsonc when their
-  # hashes differ), so editing config.jsonc directly never survives a restart --
-  # the durable source is the layout file itself. hydenix links the layouts dir
-  # read-only from the hyde package; we rebuild that tree with the active layout
-  # (hyprdots/17) patched to insert the `cpu` and `memory` modules, then force
-  # hydenix's layouts symlink to point at the patched copy. The module
-  # *definitions* already resolve via includes.json (-> ~/.local/share/waybar/
-  # modules/{cpu,memory}.jsonc), so only the module names need adding.
+  # Add cpu/memory modules to Waybar by rebuilding HyDE's read-only layouts tree with hyprdots/17 patched, since HyDE regenerates config.jsonc from the active layout on every start.
   waybarLayouts = pkgs.runCommandLocal "hyde-waybar-layouts-stats" { } ''
     cp -r ${pkgs.hyde}/Configs/.local/share/waybar/layouts $out
     chmod -R u+w $out
@@ -18,11 +9,7 @@ let
       $out/hyprdots/17.jsonc
   '';
 
-  # On-screen feedback for Spotify media keys -- playerctl itself is silent and
-  # the desktop client never notifies. Subcommands: up/down (volume + progress
-  # bar), mute (toggle, emulated via MPRIS volume since Spotify has no mute),
-  # playpause (shows the resulting Playing/Paused state). The SUPER/system paths
-  # keep HyDE's own OSD via hyde-shell volumecontrol.
+  # On-screen feedback for Spotify media keys (up/down/mute/playpause) since playerctl and the Spotify client are silent; SUPER/system paths keep HyDE's own OSD.
   spotifyOsd = pkgs.writeShellApplication {
     name = "spotify-osd";
     runtimeInputs = with pkgs; [
@@ -37,8 +24,7 @@ let
       cover="$cache/cover.jpg"          # cached by the spotify-notify service
       statefile="$cache/premute-vol"
 
-      # All Spotify OSDs share one dunst stack-tag, so there is only ever a
-      # single Spotify popup that updates in place.
+      # All Spotify OSDs share one dunst stack-tag, so a single popup updates in place.
       notify() {
         local icon=spotify
         [ -f "$cover" ] && icon="$cover"
@@ -106,12 +92,7 @@ let
     name = "helium-deferred";
     runtimeInputs = with pkgs; [ glib helium systemd ];
     text = ''
-      # The portal has no WantedBy (HyDE never reaches graphical-session.target),
-      # so it's only ever D-Bus-activated by whichever client calls it first. A
-      # bare `gdbus wait` doesn't activate anything, so on boots where no other
-      # client pokes the portal it times out and the browser launches portal-less.
-      # Start it explicitly -- Type=dbus, so this blocks until the name is owned;
-      # the wait stays as a fallback in case the unit start is rejected.
+      # HyDE never reaches graphical-session.target so the portal only D-Bus-activates on first use; start it explicitly (Type=dbus blocks until owned), with the gdbus wait as a fallback.
       systemctl --user start xdg-desktop-portal.service || true
       gdbus wait --session --timeout 30 org.freedesktop.portal.Desktop || true
       exec helium "$@"
@@ -172,10 +153,7 @@ in
       $d=[Apps]
       bindd = SUPER, I, $d Bitwarden picker (rofi-rbw), exec, rofi-rbw
 
-      # Media keys: bare -> Spotify, SUPER -> the generic "system" player.
-      # (HyDE's defaults bind bare `playerctl`, which grabs whatever MPRIS
-      # player is active -- usually a Helium/YouTube tab. Flip it: Spotify is
-      # the default, the active/other player moves under SUPER.)
+      # Media keys: bare -> Spotify, SUPER -> the generic "system" player (HyDE's default bare playerctl grabs whatever MPRIS player is active).
       unbind = , XF86AudioPlay
       unbind = , XF86AudioPause
       unbind = , XF86AudioNext

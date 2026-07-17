@@ -1,8 +1,4 @@
-# Module-managed pinentry. Reads SETDESC/SETPROMPT to tell which value rbw
-# wants and serves it from the matching file:
-#   "client__id"     → $PINENTRY_CLIENT_ID_FILE     (rbw register)
-#   "client__secret" → $PINENTRY_CLIENT_SECRET_FILE (rbw register)
-#   anything else    → $PINENTRY_PASSWORD_FILE      (rbw login/unlock)
+# Module-managed pinentry that reads SETDESC/SETPROMPT to route client__id → $PINENTRY_CLIENT_ID_FILE, client__secret → $PINENTRY_CLIENT_SECRET_FILE, and anything else → $PINENTRY_PASSWORD_FILE.
 { pkgs }:
 
 pkgs.writeShellScriptBin "pinentry-smart" ''

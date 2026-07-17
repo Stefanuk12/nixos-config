@@ -1,6 +1,4 @@
-# BaseSystem fetcher wrapping OSX-KVM's fetch-macOS-v2.py. Apple's recovery
-# URLs aren't pin-able, so the download runs at user-time, not build-time.
-# Default target dir: $OSX_KVM_DIR or ~/.local/share/osx-kvm.
+# BaseSystem fetcher wrapping OSX-KVM's fetch-macOS-v2.py; Apple's recovery URLs aren't pin-able so the download runs at user-time (default target $OSX_KVM_DIR or ~/.local/share/osx-kvm).
 #
 #   nix run .#fetch-basesystem            # interactive picker
 #   nix run .#fetch-basesystem-sonoma     # non-interactive, fixed version
@@ -15,8 +13,7 @@ let
     sha256 = "1wymbc6hj25hw8mp0km7nypr7vqmmlazaql034r5spr6plk6vb1r";
   };
 
-  # --shortname options accepted by fetch-macOS-v2.py; when set, upstream picks
-  # board-id/MLB from boards.json and skips the interactive picker.
+  # --shortname options accepted by fetch-macOS-v2.py; when set, upstream picks board-id/MLB from boards.json and skips the interactive picker.
   shortnames = [
     "high-sierra" "mojave" "catalina" "big-sur" "monterey"
     "ventura" "sonoma" "sequoia" "tahoe"

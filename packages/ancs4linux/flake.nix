@@ -101,9 +101,7 @@
         }
       );
 
-      # -------------------------------------------------------------------
       # Checks – `nix flake check` runs these.
-      # -------------------------------------------------------------------
       checks = forAllSystems (
         system:
         let
@@ -157,9 +155,7 @@
         }
       );
 
-      # -------------------------------------------------------------------
       # NixOS module
-      # -------------------------------------------------------------------
       nixosModules.default =
         {
           config,
@@ -171,11 +167,7 @@
           cfg = config.services.ancs4linux;
           pkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-          # ---------------------------------------------------------------
-          # Shared hardening for every user service in the stack. All IPC is
-          # D-Bus (AF_UNIX) and BLE is handled by BlueZ, so no direct hardware
-          # or network access is needed.
-          # ---------------------------------------------------------------
+          # Shared hardening for every user service; all IPC is D-Bus (AF_UNIX) and BLE via BlueZ, so no direct hardware or network access is needed.
           commonServiceConfig = {
             Restart = "on-failure";
             RestartSec = 5;
@@ -198,8 +190,7 @@
             # -- Capabilities & syscalls -----------------------------------
             CapabilityBoundingSet = "";
             SystemCallArchitectures = "native";
-            # @system-service whitelist minus privilege-escalation and
-            # resource-control families a notification forwarder doesn't need.
+            # @system-service whitelist minus privilege-escalation and resource-control families a notification forwarder doesn't need.
             SystemCallFilter = [
               "@system-service"
               "~@privileged"
@@ -207,8 +198,7 @@
             ];
 
             # -- Network ---------------------------------------------------
-            # D-Bus = AF_UNIX. Add AF_NETLINK/AF_BLUETOOTH if upstream ever
-            # opens sockets directly.
+            # D-Bus = AF_UNIX; add AF_NETLINK/AF_BLUETOOTH if upstream ever opens sockets directly.
             RestrictAddressFamilies = [ "AF_UNIX" ];
 
             # -- Misc ------------------------------------------------------
@@ -223,11 +213,7 @@
             Environment = [ "PYTHONUNBUFFERED=1" ];
           };
 
-          # ---------------------------------------------------------------
-          # Helper: build a systemd *user* service for one component. `partOf`
-          # ties dependents to the root advertising service so one stop tears
-          # everything down; only the root carries `wantedBy`.
-          # ---------------------------------------------------------------
+          # Helper: build a systemd *user* service; partOf ties dependents to the root advertising service so one stop tears everything down, and only the root carries wantedBy.
           mkAncsService =
             name:
             {
@@ -323,8 +309,7 @@
 
             services.dbus.packages =
               let
-                # dbus-broker doesn't accept the `*_prefix` attributes, so name
-                # each service explicitly (from upstream advertising/observer main.py).
+                # dbus-broker doesn't accept the `*_prefix` attributes, so name each service explicitly (from upstream advertising/observer main.py).
                 dbusConf = pkgs.writeTextDir "share/dbus-1/system.d/ancs4linux.conf" ''
                   <!DOCTYPE busconfig PUBLIC
                     "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
@@ -410,8 +395,7 @@
                   extraServiceConfig = {
                     RemainAfterExit = true;
                     ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.setupDelay}";
-                    # Don't let a stuck adapter hang the service manager
-                    # for the default 90 s.
+                    # Don't let a stuck adapter hang the service manager for the default 90 s.
                     TimeoutStartSec = 30;
                   };
                 };

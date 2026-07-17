@@ -1,5 +1,4 @@
-# Base-image VM: 16G / 1GB hugepages, with evdev input passthrough wired up
-# for first install. Shared config lives in ../lib/mkGamingVM.nix.
+# Base-image VM (16G, evdev input passthrough for first install) via ../lib/mkGamingVM.nix.
 
 { inputs, pkgs }:
 
@@ -13,9 +12,7 @@ import ../lib/mkGamingVM.nix { inherit inputs pkgs; } {
   memory = 16;
   hugepages = { enable = true; size = 1; unit = "G"; };  # 1GB pages
 
-  # Direct host input passthrough via evdev — lower latency than USB, only
-  # needed on first install / when Looking Glass Host isn't on the guest
-  # (find devices with: ls -l /dev/input/by-id/).
+  # Direct host input passthrough via evdev — lower latency than USB, needed on first install or when Looking Glass Host isn't on the guest.
   evdev = [
     { dev = "/dev/input/event1"; }                                        # keyboard
     { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse

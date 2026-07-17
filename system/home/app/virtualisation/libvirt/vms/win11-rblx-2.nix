@@ -1,10 +1,4 @@
-# Second Roblox VM — same shared config as win11-rblx, only the unique
-# fields (uuid, MAC, nvram vars path, disk image, serial) differ.
-#
-# Shares the same CPU pinning and Looking Glass /dev/kvmfr0 as win11-rblx,
-# so do NOT run them at the same time. Before first boot, create the disk:
-#   sudo cp --reflink=auto /var/lib/libvirt/images/win11-rblx.qcow2 \
-#                          /var/lib/libvirt/images/win11-rblx-2.qcow2
+# Second Roblox VM — same shared config as win11-rblx with unique uuid/MAC/vars/disk/serial; shares CPU pinning + Looking Glass so don't co-run, and create the disk first with `cp --reflink=auto win11-rblx.qcow2 win11-rblx-2.qcow2`.
 
 { inputs, pkgs }:
 

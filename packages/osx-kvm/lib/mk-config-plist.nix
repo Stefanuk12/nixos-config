@@ -1,17 +1,4 @@
-# Generates config.plist by mutating a base plist (default: OpenCorePkg's
-# Sample.plist via opencore-base.nix).
-#
-# Inputs:
-#   profile          — { smbios?, bootArgs?, csrActiveConfig?, kexts?,
-#                        kextBlocks?, acpi? }
-#   basePlist        — starting-point plist file
-#   extraKexts/Blocks/Acpi — appended to the profile's lists
-#   drivers          — null leaves Sample.plist's UEFI.Drivers untouched
-#   plistOverrides   — Nix attrset deep-merged onto the parsed plist after
-#                      structured ops. Non-string scalars use the tagged form
-#                      render-plist.py expects:
-#                        { _type = "data"; value = "<base64>"; }
-#                        { _type = "date"; value = "<iso8601>"; }
+# Generates config.plist by mutating a base plist (default OpenCorePkg Sample.plist), where drivers = null leaves UEFI.Drivers untouched and plistOverrides is deep-merged after structured ops (non-string scalars tagged { _type = "data"|"date"; value = ...; }).
 
 { lib, runCommand, python3, writeText, opencore }:
 

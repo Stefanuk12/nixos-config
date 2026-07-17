@@ -1,6 +1,4 @@
-# OSX-KVM macOS VM — libvirt domain definition (no GPU passthrough).
-# All the heavy lifting and the OSX-KVM-specific quirks live in
-# ../lib/mkMacOSVM.nix; this file just supplies the per-VM identity.
+# OSX-KVM macOS VM (no GPU passthrough); the heavy lifting lives in ../lib/mkMacOSVM.nix and this file just supplies the per-VM identity.
 
 { pkgs, osxKvm, ... }:
 

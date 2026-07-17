@@ -1,16 +1,10 @@
 { pkgs, lib, ... }:
 
 let
-  # Saved clips land here. ~ is expanded by the shell at runtime.
+  # Saved clips land here (~ expanded by the shell at runtime).
   replayDir = "Videos/Replays";
 
-  # Runs after each save ($1 = file path, $2 = type). For a replay (.mkv with
-  # the separate per-app tracks) it also emits a shareable single-track mp4 that
-  # mixes the full desktop (track 0) with the mic into one channel. The per-app
-  # stems are already part of the desktop mix, so combining only desktop+mic
-  # yields every source exactly once (no double-counting). Video is stream-
-  # copied; only audio is re-encoded. Both files are kept: mkv = editable
-  # master, mp4 = shareable.
+  # Runs after each save; for an .mkv replay it also emits a shareable mp4 mixing desktop (track 0) + mic, stream-copying video and re-encoding audio, keeping both (mkv master, mp4 shareable).
   onSave = pkgs.writeShellScript "gsr-on-save" ''
     src="$1"
     case "$src" in
@@ -35,22 +29,14 @@ let
     esac
   '';
 
-  # Arm the rolling replay buffer on the high-refresh gaming monitor, falling
-  # back to whole-desktop capture if it can't be resolved (e.g. single screen).
-  # `focused` capture is X11-only, so the target monitor is picked up front.
+  # Arm the rolling replay buffer on the high-refresh gaming monitor, falling back to whole-desktop capture if it can't be resolved (focused capture is X11-only).
   replay = pkgs.writeShellScript "gsr-replay" ''
     ${pkgs.coreutils}/bin/sleep 2  # let pipewire + hyprland IPC come up
     monitor=$(hyprctl monitors -j 2>/dev/null \
       | ${pkgs.jq}/bin/jq -r '
           map(select(.disabled | not))
           | (map(select(.description | test("GIGABYTE"))) + .)[0].name // empty')
-    # Each -a is its own track in the (mkv) clip. GSR can't auto-split every
-    # app, so we name them: T1 full desktop mix (catch-all for games and
-    # anything unlisted), T2 Spotify, T3 Helium (reports itself as
-    # "alsa_playback.helium"), T4 Vesktop (reports the generic Electron name
-    # "Chromium"), and T5 the mic. The on-save script assumes the mic is the
-    # LAST track, so keep default_input at the end. Confirm live names with
-    # `--list-application-audio` while the app runs.
+    # Each -a is its own mkv track (T1 desktop mix, T2 Spotify, T3 Helium, T4 Vesktop/Chromium, T5 mic); the on-save script assumes the mic is LAST, so keep default_input at the end.
     exec gpu-screen-recorder \
       -w "''${monitor:-screen}" \
       -f 60 \
@@ -77,15 +63,7 @@ in
       exec-once = ${replay}
     '';
 
-    # nixpkgs wraps the binary, so it runs as a /nix/store/…/.wrapped path and
-    # its name is truncated to "gpu-screen-reco". That defeats GSR's documented
-    # `pkill -f '^gpu-screen-recorder'`, and an unanchored -f match would also
-    # hit gsr-kms-server (same store path). Match the process name instead — it
-    # uniquely targets the recorder and never the kms helper.
-    # `bindd` (bind-with-description) makes these appear in HyDE's SUPER+/
-    # keybind cheatsheet. $d is HyDE's category variable (defined in the
-    # keybindings.conf prepended before this block); setting it here groups
-    # both binds under a "Screen Recording" section in the cheatsheet.
+    # Match the truncated process name "gpu-screen-rec" (nixpkgs wraps + truncates the binary, and an unanchored -f would also hit gsr-kms-server); bindd shows these in HyDE's cheatsheet under $d's category.
     keybindings.extraConfig = lib.mkAfter ''
       $d=[$ut|Screen Recording]
       # SUPER+ALT+R: clip the last 30 seconds

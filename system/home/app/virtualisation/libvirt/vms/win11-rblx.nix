@@ -1,8 +1,6 @@
-# Roblox gaming VM. Shared config lives in ../lib/mkGamingVM.nix; to enable
-# evdev input passthrough pass an `evdev` list (see win11-base.nix).
+# Roblox gaming VM via ../lib/mkGamingVM.nix; pass an `evdev` list to enable input passthrough (see win11-base.nix).
 
-# NOTE FOR FUTURE SELF: to base image, consider installing openssh server, then also running the clean qemu script
-# you should install kde connect on this + looking glass host too
+# TODO: on the base image install openssh server + KDE Connect + Looking Glass Host, then run the clean qemu script.
 
 { inputs, pkgs }:
 

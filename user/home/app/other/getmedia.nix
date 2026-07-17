@@ -1,13 +1,7 @@
 { pkgs, ... }:
 
 let
-  # Thin yt-dlp wrapper: gives each download a clean, per-site filename and
-  # auto-sorts it into ~/Videos or ~/Music. Any extra flags are forwarded
-  # straight to yt-dlp, e.g.
-  #   getmedia https://youtu.be/xyz                       # video  -> ~/Videos
-  #   getmedia -t mp3 https://youtu.be/xyz                # audio  -> ~/Music
-  #   getmedia --cookies-from-browser firefox <ig-url>    # private Instagram
-  #   getmedia --yes-playlist <playlist-url>              # whole playlist
+  # Thin yt-dlp wrapper that gives each download a clean per-site filename, auto-sorts into ~/Videos or ~/Music, and forwards extra flags to yt-dlp.
   getmedia = pkgs.writeShellApplication {
     name = "getmedia";
     runtimeInputs = with pkgs; [
@@ -26,9 +20,7 @@ let
       video_dir="''${GETMEDIA_VIDEO_DIR:-$HOME/Videos}"
       audio_dir="''${GETMEDIA_AUDIO_DIR:-$HOME/Music}"
 
-      # If the invocation looks like an audio grab (-t mp3, -x, --audio-format,
-      # or a bare audio format token) sort it into ~/Music with an artist/title
-      # layout; otherwise treat it as video into ~/Videos, foldered per site.
+      # Audio-looking invocations (-x, --audio-format, a bare format token) sort into ~/Music by artist/title; otherwise video into ~/Videos foldered per site.
       mode="video"
       for arg in "$@"; do
         case "$arg" in

@@ -125,8 +125,7 @@ in
           fi
           export PIA_USER PIA_PASS
 
-          # manual-connections uses relative paths and a hardcoded /opt/piavpn-manual
-          # state dir. Copy to a writable scratch dir and rewrite the path.
+          # manual-connections uses relative paths + a hardcoded /opt/piavpn-manual state dir, so copy to a writable scratch dir and rewrite the path.
           work=$(mktemp -d)
           trap 'rm -rf "$work"' EXIT
           cp -rT ${piaSrc} "$work"
@@ -136,10 +135,7 @@ in
             | xargs -0 -r sed -i "s|/opt/piavpn-manual|$work/state|g"
           cd "$work"
 
-          # run_setup.sh has two non-interactive paths:
-          #   AUTOCONNECT=true                  → auto-pick lowest-latency region
-          #   AUTOCONNECT=false + PREFERRED_REGION=<id> → use that region verbatim
-          # Anything else drops into an interactive prompt.
+          # run_setup.sh runs non-interactively with AUTOCONNECT=true (lowest-latency region) or AUTOCONNECT=false + PREFERRED_REGION=<id>, else it prompts.
           PIA_CONNECT=false \
           PIA_PF=false \
           PIA_DNS=true \
