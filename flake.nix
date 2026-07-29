@@ -2,10 +2,14 @@
   description = "yo mother";
 
   inputs = {
-    hydenix.url = "github:Stefanuk12/hydenix";
-    # nixpkgs is deliberately left undeclared; the alternatives are nixos-unstable directly or
-    # following hydenix/nixpkgs.
+    # nixpkgs is deliberately left undeclared; it resolves through the flake registry.
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
+
+    # Desktop shell: bar, launcher, notifications, OSD, lock screen, wallpaper.
+    noctalia.url = "github:noctalia-dev/noctalia";
+    noctalia.inputs.nixpkgs.follows = "nixpkgs";
+    noctalia-greeter.url = "github:noctalia-dev/noctalia-greeter";
+    noctalia-greeter.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -76,7 +80,6 @@
     {
       self,
       nixpkgs,
-      hydenix,
       home-manager,
       nix-colors,
       nixvirt,
@@ -100,7 +103,7 @@
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs systems;
       homeOverlays = [
-        hydenix.overlays.default
+        inputs.noctalia.overlays.default
         inputs.helium.overlays.default
         # openldap 2.6.x syncrepl tests flake on timing.
         (final: prev: {

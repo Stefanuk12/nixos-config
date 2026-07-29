@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   replayDir = "Videos/Replays";
@@ -58,16 +58,15 @@ in
   # GSR fails on a missing output path.
   home.file."${replayDir}/.keep".text = "";
 
-  hydenix.hm.hyprland = {
-    extraConfig = lib.mkAfter ''
-      exec-once = ${replay}
-    '';
+  wayland.windowManager.hyprland.settings = {
+    # Interpolated, not the derivation itself: toHyprconf recurses into any attrset it is
+    # handed, and a derivation is one.
+    exec-once = [ "${replay}" ];
 
     # "gpu-screen-rec" is the truncated process name; an unanchored -f would also hit gsr-kms-server.
-    keybindings.extraConfig = lib.mkAfter ''
-      $d=[$ut|Screen Recording]
-      bindd = SUPER ALT, R, $d Clip last 30s (replay), exec, pkill --signal SIGRTMIN+2 gpu-screen-rec
-      bindd = SUPER ALT, F, $d Save full replay buffer, exec, pkill --signal SIGUSR1 gpu-screen-rec
-    '';
+    bind = [
+      "SUPER ALT, R, exec, pkill --signal SIGRTMIN+2 gpu-screen-rec"
+      "SUPER ALT, F, exec, pkill --signal SIGUSR1 gpu-screen-rec"
+    ];
   };
 }

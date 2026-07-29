@@ -81,5 +81,7 @@ in
     "nix-command"
     "flakes"
   ];
-  system.stateVersion = lib.mkDefault "23.05";
+  # 25.05, not 23.05: hydenix used to force this value, so lowering it on its removal would
+  # silently change service defaults on an already-installed system.
+  system.stateVersion = "25.05";
 }

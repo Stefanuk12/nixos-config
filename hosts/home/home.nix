@@ -18,8 +18,8 @@
   home.username = username;
   home.homeDirectory = "/home/" + username;
 
-  # Don't change without reading the release notes.
-  home.stateVersion = lib.mkDefault "23.05";
+  # Don't change without reading the release notes. 25.05 because hydenix used to force it.
+  home.stateVersion = "25.05";
 
   home.packages = with pkgs; [
     kitty

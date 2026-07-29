@@ -1,14 +1,15 @@
-{ inputs, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 
 let
+  noctalia = "${config.programs.noctalia.package}/bin/noctalia";
+
   # Notifications trigger compositor repaint stalls mid-gameplay; they queue and pop on leaving.
-  osuDunstSuppress = pkgs.writeShellApplication {
-    name = "osu-dunst-suppress";
+  osuDndSuppress = pkgs.writeShellApplication {
+    name = "osu-noctalia-dnd";
     runtimeInputs = with pkgs; [
       hyprland
       socat
       jq
-      dunst
     ];
     text = ''
       set -uo pipefail
@@ -19,7 +20,7 @@ let
 
       apply() {
         if [ "$1" != "$paused" ]; then
-          dunstctl set-paused "$1" >/dev/null 2>&1 || return 0
+          ${noctalia} msg notification-dnd-set "$1" >/dev/null 2>&1 || return 0
           paused="$1"
         fi
       }
@@ -55,17 +56,17 @@ in
   home.packages = [
     pkgs.osu-lazer-bin
     inputs.osu-collect.packages.${pkgs.stdenv.hostPlatform.system}.default
-    osuDunstSuppress
+    osuDndSuppress
   ];
 
-  systemd.user.services.osu-dunst-suppress = {
+  systemd.user.services.osu-noctalia-dnd = {
     Unit = {
-      Description = "Pause dunst on workspaces containing an osu! window";
+      Description = "Enable noctalia DND on workspaces containing an osu! window";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${osuDunstSuppress}/bin/osu-dunst-suppress";
+      ExecStart = "${osuDndSuppress}/bin/osu-noctalia-dnd";
       Restart = "on-failure";
       RestartSec = 5;
     };

@@ -35,9 +35,7 @@ let
               icon="$cover"
             fi
 
-            notify-send -a Spotify -i "$icon" \
-              -h string:x-dunst-stack-tag:spotify-np \
-              "$title" "$artist — $album"
+            notify-send -a Spotify -i "$icon" "$title" "$artist — $album"
           done
     '';
   };

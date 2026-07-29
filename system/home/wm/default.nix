@@ -5,7 +5,8 @@ let
 in
 {
   imports = [
-    ./hydenix.nix
+    ./hyprland.nix
+    ./login.nix
   ];
 
   services.udev.packages = lib.singleton (

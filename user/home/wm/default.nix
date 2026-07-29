@@ -2,6 +2,8 @@
 
 {
   imports = [
-    ./hydenix.nix
+    ./hyprland.nix
+    ./noctalia.nix
+    ./theme.nix
   ];
 }
