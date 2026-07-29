@@ -10,6 +10,7 @@
     ./obs_studio.nix
     ./pia.nix
     ./rbw-fetch.nix
+    ./trezor.nix
     ./waydroid.nix
   ];
 }
