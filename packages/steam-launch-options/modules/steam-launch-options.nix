@@ -152,11 +152,24 @@ let
 
 
     def main():
-        if not wait_for_steam_gone():
-            print("Timed out waiting for Steam to exit cleanly — giving up.")
-            sys.exit(0)
+        args = sys.argv[1:]
+        wait = "--wait" in args
+        positional = [a for a in args if not a.startswith("--")]
 
-        overrides = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+        # Steam keeps localconfig.vdf in memory and rewrites it on exit, so patching underneath a
+        # running Steam is pointless — it clobbers the file and never re-reads it. Without --wait
+        # we therefore return immediately instead of stalling a home-manager switch; the path unit
+        # fires on the write Steam makes as it exits, and re-runs this with --wait.
+        if steam_running():
+            if not wait:
+                print("Steam is running — deferring; "
+                      "the patch will apply when Steam exits.")
+                sys.exit(0)
+            if not wait_for_steam_gone():
+                print("Timed out waiting for Steam to exit cleanly — giving up.")
+                sys.exit(0)
+
+        overrides = json.loads(Path(positional[0]).read_text(encoding="utf-8"))
 
         home = os.environ["HOME"]
         paths = sorted(
@@ -180,7 +193,7 @@ let
 
   patch-steam-launch-options =
     pkgs.writeShellScriptBin "patch-steam-launch-options" ''
-      exec ${python}/bin/python3 ${patcher-py} ${optionsJson}
+      exec ${python}/bin/python3 ${patcher-py} ${optionsJson} "$@"
     '';
 
 in
@@ -216,7 +229,8 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ patch-steam-launch-options ];
 
-    # Try on every switch — usually a no-op while Steam runs, but catches the case where it isn't.
+    # Patches straight away when Steam is closed, and returns immediately when it is not — a
+    # switch never blocks on Steam. The deferred case is picked up by the units below.
     home.activation.patchSteamLaunchOptions =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD ${patch-steam-launch-options}/bin/patch-steam-launch-options || true
@@ -233,10 +247,12 @@ in
       Unit.Description = "Apply declarative Steam launch options";
       Service = {
         Type = "oneshot";
-        # The patcher itself blocks until Steam has been gone for 5 stable seconds (or 3-minute hard timeout).
+        # --wait only here, never in the activation path: this unit is triggered by the write
+        # Steam makes as it shuts down, so it needs the 5-second stability check to avoid racing
+        # that final write. Hard timeout keeps a wedged Steam from pinning the unit forever.
         TimeoutStartSec = "300s";
         ExecStart =
-          "${patch-steam-launch-options}/bin/patch-steam-launch-options";
+          "${patch-steam-launch-options}/bin/patch-steam-launch-options --wait";
       };
     };
 
