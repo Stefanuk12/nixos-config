@@ -14,6 +14,7 @@ let
       cache="''${XDG_CACHE_HOME:-$HOME/.cache}/spotify-notify"
       mkdir -p "$cache"
       cover="$cache/cover.jpg"
+      idfile="$cache/notify-id"   # shared with spotify-osd so both replace the same popup
       last=""
 
       # trackid only changes per song, so play/pause toggles collapse into the dedupe below.
@@ -35,7 +36,15 @@ let
               icon="$cover"
             fi
 
-            notify-send -a Spotify -i "$icon" "$title" "$artist — $album"
+            # noctalia has no stack-tag hint, so replacement rides on the freedesktop
+            # replaces_id: -p prints the new id, -r reuses the previous one.
+            prev=$(cat "$idfile" 2>/dev/null || echo 0)
+            case "$prev" in "" | *[!0-9]*) prev=0 ;; esac
+            args=(-a Spotify -i "$icon" -p)
+            [ "$prev" -gt 0 ] && args+=(-r "$prev")
+            if nid=$(notify-send "''${args[@]}" "$title" "$artist — $album"); then
+              printf '%s' "$nid" > "$idfile"
+            fi
           done
     '';
   };

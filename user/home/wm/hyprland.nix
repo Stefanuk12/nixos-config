@@ -16,14 +16,22 @@ let
       mkdir -p "$cache"
       cover="$cache/cover.jpg"          # cached by the spotify-notify service
       statefile="$cache/premute-vol"
+      idfile="$cache/notify-id"         # shared with spotify-notify so both update one popup
 
-      # noctalia coalesces by app name, so a single Spotify popup updates in place.
+      # noctalia honours the freedesktop replaces_id but has no stack-tag/x-canonical hint, so
+      # replacement means remembering the id: -p prints the new one, -r reuses the last.
       notify() {
         local icon=spotify
         [ -f "$cover" ] && icon="$cover"
-        local args=(-a Spotify -t 1500 -i "$icon")
+        local args=(-a Spotify -t 1500 -i "$icon" -p)
+        local last new
+        last=$(cat "$idfile" 2>/dev/null || echo 0)
+        case "$last" in "" | *[!0-9]*) last=0 ;; esac
+        [ "$last" -gt 0 ] && args+=(-r "$last")
         [ -n "''${3:-}" ] && args+=(-h "int:value:$3")
-        notify-send "''${args[@]}" "$1" "$2"
+        if new=$(notify-send "''${args[@]}" "$1" "$2"); then
+          printf '%s' "$new" > "$idfile"
+        fi
       }
 
       vol_pct() {
