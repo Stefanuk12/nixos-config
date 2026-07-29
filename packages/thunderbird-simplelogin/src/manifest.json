@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "SimpleLogin Aliases",
   "version": "1.0.0",
   "description": "Browse your SimpleLogin aliases from the compose window, send as them, and create them on the fly from the From field.",
@@ -16,14 +16,12 @@
     "addressBooks",
     "messagesRead",
     "storage",
-    "notifications"
+    "notifications",
+    "https://app.simplelogin.io/*"
   ],
   "optional_permissions": [
     "messagesImport",
     "messagesDelete"
-  ],
-  "host_permissions": [
-    "https://app.simplelogin.io/*"
   ],
   "background": {
     "scripts": [
@@ -33,7 +31,8 @@
       "lib/messages.js",
       "lib/store.js",
       "background.js"
-    ]
+    ],
+    "persistent": true
   },
   "compose_action": {
     "default_title": "SimpleLogin aliases",

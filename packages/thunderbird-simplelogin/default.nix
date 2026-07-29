@@ -1,6 +1,12 @@
 # SimpleLogin alias manager for Thunderbird, built from ./src into an unsigned XPI.
 # The share/mozilla/extensions/<app-id>/ layout is the only shape home-manager's
 # `programs.thunderbird.profiles.<n>.extensions` picks up; a bare XPI at $out root is ignored.
+#
+# Deliberately manifest v2. Thunderbird primes only a fixed set of events to wake a suspended MV3
+# event page, and runtime.onMessage is not one of them, so once the background page idled out every
+# panel opened to "the background page did not answer". MV2 also keeps browser.contacts and
+# browser.mailingLists, which are max_manifest_version 2 and simply undefined under MV3, and grants
+# the SimpleLogin host permission at install instead of leaving it opt-in.
 { lib, stdenvNoCC, runCommandLocal, writeShellApplication, nodejs, zip, rbw, jq }:
 
 let

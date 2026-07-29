@@ -246,7 +246,7 @@ async function maybeAutoAlias(tabId, details, settings, snapshot) {
   return true;
 }
 
-// Address-book entries only expose a vCard in MV3.
+// Fallback for address books whose entries carry a vCard instead of PrimaryEmail.
 function emailFromVCard(vCard) {
   if (!vCard) return "";
   const unfolded = String(vCard).replace(/\r?\n[ \t]/g, "");
