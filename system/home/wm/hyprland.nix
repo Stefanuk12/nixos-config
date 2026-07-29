@@ -21,10 +21,6 @@
   security.polkit.enable = true;
   security.rtkit.enable = true;
 
-  # Noctalia's battery, network and power-profile widgets read these.
-  services.upower.enable = true;
-  services.power-profiles-daemon.enable = true;
-
   services.gvfs.enable = true;
   services.libinput.enable = true;
   programs.dconf.enable = true;
