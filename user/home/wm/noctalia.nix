@@ -38,19 +38,22 @@ in
       bar.main = {
         position = "top";
 
+        # Default is 100px reserved at each end. The full-date clock widened the centre section
+        # enough to squeeze the end row, so give that 150px back rather than shorten the date.
+        margin_ends = 24;
+
         # Pill per widget. capsule_radius is deliberately unset — that selects the automatic
         # full-pill radius rather than a fixed corner.
         capsule = true;
 
-        # Left is where you act, centre is the glance, right reads outward from "what this
-        # machine is doing" to "things I click to change it".
-        start = [ "launcher" "workspaces" ];
-        center = [ "clock" ];
+        # bar.cpp centres the centre section absolutely and caps each side slot at
+        # (bar - centre)/2, clipping the overflow. workspaces is narrow, so unlike the full-date
+        # clock it leaves both side slots roomy — which is what makes it safe to put there.
+        start = [ "launcher" "clock" "media" ];
+        center = [ "workspaces" ];
         end = [
-          "media" # what is playing
           "group:resources" # how the box is doing
           "tray" # whatever apps put there
-          "group:utilities"
           "group:hardware"
           "group:shell" # panels, so the far corner stays the session button
         ];
@@ -64,16 +67,16 @@ in
             members = [ "cpu" "ram" ];
           }
           {
-            id = "utilities";
-            members = [ "clipboard" "notifications" ];
-          }
-          {
             id = "hardware";
             members = [ "network" "bluetooth" "volume" ];
           }
           {
             id = "shell";
-            members = [ "wallpaper" "control-center" "session" ];
+            # notifications sits with the other shell surfaces rather than in a utilities pill:
+            # its panel is the notification history, and clicking through to the control centre's
+            # notification tab from right next door is the natural follow-on. No clipboard or
+            # wallpaper button — SUPER+V and SUPER+SHIFT+W cover both.
+            members = [ "notifications" "control-center" "session" ];
           }
         ];
       };
@@ -82,6 +85,24 @@ in
       widget.clock = {
         format = "{:%A %d %B %Y · %H:%M}";
         tooltip_format = "{:%H:%M:%S  ·  week %V}";
+      };
+
+      # title_scroll defaults to "none", which hard-clips a long title and squares off the
+      # capsule's cap. "always" keeps the text moving inside a fixed-width pill, so it never
+      # asks the bar for more room than it has — raising max_length instead makes it worse,
+      # because the wider widget overflows the row and the leftmost item is what gets cut.
+      # With the centre empty the end row is no longer budgeted against the clock, so this is a
+      # readability choice rather than a fit constraint; longer titles still scroll.
+      # show_label defaults to true, which prints the interface name ("eno1") next to the icon.
+      # On a desktop with one wired link that never changes, the icon alone carries the state.
+      widget.network.show_label = false;
+
+      widget.media = {
+        title_scroll = "always";
+        max_length = 300;
+        # Default false, which keeps an empty glyph and its padding in the bar whenever nothing
+        # is playing. True drops the widget entirely instead.
+        hide_when_no_media = true;
       };
 
       system.monitor.enabled = true;
