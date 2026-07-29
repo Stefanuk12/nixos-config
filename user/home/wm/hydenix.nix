@@ -1,7 +1,8 @@
 { inputs, pkgs, lib, ... }:
 
 let
-  # Add cpu/memory modules to Waybar by rebuilding HyDE's read-only layouts tree with hyprdots/17 patched, since HyDE regenerates config.jsonc from the active layout on every start.
+  # HyDE regenerates config.jsonc from the active layout on every start, so cpu/memory have to be
+  # patched into a rebuilt copy of its read-only layouts tree.
   waybarLayouts = pkgs.runCommandLocal "hyde-waybar-layouts-stats" { } ''
     cp -r ${pkgs.hyde}/Configs/.local/share/waybar/layouts $out
     chmod -R u+w $out
@@ -9,7 +10,8 @@ let
       $out/hyprdots/17.jsonc
   '';
 
-  # On-screen feedback for Spotify media keys (up/down/mute/playpause) since playerctl and the Spotify client are silent; SUPER/system paths keep HyDE's own OSD.
+  # playerctl and the Spotify client give no on-screen feedback for the media keys; the SUPER
+  # (system) bindings keep HyDE's own OSD.
   spotifyOsd = pkgs.writeShellApplication {
     name = "spotify-osd";
     runtimeInputs = with pkgs; [
@@ -92,7 +94,8 @@ let
     name = "helium-deferred";
     runtimeInputs = with pkgs; [ glib helium systemd ];
     text = ''
-      # HyDE never reaches graphical-session.target so the portal only D-Bus-activates on first use; start it explicitly (Type=dbus blocks until owned), with the gdbus wait as a fallback.
+      # HyDE never reaches graphical-session.target, so the portal only D-Bus-activates on first
+      # use. Type=dbus blocks until owned; the gdbus wait is a fallback.
       systemctl --user start xdg-desktop-portal.service || true
       gdbus wait --session --timeout 30 org.freedesktop.portal.Desktop || true
       exec helium "$@"
@@ -109,7 +112,6 @@ in
     networkmanagerapplet
   ];
 
-  # Point hydenix's read-only waybar layouts at our cpu/memory-patched copy.
   home.file.".local/share/waybar/layouts".source = lib.mkForce waybarLayouts;
 
   xdg.userDirs.setSessionVariables = true;
@@ -136,9 +138,17 @@ in
       exec-once = systemctl --user start spotify-notify.service
       exec-once = systemctl --user start osu-dunst-suppress.service
       env = AQ_DRM_DEVICES,/dev/dri/amd-igpu
+      # Lets the iGPU compositor import frames rendered on the dGPU (else games offloaded to the
+      # 5080 are a black screen).
+      env = AQ_NO_MODIFIERS,1
+      env = AQ_MGPU_NO_EXPLICIT,1
 
       workspace = 1, monitor:desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, default:true
       workspace = 2, monitor:desc:Acer Technologies VG240Y, default:true
+
+      # XWayland games that set the cursor every frame spam "cursorImage request", and Hyprland
+      # logs on its main thread — 100MB+ logs and in-game hitches. Re-enable only to debug.
+      debug:disable_logs = true
 
       input {
         kb_layout = iso_us
@@ -153,7 +163,7 @@ in
       $d=[Apps]
       bindd = SUPER, I, $d Bitwarden picker (rofi-rbw), exec, rofi-rbw
 
-      # Media keys: bare -> Spotify, SUPER -> the generic "system" player (HyDE's default bare playerctl grabs whatever MPRIS player is active).
+      # Bare -> Spotify, SUPER -> generic player (HyDE's default grabs whatever MPRIS player is active).
       unbind = , XF86AudioPlay
       unbind = , XF86AudioPause
       unbind = , XF86AudioNext
@@ -187,9 +197,10 @@ in
       binddl = SUPER, XF86AudioMute, $d mute system output, exec, hyde-shell volumecontrol -o m
     '';
     monitors.overrideConfig = ''
-      monitor = desc:Acer Technologies VG240Y, 1920x1080@75, 0x0, 1, vrr, 2
-      monitor = desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, 1920x1080@165, 1920x0, 1, vrr, 2, bitdepth, 10
-      monitor = , disable
+      # G24F is anchored at 0,0 so nothing (cursor spawn, notifications, layer-shell bars) is
+      # stranded there when the Acer is unplugged. Acer sits to its left; use 1920x0 if it moves.
+      monitor = desc:GIGA-BYTE TECHNOLOGY CO. LTD. GIGABYTE G24F, 1920x1080@165, 0x0, 1, vrr, 2, bitdepth, 10
+      monitor = desc:Acer Technologies VG240Y, 1920x1080@75, -1920x0, 1, vrr, 2
     '';
   };
 }
