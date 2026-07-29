@@ -15,11 +15,10 @@
     ../../user/${hostName}
   ];
 
-  # Identity and paths Home Manager manages.
   home.username = username;
   home.homeDirectory = "/home/" + username;
 
-  # Home Manager release this config targets; don't change without checking release notes.
+  # Don't change without reading the release notes.
   home.stateVersion = lib.mkDefault "23.05";
 
   home.packages = with pkgs; [
@@ -27,6 +26,5 @@
     sops
   ];
 
-  # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }

@@ -32,6 +32,6 @@
     };
   };
 
-  services.displayManager.sddm.wayland.compositorCommand = "kwin_wayland --drm-device=/dev/dri/card0";
+  services.displayManager.sddm.wayland.compositorCommand = "kwin_wayland --drm-device=/dev/dri/amd-igpu";
   boot.supportedFilesystems = [ "ntfs" ];
 }
