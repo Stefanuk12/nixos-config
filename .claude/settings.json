@@ -42,7 +42,8 @@
       "Read(//proc/**)",
       "Read(//etc/modprobe.d/**)",
       "Bash(lsmod)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git reset *)"
     ]
   }
 }
