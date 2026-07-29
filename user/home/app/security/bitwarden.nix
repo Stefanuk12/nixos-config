@@ -31,27 +31,11 @@ let
     done
   '';
 
-  # WebAuthn 2FA from doy/rbw PR #334, unmerged as of 1.15.0. Its USB backend (fido-hid-rs) links
-  # libudev, hence pkg-config + udev. Crates vendor from the PR's Cargo.lock, so no cargoHash.
-  rbw = pkgs.rbw.overrideAttrs (old: {
-    version = "1.15.0-webauthn-pr334";
-    src = pkgs.fetchFromGitHub {
-      owner = "aokellermann";
-      repo = "rbw";
-      rev = "02471b8a798e8021a10ff6799f7e997a71a4070a";
-      hash = "sha256-pXqOjQq8f7cu8zo+Lbf5DOUMCHYc+Lv4PV7uG/m7ZSo=";
-    };
-    cargoDeps = pkgs.rustPlatform.importCargoLock {
-      lockFile = ./rbw-webauthn-Cargo.lock;
-    };
-    buildFeatures = (old.buildFeatures or [ ]) ++ [ "webauthn" ];
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.pkg-config ];
-    buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.udev ];
-  });
 in
 {
+  # pkgs.rbw is the WebAuthn build from packages/rbw-webauthn (see the overlay in flake.nix).
   home.packages = [
-    rbw
+    pkgs.rbw
     pkgs.rofi-rbw
     pkgs.pinentry-qt
     pinentrySmart
@@ -67,11 +51,11 @@ in
   home.activation.rbw-config = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -r /run/secrets/bw/email ]; then
       email=$(cat /run/secrets/bw/email)
-      run ${rbw}/bin/rbw config set email "$email"
+      run ${pkgs.rbw}/bin/rbw config set email "$email"
     else
       echo "rbw-config: /run/secrets/bw/email not readable, skipping email" >&2
     fi
-    run ${rbw}/bin/rbw config set base_url https://vault.bitwarden.com
-    run ${rbw}/bin/rbw config set pinentry ${pinentrySmart}/bin/pinentry-smart
+    run ${pkgs.rbw}/bin/rbw config set base_url https://vault.bitwarden.com
+    run ${pkgs.rbw}/bin/rbw config set pinentry ${pinentrySmart}/bin/pinentry-smart
   '';
 }

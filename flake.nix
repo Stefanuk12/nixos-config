@@ -132,33 +132,6 @@
             };
           });
         })
-        (final: prev: {
-          rbw = prev.rbw.overrideAttrs (old: rec {
-            version = "1.15.0-webauthn-pr334";
-            src = final.fetchFromGitHub {
-              owner = "aokellermann";
-              repo = "rbw";
-              rev = "02471b8a798e8021a10ff6799f7e997a71a4070a";
-              hash = "sha256-pXqOjQq8f7cu8zo+Lbf5DOUMCHYc+Lv4PV7uG/m7ZSo=";
-            };
-            cargoDeps = final.rustPlatform.fetchCargoVendor {
-              inherit src;
-              name = "rbw-${version}-vendor";
-              hash = "sha256-EFT+J4k/QMLCPV4qy/clbO/s9ET9kFrbmLXN7XMKcBg=";
-            };
-            # buildRustPackage bakes `buildFeatures` into cargo flags at call time, so
-            # setting it via overrideAttrs is a no-op. Set the vars the cargo hooks read
-            # directly (structuredAttrs -> these become bash arrays). Both build and check,
-            # so the test phase doesn't rebuild the binaries without the feature.
-            cargoBuildFeatures = (old.cargoBuildFeatures or [ ]) ++ [ "webauthn" ];
-            cargoCheckFeatures = (old.cargoCheckFeatures or [ ]) ++ [ "webauthn" ];
-            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
-              final.pkg-config
-              final.rustPlatform.bindgenHook # fido-hid-rs uses bindgen; needs libclang
-            ];
-            buildInputs = (old.buildInputs or [ ]) ++ [ final.udev final.openssl ];
-          });
-        })
         # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
         # Recompute vendorHash on bump.
         (final: prev: {
