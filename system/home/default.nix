@@ -3,10 +3,11 @@
   imports = [
     ./app
     ./wm
+    ./bluetooth
     ./lanzaboote.nix
-    ./bluetooth.nix
     ./docker.nix
     ./iphone.nix
+    ./openrazer.nix
     ./swap.nix
   ];
 }

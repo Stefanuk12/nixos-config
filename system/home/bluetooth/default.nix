@@ -1,18 +1,20 @@
 { config, pkgs, ... }:
 
 {
+  imports = [ ./mt7927-bt.nix ];
+
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
     settings = {
       General = {
         Name = "stefan_pc";
-        # Advertise as a loudspeaker (0x240414) so iOS/Android list this PC in their audio output picker and stream A2DP to it; a "Computer" major class is filtered out of iOS's picker.
+        # Loudspeaker, so iOS/Android list this PC in their output picker — a "Computer" major
+        # class is filtered out of iOS's.
         Class = "0x240414";
         Experimental = true;
         Discoverable = false;
         Pairable = true;
-        # Enable = "Source,Sink,Media,Socket"; # this actually just breaks my a2dp sink
       };
       Policy = {
         AutoEnable = true;
@@ -41,7 +43,13 @@
     };
   };
 
-  # systemd-rfkill persists a soft block across reboots, overriding powerOnBoot/AutoEnable; clear it after rfkill state is restored.
+  # The rfkill device only appears ~25s into boot, after bt-unblock has run, so it comes up
+  # soft-blocked. Unblocking on device-add is race-free.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="rfkill", ATTR{type}=="bluetooth", ATTR{soft}="0"
+  '';
+
+  # systemd-rfkill persists a soft block across reboots, overriding powerOnBoot/AutoEnable.
   systemd.services.bt-unblock = {
     description = "Clear persisted Bluetooth rfkill soft block on boot";
     after = [ "systemd-rfkill.service" ];

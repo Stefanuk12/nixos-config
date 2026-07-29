@@ -1,13 +1,12 @@
 { ... }:
 {
-  # Compressed in-RAM swap; high priority so it absorbs memory pressure before hitting disk.
+  # High priority so it absorbs memory pressure before the disk swap below.
   zramSwap = {
     enable = true;
-    memoryPercent = 50; # up to ~16GB of compressed swap on this 32GB host
+    memoryPercent = 50;
     priority = 100;
   };
 
-  # Disk-backed swap file; lower priority, only used once zram fills up.
   swapDevices = [
     {
       device = "/var/lib/swapfile";
