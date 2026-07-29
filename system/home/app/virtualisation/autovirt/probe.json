@@ -12,8 +12,8 @@
   },
   "bios": {
     "vendor": "American Megatrends Inc.",
-    "version": "2616",
-    "date": "04/29/2024",
+    "version": "2004",
+    "date": "01/28/2026",
     "revision": "0x00010000"
   },
   "smbios": {

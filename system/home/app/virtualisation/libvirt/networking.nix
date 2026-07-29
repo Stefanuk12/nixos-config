@@ -7,7 +7,7 @@
 }:
 
 {
-  # eth0 is a br0 bridge port, so it must not run DHCP or be NetworkManager-managed, else NM pulls it out of br0 and the bridge loses its uplink.
+  # eth0 is a br0 port: no DHCP, and unmanaged, else NM pulls it out and the bridge loses uplink.
   networking.interfaces.eth0.useDHCP = false;
   networking.networkmanager.unmanaged = [ "eth0" ];
   networking.interfaces.br0.useDHCP = true;

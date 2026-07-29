@@ -1,9 +1,10 @@
 # Shared config builder for the hardened GPU-passthrough Windows gaming VMs (win11-base/rblx/rblx-2); they share CPU pinning, GPU, Looking Glass /dev/kvmfr0 and default nvram/disk paths, so never run two at once.
 
-{ inputs, pkgs }:
+{ config }:
 
 let
   pinning = import ./pinning.nix;
+  hw = import ../../../../../../hosts/home/hardware-profile.nix;
 in
 
 { name
@@ -30,9 +31,9 @@ in
     pinTo = pinning.vmCores;
     hostCores = pinning.hostCores;
     features = {
-      # svm (AMD virt), topoext, invtsc (stable guest TSC).
       require = [ "svm" "topoext" "invtsc" ];
-      # Concealment (hardened only): hide the hypervisor bit + spectre MSRs that leak virt context, since the VR profile keeps them visible for Hyper-V enlightenments.
+      # Hides the hypervisor bit + the spectre MSRs that leak virt context. The VR profile keeps
+      # them visible for Hyper-V enlightenments.
       disable = if hardened then [
         "vmx-vnmi" "hypervisor"
         "ssbd" "amd-ssbd" "virt-ssbd"
@@ -42,8 +43,9 @@ in
   };
 
   firmware = {
-    code = "/var/lib/barely-metal/firmware/OVMF_CODE.fd";
-    varsTemplate = "/var/lib/barely-metal/firmware/OVMF_VARS.fd";
+    code = "${config.barelyMetal.ovmfPackage}/FV/OVMF_CODE.fd";
+    # Host-SB-key-injected vars from the activation; the store vars carry no host keys.
+    varsTemplate = config.barelyMetal.ovmfVarsPath;
     inherit varsPath;
     secureBoot = true;
   };
@@ -51,9 +53,9 @@ in
   # When hardened = false, mkWindowsVM ignores emulator/smbios/acpiTable and falls back to stock qemu with Hyper-V enlightenments on.
   hardening = {
     enable = hardened;
-    emulator = "${inputs.barely-metal.packages.${pkgs.stdenv.hostPlatform.system}.qemu-patched}/bin/qemu-system-x86_64";
-    smbios = "/var/lib/barely-metal/firmware/smbios.bin";
-    acpiTable = "/var/lib/barely-metal/firmware/acpi/spoofed_devices.aml";
+    emulator = "${config.barelyMetal.qemuPackage}/bin/qemu-system-x86_64";
+    smbios = config.barelyMetal.smbiosBinPath;
+    acpiTable = "${config.barelyMetal.acpiTablesPackage}/spoofed_devices.aml";
   };
 
   disks = [{
@@ -64,14 +66,18 @@ in
   }];
 
   cdroms = [{
-    file = "/var/lib/barely-metal/firmware/guest-scripts.iso";
+    file = "${config.barelyMetal.guestScriptsIsoPackage}";
   }];
 
   gpu = {
     addresses = [
-      { bus = 3; slot = 0; function = 0; }
-      { bus = 3; slot = 0; function = 1; }
+      { bus = hw.dgpu.busInt; slot = 0; function = 0; }
+      { bus = hw.dgpu.busInt; slot = 0; function = 1; }
     ];
+    # OVMF needs the GOP image to init the card as its console when video=none, else it hangs
+    # during enumeration. Re-dump on a swap:
+    #   echo 1 > /sys/bus/pci/devices/0000:01:00.0/rom; cat rom > vbios.rom; echo 0 > rom
+    romFile = ../../vbios-rtx5080.rom;
   };
 
   lookingGlass = {
@@ -94,10 +100,9 @@ in
   tpm = true;
   spice = true;
 
-  # CPU governor settings for the libvirt qemu hook.
   governor = {
     enable = true;
-    active = "performance";   # Set on VM start
-    restore = "schedutil";    # Restored on VM stop
+    active = "performance";
+    restore = "schedutil";
   };
 }

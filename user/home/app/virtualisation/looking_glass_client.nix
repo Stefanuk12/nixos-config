@@ -1,7 +1,6 @@
 { pkgs, ... }:
 
 let
-  # Override the looking-glass-client package to stub out checkUUID
   patchedLookingGlass = pkgs.looking-glass-client.overrideAttrs (old: {
     postPatch = (old.postPatch or "") + ''
       sed -i '/^static void checkUUID/,/^}/ c\

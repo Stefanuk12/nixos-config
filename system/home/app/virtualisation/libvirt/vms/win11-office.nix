@@ -1,4 +1,5 @@
-# Plain Office workload VM (no hardening, no GPU passthrough, no pinning/hugepages/governor) — pure data consumed by mkWindowsVM; inputs/pkgs stay in the signature for consistency though unused.
+# Plain Office VM: no hardening, GPU passthrough, pinning, hugepages or governor. inputs/pkgs are
+# unused but kept in the signature for consistency with the other VMs.
 
 { inputs, pkgs }:
 
@@ -13,9 +14,8 @@
     cores = 4;
     threads = 2;
     clusters = 1;
-    # No pinTo / hostCores — let the host scheduler place vCPUs.
+    # No pinTo / hostCores: let the host scheduler place vCPUs.
     features = {
-      # svm + topoext are still useful for correctness on AMD hosts.
       require = [ "svm" "topoext" ];
       disable = [ ];
     };
@@ -28,7 +28,6 @@
     secureBoot = true;   # Windows 11 requirement
   };
 
-  # Hardening fully disabled — mkVM uses the default nixpkgs qemu and skips SMBIOS/ACPI/MSR/clock concealment.
   hardening.enable = false;
 
   disks = [{
@@ -38,10 +37,10 @@
     boot = 1;
   }];
 
-  # Attach a Windows ISO here on first install (cdroms = [ { file = ".../Win11_24H2_English_x64.iso"; } ]).
+  # Attach a Windows ISO here on first install.
   cdroms = [ ];
 
-  # No GPU passthrough; mkVM forces video.model.type = "none", so extraDevices (merged last) restores a normal QXL + SPICE display.
+  # mkWindowsVM forces video.model.type = "none"; extraDevices merges last, restoring a display.
   extraDevices = {
     video.model = {
       type = "qxl";
@@ -67,13 +66,13 @@
     uid = 1000;
   };
 
-  tpm = true;      # Windows 11 requirement
-  spice = true;    # primary display path
+  tpm = true; # Windows 11 requirement
+  spice = true;
 
-  # Governor switching left off — Office isn't perf-critical.
   governor.enable = false;
 
-  # mkVM only emits <vcpu count> with pinning, but <topology> always declares cores×threads, so declare the total (4×2=8) or libvirt rejects the mismatch.
+  # mkWindowsVM only emits <vcpu count> when pinning, but <topology> always declares cores×threads,
+  # so state the total (4×2) or libvirt rejects the mismatch.
   extraAttrs = {
     vcpu = { placement = "static"; count = 8; };
   };

@@ -5,28 +5,40 @@
   ...
 }:
 
+let
+  hw = import ../../../../../hosts/home/hardware-profile.nix;
+in
 {
   imports = [
     inputs.barely-metal.nixosModules.default
     inputs.nixos-facter-modules.nixosModules.facter
   ];
 
-  # Point nixos-facter at your hardware report
   facter.reportPath = ./facter.json;
 
   barelyMetal = {
+    # On for firmware/SMBIOS/Secure-Boot activation, minus its two clobbering side effects: VMs keep
+    # their own emulators (opted in per-VM via qemuPackage) and the custom libvirt networks survive.
     enable = true;
+    setDefaultQemuPackage = false;
+    network.randomizeMac = false;
 
-    # Pass your hardware probe data
+    # autoDetectDrivers off so nvidia isn't blacklisted (dgpu-enable must still bind it);
+    # amdVendorReset off because the passthrough card is NVIDIA.
+    vfio = {
+      enable = true;
+      pciIds = hw.dgpu.deviceIds;
+      autoDetectDrivers = false;
+      amdVendorReset = false;
+    };
+
     probeData = builtins.fromJSON (builtins.readFile ./probe.json);
 
-    # Users to add to kvm, libvirtd, input groups
     users = [ "stefan" ];
 
-    # Replace the OVMF boot logo (saved by barely-metal-probe)
+    # Saved by barely-metal-probe.
     spoofing.bootLogo = ./boot-logo.bmp;
 
-    # Looking Glass shared memory display (optional)
     lookingGlass = {
       enable = true;
       user = "stefan";
@@ -35,16 +47,6 @@
       spoofKvmfrIds = false;
     };
   };
-
-  services.udev.packages = lib.singleton (
-    pkgs.writeTextFile {
-      name = "kvmfr-permissions";
-      text = ''
-        SUBSYSTEM=="kvmfr", GROUP="kvm", MODE="0660"
-      '';
-      destination = "/etc/udev/rules.d/70-kvmfr.rules";
-    }
-  );
 
   virtualisation.libvirtd.qemu.runAsRoot = true;
   virtualisation.libvirtd.qemu.verbatimConfig = lib.mkForce ''

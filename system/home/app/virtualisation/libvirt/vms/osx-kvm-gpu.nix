@@ -1,17 +1,20 @@
 args@{ pkgs, osxKvm, ... }:
 
 let
-  # ── OpenCore source override (DarwinOCPkg) ─────────────────────────────────
-  # Switch this VM's OpenCore image to royalgraphx/DarwinOCPkg (OpenCorePkg 1.0.4 repackaged with curated HFS+/partition drivers) via overrideScope, shadowing the function-arg osxKvm.
+  # No GPU passthrough: macOS has no driver for the RTX 5080 (NVIDIA support ended at
+  # Kepler/Pascal), so this guest runs on mkMacOSVM's emulated vmvga + SPICE. To restore it you
+  # need a macOS-supported AMD card (Polaris/Vega/Navi): re-add `hostdevs` (bus = hw.dgpu.busInt,
+  # functions 0 and 1) with a freshly dumped VBIOS, set `spoofGpu` to that card's device id, set
+  # `videos = [ { model.type = "none"; } ]`, and re-import hardware-profile.nix for `hw`.
+
+  # OpenCorePkg 1.0.4 repackaged with curated HFS+/partition drivers. overrideScope shadows the
+  # function-arg osxKvm.
   osxKvm = args.osxKvm.overrideScope (final: prev: {
     opencore = prev.opencore.override { source = "darwinOCPkg"; };
   });
 
-  # ── OpenCore / config.plist ──
-  # mkMacOSVM/mkImage expect `drivers` as a sibling arg, so pull it back out of the profile for a plain `inherit`.
+  # mkMacOSVM/mkImage want `drivers` as a sibling arg, so pull it back out of the profile.
   inherit (profile) drivers;
-
-  # --- ACPI table sources --------------------------------------------------
 
   ssdtEcUsbx = pkgs.fetchurl {
     url = "https://github.com/royalgraphx/DarwinOCPkg/raw/refs/heads/main/Docs/AcpiSamples/SSDT-EC-USBX.aml";
@@ -22,8 +25,6 @@ let
     sha256 = "1703gw6hkwbb4ll8cj9dcbvxlpn5x11qhfxcgsdgljfb51lkb96z";
   };
 
-  # --- Kext sources --------------------------------------------------------
-
   vmHideSrc = pkgs.fetchzip {
     url = "https://github.com/Carnations-Botanica/VMHide/releases/download/2.0.0/VMHide-2.0.0-RELEASE.zip";
     sha256 = "199qmmkpcgswdb9pdvw55n2kvzvhprzq0qj78i0sn40yvy631ppz";
@@ -32,8 +33,6 @@ let
   vmHide = pkgs.runCommand "VMHide-2.0.0" { } ''
     cp -r ${vmHideSrc}/VMHide.kext $out
   '';
-
-  # --- OpenCore profile ----------------------------------------------------
 
   profile = {
     smbios = {
@@ -126,8 +125,6 @@ let
     ];
   };
 
-  # --- config.plist deep-merge overrides -----------------------------------
-
   plistOverrides = {
     Booter.Quirks = {
       EnableWriteUnprotector = false;
@@ -204,14 +201,14 @@ let
     };
   };
 
-  # 12 vCPUs pinned onto the same cores as the Windows VMs, hoisted to a top-level attr so domains.nix's qemu hook can read `m.pin` for governor switching.
+  # Top-level so domains.nix's qemu hook can read `m.pin` for governor switching.
   pin = import ../lib/pinning.nix;
 
   vm = (import ../lib/mkMacOSVM.nix { inherit pkgs osxKvm; }) {
     inherit profile plistOverrides drivers;
     name = "osx-kvm-gpu";
     uuid = "9a8f7c3e-2d4b-4a1c-9e6f-5b0c1d2e3f4b";
-    # Reshape the domain to DarwinKVM's reference XML (see darwinKvmStyle in mkMacOSVM.nix); CPU model and <loader>/<nvram> stay OSX-KVM.
+    # DarwinKVM's reference XML shape; CPU model and <loader>/<nvram> stay OSX-KVM.
     darwinKvmStyle = true;
     memory = 16384;
     topology = {
@@ -220,24 +217,6 @@ let
       threads = 2;
     };
     inherit pin;
-    hostdevs = [
-      {
-        bus = 3;
-        slot = 0;
-        function = 0;
-        rom = "/var/lib/libvirt/vbios/6950xt.rom";
-      }
-      {
-        bus = 3;
-        slot = 0;
-        function = 1;
-      }
-    ];
-    spoofGpu = {
-      aliasIdx = 0;
-      deviceId = 29631;
-    };
-    videos = [ { model.type = "none"; } ];
     portForwards = [
       {
         proto = "tcp";

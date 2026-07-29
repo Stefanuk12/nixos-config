@@ -4,46 +4,33 @@
   lib,
   ...
 }:
-let
-  kernelPatches = {
-    svm = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/Scrut1ny/AutoVirt/refs/heads/main/patches/Kernel/Archive/linux-6.18.8-svm.patch";
-      hash = "sha256-zz18xerutulLGzlHhnu26WCY8rVQXApyeoDtCjbejIk=";
-    };
-  };
-in
 {
-  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_18;
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest; # in-tree btmtk MT6639 (MT7927 BT) lands in 7.1
   boot.kernelPatches = [
-    # Disabled - current patches mess up CPU frequency, purely visual though
-    # {
-    #   name = "autovirt-svm";
-    #   patch = kernelPatches.svm;
-    # }
+    # Lets barely-metal's patched QEMU map the dGPU's large BARs (the 5080's 16 GB Resizable BAR);
+    # without it OVMF stalls enumerating the GPU. `option` = skipped rather than a build error on
+    # kernels predating VFIO_PCI_DMABUF.
+    {
+      name = "enable-vfio-pci-dmabuf";
+      patch = null;
+      structuredExtraConfig.VFIO_PCI_DMABUF = lib.kernel.option lib.kernel.yes;
+    }
   ];
+  # vfio-pci ids come from barelyMetal.vfio; the softdeps keep nvidia/nouveau off the dGPU first.
   boot.extraModprobeConfig = ''
-    options vfio-pci ids=1002:73a5,1002:ab28
     options kvm_amd nested=1
-    softdep amdgpu pre: vfio-pci
     options v4l2loopback exclusive_caps=1 card_label="OBS Virtual Camera"
+
+    softdep nvidia pre: vfio-pci
+    softdep nouveau pre: vfio-pci
+    softdep drm pre: vfio-pci
   '';
   boot.kernelParams = [
-    # "amdgpu.dc=0"
-    # "radeon.modeset=0"
-    "amdgpu.ppfeaturemask=0xf7fff"
-    "iommu=pt"
-    "kvm.ignore_msrs=1"
-    "video=efifb:off"
-    "vfio-pci.ids=1002:73a5,1002:ab28"
-    # Force the dGPU's HDMI-A-2 dummy plug disconnected so Hyprland doesn't bind card0 when the dGPU rebinds to amdgpu post-boot.
+    # IOMMU (amd_iommu=on iommu=pt) and vfio-pci.ids come from barelyMetal.vfio
     "video=HDMI-A-2:d"
-    # 2MB hugepages are allocated on-demand via vm.nr_overcommit_hugepages (set by domains.nix); no kernel params needed.
   ];
   boot.initrd.kernelModules = [
-    "vfio_pci"
-    "vfio"
-    "vfio_iommu_type1"
-
+    # vfio_pci/vfio/vfio_iommu_type1 in initrd come from barelyMetal.vfio (earlyBinding)
     "i2c_dev"
     "ddcci_backlight"
   ];

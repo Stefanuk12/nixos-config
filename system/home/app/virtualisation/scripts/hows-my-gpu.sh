@@ -1,8 +1,8 @@
-echo "AMD Dedicated Graphics" | grep "AMD" --color=always
-lspci -nnk | grep -iA3 "VGA compatible controller .* Navi" | grep "Kernel driver in use:" --color=always
+#!/usr/bin/env sh
+# Which kernel driver owns each GPU. The dGPU toggles between vfio-pci and its host driver.
+lspci -nnk | grep -EiA3 'VGA compatible controller|3D controller|Display controller' \
+  | grep -Ei --color=always \
+      'VGA compatible controller|3D controller|Display controller|Kernel driver in use|Kernel modules'
 
-echo "AMD Integrated Graphics" | grep "AMD" --color=always
-lspci -nnk | grep -iA3 "VGA compatible controller .* Raphael" | grep "Kernel driver in use:" --color=always
-
-echo ""
-echo "Enable and disable the dedicated AMD GPU with dgpu-enable and dgpu-disable." | grep --color=always -E "dgpu-(enable|disable)"
+echo
+echo "Toggle the dedicated GPU with: dgpu-enable / dgpu-disable"

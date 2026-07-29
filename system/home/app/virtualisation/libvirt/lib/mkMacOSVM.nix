@@ -23,7 +23,7 @@
 }:
 
 let
-  # OpenCore image + OVMF come from the osx-kvm toolkit; user-data disks and NVRAM stay in runtimeDir since they can't live in /nix/store.
+  # User-data disks and NVRAM stay in runtimeDir; they can't live in /nix/store.
   ocImage = osxKvm.mkImage {
     inherit profile extraKexts extraKextBlocks extraAcpi drivers plistOverrides;
   };
@@ -31,8 +31,8 @@ let
   optionalAttrs = c: a: if c then a else {};
   optionals     = c: l: if c then l else [];
 
-  # ── DarwinKVM-style reshapes (gated on darwinKvmStyle) ─────────────
-  # All inert when the toggle is false; CPU mode and <loader>/<nvram> stay locked to the OSX-KVM lineage.
+  # DarwinKVM-style reshapes below are inert unless darwinKvmStyle; CPU mode and <loader>/<nvram>
+  # stay locked to the OSX-KVM lineage either way.
 
   # <nosharepages/> — DarwinKVM convention that also discourages KSM merging.
   darwinKvmDomainExtras = optionalAttrs darwinKvmStyle {
@@ -93,7 +93,8 @@ let
     };
   };
 
-  # Single multifunction pcie-root-port at slot 1 (GPU .0, HDMI audio .1) is the MacPro7,1 GPU path AMDRadeonX6000/AGPM expect — other slots hide the GPU — and no explicit <alias> is set so spoofGpu.aliasIdx keys off the auto-generated "hostdevN".
+  # Slot 1 multifunction (GPU .0, audio .1) is the MacPro7,1 path AMDRadeonX6000/AGPM expect; other
+  # slots hide the GPU. No explicit <alias>, so spoofGpu.aliasIdx keys off the auto "hostdevN".
   gpuControllers = optionals hasGpu [{
     type = "pci"; index = 1; model = "pcie-root-port";
     address = { type = "pci"; domain = 0; bus = 0; slot = 1; function = 0; };
@@ -142,7 +143,7 @@ let
     { value = "name=opt/ovmf/X-PciMmio64Mb,string=65536"; }
   ];
 
-  # Net via qemu-commandline only for port forwards (else libvirt's <interface> handles it); slirp hostfwd takes no ranges, so each range expands per-port with the same MAC/PCI address.
+  # slirp hostfwd takes no ranges, so each range expands per-port with the same MAC/PCI address.
   expandRange = f:
     let to = if f ? to then f.to else f.from;
     in builtins.genList (i: { inherit (f) proto; port = f.from + i; }) (to - f.from + 1);
@@ -166,7 +167,7 @@ let
     };
   };
 
-  # The libvirt domain attrset (for nixvirt's writeXML), a let binding so it can sit alongside configPlist since callers want both.
+  # A let binding so it can sit alongside configPlist; callers want both.
   domain =
 {
   type = "kvm";
@@ -215,7 +216,8 @@ let
     emulator = "${pkgs.qemu_kvm}/bin/qemu-system-x86_64";
 
     disk = [
-      # OpenCore image is in /nix/store so opened RO; libvirt rejects readonly on SATA, hence virtio-blk (macOS ignores the bus after UEFI handoff).
+      # Store paths open RO and libvirt rejects readonly on SATA, hence virtio-blk (macOS ignores
+      # the bus after UEFI handoff).
       {
         type = "file"; device = "disk";
         driver.name = "qemu"; driver.type = "qcow2";
@@ -248,7 +250,8 @@ let
       { type = "pci";  index = 0; model = "pcie-root"; }
     ] ++ gpuControllers;
 
-    # User-mode (slirp NAT) virtio-net-pci since macOS recovery lacks e1000e but ships virtio-net kexts; moves to qemu-commandline when portForwards is set, which nixvirt's <interface> can't express.
+    # virtio-net because macOS recovery lacks e1000e; moves to qemu-commandline when portForwards
+    # is set, which nixvirt's <interface> can't express.
     interface = optionals (portForwards == []) [{
       type        = "user";
       mac.address = "52:54:00:c9:18:27";
@@ -267,7 +270,7 @@ let
     memballoon.model = "none";
     video = videos;
   }
-  # vmvga keeps SPICE so OpenCore/early macOS are visible before the AMD kexts claim the dGPU; videos = [{ model.type = "none"; }] drops the adapter and SPICE.
+  # vmvga keeps SPICE so OpenCore is visible before the GPU kexts load; model.type "none" drops both.
   // optionalAttrs (builtins.any (v: v.model.type or "" != "none") videos) {
     graphics = {
       type = "spice"; autoport = true;

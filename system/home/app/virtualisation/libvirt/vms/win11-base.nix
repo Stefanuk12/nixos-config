@@ -1,8 +1,8 @@
 # Base-image VM (16G, evdev input passthrough for first install) via ../lib/mkGamingVM.nix.
 
-{ inputs, pkgs }:
+{ config }:
 
-import ../lib/mkGamingVM.nix { inherit inputs pkgs; } {
+import ../lib/mkGamingVM.nix { inherit config; } {
   name = "win11-base";
   uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f32";
   diskFile = /var/lib/libvirt/images/win11-base.qcow2;
@@ -10,12 +10,12 @@ import ../lib/mkGamingVM.nix { inherit inputs pkgs; } {
   mac = "52:54:3a:20:c8:5d";
 
   memory = 16;
-  hugepages = { enable = true; size = 1; unit = "G"; };  # 1GB pages
 
-  # Direct host input passthrough via evdev — lower latency than USB, needed on first install or when Looking Glass Host isn't on the guest.
+  # Needed on first install, or when Looking Glass Host isn't on the guest yet. by-id paths only —
+  # eventN numbers shift with probe order across reboots and replugs.
   evdev = [
-    { dev = "/dev/input/event1"; }                                        # keyboard
-    { dev = "/dev/input/event6"; grab = "all"; grabToggle = "ctrl-ctrl";  # mouse
-      repeat = true; }
+    { dev = "/dev/input/by-id/usb-Razer_Razer_BlackWidow_V4_75_-event-kbd"; }  # keyboard
+    { dev = "/dev/input/by-id/usb-Razer_Razer_Viper_V3_Pro-event-mouse";       # mouse
+      grab = "all"; grabToggle = "ctrl-ctrl"; repeat = true; }
   ];
 }

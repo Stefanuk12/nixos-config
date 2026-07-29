@@ -7,7 +7,6 @@
 }:
 
 {
-  # remove need for sudo auth when switching inputs
   security.sudo.extraRules = [
     {
       groups = [ "libvirtd" ];
@@ -42,7 +41,7 @@
 
   environment.systemPackages = with pkgs; [
     python313Packages.virt-firmware
-    # Wraps fetch-macOS-v2.py + qemu-img init (from the osx-kvm flake) to bootstrap a fresh OSX-KVM dir declaratively.
+    # fetch-macOS-v2.py + qemu-img init, to bootstrap a fresh OSX-KVM dir.
     inputs.osx-kvm.packages.${pkgs.stdenv.hostPlatform.system}.fetch-basesystem
   ];
 }

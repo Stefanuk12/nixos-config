@@ -3,8 +3,6 @@
 cfg:
 
 let
-  # ── Helpers ──────────────────────────────────────────────
-
   mkUnit = unit: count: { inherit unit count; };
 
   indexed = f: list:
@@ -15,9 +13,6 @@ let
 
   letters = [ "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" ];
 
-  # ── Unpack config with defaults ──────────────────────────
-
-  # Use realistic memory amounts: 8, 16, 32, 64
   mem         = cfg.memory or 16;
   memUnit     = cfg.memoryUnit or "G";
 
@@ -57,6 +52,7 @@ let
   gpuCfg      = cfg.gpu or {};
   gpuAddrs    = gpuCfg.addresses or [];
   gpuStartBus = gpuCfg.startBus or 4;
+  gpuRomFile  = gpuCfg.romFile or null;
   hasGpu      = gpuAddrs != [];
 
   # USB passthrough by integer vendor:product (libvirt reads base-0); the device must be present at VM start since nixvirt's hostdev has no startupPolicy.
@@ -80,9 +76,7 @@ let
   extraDevices   = cfg.extraDevices or {};
   extraQemuArgs  = cfg.extraQemuArgs or [];
 
-  # ── Memory backing ────────────────────────────────────────
   # Hugepages cut TLB misses; null hpSize uses the host default (2MB), while 1GB pages need size = 1 plus host boot.kernelParams.
-
   memoryBackingSection = optionalAttrs hpEnabled {
     memoryBacking = {
       hugepages = if hpSize != null
@@ -93,9 +87,7 @@ let
     };
   };
 
-  # ── CPU pinning ──────────────────────────────────────────
   # pinTo maps vCPUs to host cores in order; hostCores are reserved for emulator + iothread overhead.
-
   pinningSection = optionalAttrs hasPinning {
     vcpu = { placement = "static"; count = vcpuCount; };
     cputune = {
@@ -108,9 +100,7 @@ let
     };
   };
 
-  # ── OS / firmware ─────────────────────────────────────────
   # Domain UUID is NOT the guest SMBIOS UUID — spoof SMBIOS separately via qemu:commandline -smbios type=1,uuid=...
-
   osSection = {
     type = "hvm";
     arch = "x86_64";
@@ -130,8 +120,6 @@ let
     };
   };
 
-  # ── CPU topology + features ──────────────────────────────
-
   cpuSection = {
     mode = "host-passthrough";
     check = "none";
@@ -140,15 +128,11 @@ let
     cache.mode = "passthrough";
     maxphysaddr.mode = "passthrough";
     feature =
-      # Performance features (e.g. svm/vmx, topoext, invtsc)
       (map (n: { policy = "require"; name = n; }) featReq) ++
-      # Concealment features (e.g. hypervisor, ssbd, virt-ssbd)
       (map (n: { policy = "disable"; name = n; }) featDis);
   };
 
-  # ── Clock ─────────────────────────────────────────────────
   # Hardened uses native TSC with paravirtual clocks off (kvmclock/hypervclock leak the hypervisor); default uses standard Windows timers with Hyper-V enlightenments.
-
   clockSection = if hardened then {
     offset = "localtime";
     timer = [
@@ -169,9 +153,7 @@ let
     ];
   };
 
-  # ── Features ──────────────────────────────────────────────
   # Hardened disables all Hyper-V enlightenments and hides KVM/PMU/vmport/PS2 to dodge anti-cheat fingerprinting, while vendor_id state=on fixes NVIDIA Code 43 on unpatched KVM.
-
   featuresSection = if hardened then {
     acpi = {}; apic = {};
     hyperv = {
@@ -222,9 +204,7 @@ let
     smm.state = secureBoot;
   };
 
-  # ── Device builders ───────────────────────────────────────
   # Disk bus for anti-detection: sata (safest, no virtio fingerprint), nvme (realistic), or virtio (fastest but detectable).
-
   mkDisk = idx: d: {
     type = "file";
     device = "disk";
@@ -277,6 +257,10 @@ let
       slot = 0; function = 0;
     };
     alias.name = "hostdev${toString idx}";
+  } // optionalAttrs (gpuRomFile != null && (addr.function or 0) == 0) {
+    # VBIOS goes on the GPU function only (the audio function has no option ROM); OVMF runs the
+    # ROM's UEFI GOP to init the passthrough card.
+    rom.file = gpuRomFile;
   };
 
   # USB hostdev lands on the emulated xHCI bus; managed=true detaches it from the host driver on start and reattaches on stop.
@@ -289,8 +273,6 @@ let
       product.id = u.product;
     };
   };
-
-  # ── Devices (assembled) ───────────────────────────────────
 
   mkEvdev = e:
     let hasGrab = e ? grab || e ? grabToggle || e ? repeat;
@@ -332,12 +314,11 @@ let
 
     # No virtio balloon — no dynamic RAM and no virtio fingerprint.
     memballoon.model = "none";
-
   } // optionalAttrs (net != null) {
-    # DO NOT use virtio for anti-detection — use e1000e or bridge
+    # Never virtio here — e1000e or bridge, or the guest is trivially detectable.
     interface = [({
       type = net.type or "bridge";
-      mac.address = net.mac;  # Always randomise MAC address
+      mac.address = net.mac;
       source.bridge = net.bridge;
       model.type = net.model or "e1000e";
       link.state = "up";
@@ -378,24 +359,18 @@ let
               ++ (optionals hasUsb (map mkUsbHostdev usbDevices));
   } // extraDevices;
 
-  # ── QEMU command line args ────────────────────────────────
-  # kvm-pv-enforce-cpuid makes probing an absent PV MSR inject #GP even when kvm=off, closing an MSR-based KVM detection vector.
-
   mkArg = v: { value = v; };
 
-  # Enforce CPUID-gated PV MSR access (opt-in, can crash the guest).
   kvmEnforceArgs = optionals (hardened && enforcePvCpuid) [
     (mkArg "-cpu")
     (mkArg "host,kvm-pv-enforce-cpuid=on")
   ];
 
-  # Spoof SMBIOS from a binary dump of the host hardware.
   smbiosArgs = optionals (hardened && hard ? smbios) [
     (mkArg "-smbios")
     (mkArg "file=${hard.smbios}")
   ];
 
-  # Spoof ACPI tables (e.g. spoofed_devices.aml, battery SSDT)
   acpiArgs =
     optionals (hardened && hard ? acpiTable) [
       (mkArg "-acpitable")
@@ -421,9 +396,7 @@ let
     qemu-commandline.arg = allQemuArgs;
   };
 
-  # ── QEMU overrides (SSD spoofing for anti-detection) ────
   # SSD-backed qcow2 only: rotation_rate=1 marks it non-rotational and discard_granularity=512 is a realistic value.
-
   qemuOverrideSection = optionalAttrs hardened {
     qemu-override.device = {
       alias = "sata0-0-0";
@@ -434,22 +407,19 @@ let
     };
   };
 
-  # ── Misc (lifecycle, power management) ───────────────────
   # S3/S4 sleep states are advertised because real hardware supports them and their absence is a detection vector.
-
   miscSection = {
     on_poweroff = "destroy";
     on_reboot = "restart";
     on_crash = "destroy";
     pm = {
-      suspend-to-mem.enabled = true;   # S3 (suspend-to-RAM)
-      suspend-to-disk.enabled = true;  # S4 (hibernate)
+      suspend-to-mem.enabled = true;
+      suspend-to-disk.enabled = true;
     };
   };
 
 in
 
-# ── Final assembly ───────────────────────────────────────
 {
   type = "kvm";
   inherit (cfg) name uuid;

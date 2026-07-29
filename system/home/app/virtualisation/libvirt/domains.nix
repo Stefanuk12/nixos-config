@@ -9,23 +9,22 @@
 let
   mkWindowsVM = import ./lib/mkWindowsVM.nix;
 
-  # Windows VM configs — single source of truth for domain XML + hooks
   vms = {
-    win11-base   = import ./vms/win11-base.nix     { inherit inputs pkgs; };
-    win11-rbxl   = import ./vms/win11-rblx.nix     { inherit inputs pkgs; };
-    win11-rbxl-2 = import ./vms/win11-rblx-2.nix   { inherit inputs pkgs; };
+    win11-base   = import ./vms/win11-base.nix     { inherit config; };
+    win11-rbxl   = import ./vms/win11-rblx.nix     { inherit config; };
+    win11-rbxl-2 = import ./vms/win11-rblx-2.nix   { inherit config; };
     win11-office = import ./vms/win11-office.nix   { inherit inputs pkgs; };
-    gaming       = import ./vms/gaming.nix         { inherit inputs pkgs; };
+    gaming       = import ./vms/gaming.nix         { inherit config; };
   };
 
-  # macOS variants share ./lib/mkMacOSVM.nix (bypassing mkWindowsVM's Windows hardening); each exports { domain, pin?, governor? } and the osx-kvm toolkit is evaluated once here and threaded through.
+  # macOS uses ./lib/mkMacOSVM.nix instead (no Windows hardening); each module exports
+  # { domain, pin?, governor? }. The osx-kvm toolkit is evaluated once and threaded through.
   osxKvm = inputs.osx-kvm.lib.mkOsxKvm { inherit pkgs; };
   osxModules = {
     osx-kvm     = import ./vms/osx-kvm.nix     { inherit pkgs osxKvm; };
     osx-kvm-gpu = import ./vms/osx-kvm-gpu.nix { inherit pkgs osxKvm; };
   };
 
-  # ── Domain XML generation ──────────────────────────────
   mkDomain = cfg: {
     definition = inputs.nixvirt.lib.domain.writeXML (mkWindowsVM cfg);
     active = false;
@@ -36,9 +35,8 @@ let
     active = false;
   };
 
-  # ── QEMU hook generation ────────────────────────────────
-  # One hook script for every VM (windows + osx) that asks for governor management; mkCase takes a flat record so both config shapes feed in the same way.
-
+  # One hook script for every VM asking for governor management; mkCase takes a flat record so
+  # both config shapes feed in the same way.
   mkCase = { name, active, restore, vmCores, hostCores }: ''
     ${name})
       case "$OPERATION/$SUB_OPERATION" in
@@ -98,15 +96,12 @@ let
 
   hasHooks = allCases != [];
 
-  # ── Hugepage host configuration ─────────────────────────
-  # Derives sysctl from VM hugepage settings — 2MB pages use overcommit, 1GB pages must be allocated at boot.
-
+  # 2MB pages use overcommit; 1GB pages must be allocated at boot.
   vmsWithHugepages = lib.filterAttrs (_: cfg:
     let hp = cfg.hugepages or false;
     in if builtins.isAttrs hp then hp.enable or false else hp
   ) vms;
 
-  # Convert memory to MB for page count calculation
   memToMB = cfg:
     let u = cfg.memoryUnit or "G";
     in if u == "G" then cfg.memory * 1024 else cfg.memory;
@@ -122,7 +117,6 @@ let
       else if u == "M" then sz * 1024
       else sz;
 
-  # Group VMs by page size, sum required pages
   totalPagesBySize = builtins.foldl' (acc: cfg:
     let
       psk = pageSizeKB cfg;
@@ -133,6 +127,10 @@ let
   ) {} (builtins.attrValues vmsWithHugepages);
 
   needs2M = totalPagesBySize ? "2048";
+
+  # Anything but 2MB is "gigantic": the kernel ignores nr_overcommit_hugepages for those, so the
+  # pool would silently stay empty and the VM fail to start. Caught by the assertion below.
+  gianticSizes = builtins.filter (s: s != "2048") (builtins.attrNames totalPagesBySize);
 in
 {
   imports = [
@@ -144,19 +142,30 @@ in
     (lib.mapAttrsToList (_: mkDomain) vms)
     ++ map (m: mkRawDomain m.domain) (builtins.attrValues osxModules);
 
-  # Post-ocvalidate config.plist per macOS VM, symlinked into /etc (cat /etc/osx-kvm/<vm>/config.plist) from mk-image.nix's /nix/store output.
+  # Post-ocvalidate config.plist per macOS VM: cat /etc/osx-kvm/<vm>/config.plist.
   environment.etc = lib.mapAttrs'
     (n: m: lib.nameValuePair "osx-kvm/${n}/config.plist" { source = m.configPlist; })
     osxModules;
 
-  # Install qemu hook only if any VM has governor management enabled
   systemd.services.libvirtd.preStart = lib.mkIf hasHooks ''
     mkdir -p /var/lib/libvirt/hooks
     ln -sf ${hookScript} /var/lib/libvirt/hooks/qemu
   '';
 
-  # 2MB hugepages via overcommit, +512 pages (1 GB) headroom for other consumers (e.g. postgres) so a VM at the exact ceiling still starts.
+  # +512 pages (1 GB) of headroom for other consumers (e.g. postgres) so a VM at the exact ceiling
+  # still starts.
   boot.kernel.sysctl = lib.mkIf needs2M {
     "vm.nr_overcommit_hugepages" = totalPagesBySize."2048" + 512;
   };
+
+  assertions = map (sz: {
+    assertion = false;
+    message = ''
+      A VM requests ${sz}kB hugepages, but only 2MB pages are set up here (they are the
+      only size the kernel will hand out on demand). Either switch that VM to
+      `hugepages = { enable = true; size = 2; unit = "M"; }`, or reserve the gigantic
+      pages at boot with kernel params (hugepagesz=${sz}kB hugepages=N) — note that
+      permanently reserves the RAM whether or not the VM is running.
+    '';
+  }) gianticSizes;
 }

@@ -12,7 +12,6 @@
     uefi-run
     lxc
     swtpm
-    bottles
     quickemu
     dosfstools
     sshfs
