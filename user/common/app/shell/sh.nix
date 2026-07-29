@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
   shellAliases = {
     ls = "eza --icons -l -T -L=1";
@@ -19,6 +19,10 @@ in
     enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+
+    # Pins the pre-26.05 default (~/.zshrc). Moving this to $XDG_CONFIG_HOME/zsh relocates
+    # .zshrc, and a session holding a stale ZDOTDIR then finds nothing and loses its config.
+    dotDir = config.home.homeDirectory;
   };
 
   home.packages = with pkgs; [
