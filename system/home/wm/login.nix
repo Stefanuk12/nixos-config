@@ -30,5 +30,11 @@
     };
   };
 
+  # noctalia keeps the Google Calendar OAuth refresh token in the Secret Service, and nothing
+  # else on this host provides one. Hooking it into greetd's PAM stack unlocks it at login so
+  # the token survives without a second prompt.
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
+
   environment.systemPackages = [ pkgs.bibata-cursors ];
 }
