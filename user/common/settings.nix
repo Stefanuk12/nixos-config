@@ -21,7 +21,7 @@ in
     };
     terminal = mkOption {
       type = types.str;
-      default = "alacritty";
+      default = "ghostty";
       description = ''
         The terminal to use.
       '';

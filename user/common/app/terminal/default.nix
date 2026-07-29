@@ -1,6 +1,7 @@
-{ config, ... }:
+{ ... }:
 
 {
   imports = [
+    ./ghostty.nix
   ];
 }
