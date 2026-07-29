@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+    <title>SimpleLogin</title>
+    <link rel="stylesheet" href="../popup/popup.css" />
+    <link rel="stylesheet" href="message.css" />
+  </head>
+  <body>
+    <div id="banner" class="banner state-loading">
+      <div class="banner-row">
+        <span id="banner-pill" class="pill">…</span>
+        <span id="banner-address" class="address">Reading message…</span>
+      </div>
+      <p id="banner-detail" class="detail"></p>
+    </div>
+
+    <dl id="facts" class="facts" hidden>
+      <dt>From</dt>
+      <dd id="fact-sender"></dd>
+      <dt>Activity</dt>
+      <dd id="fact-activity"></dd>
+      <dt>Forwards to</dt>
+      <dd id="fact-mailboxes"></dd>
+    </dl>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <div id="actions" class="message-actions" hidden></div>
+
+    <details id="edit-box" class="create" hidden>
+      <summary>Edit this alias</summary>
+      <div class="create-body">
+        <div class="field">
+          <label for="edit-name">Display name</label>
+          <input id="edit-name" type="text" placeholder="(none)" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="edit-note">Note</label>
+          <input id="edit-note" type="text" autocomplete="off" />
+        </div>
+        <button id="edit-save" class="primary">Save</button>
+      </div>
+    </details>
+
+    <footer>
+      <span id="footer-note"></span>
+      <button id="open-options" class="link">Options</button>
+    </footer>
+
+    <script src="../lib/classify.js"></script>
+    <script src="message.js"></script>
+  </body>
+</html>

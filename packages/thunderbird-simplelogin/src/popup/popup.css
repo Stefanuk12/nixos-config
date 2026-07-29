@@ -1,0 +1,211 @@
+/* Follows the host theme rather than committing to one, so the panel does not
+   glare white inside a dark Thunderbird. */
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --border: #d6dae0;
+  --raised: #f6f8fa;
+  --accent: #1f6feb;
+  --ok: #1a7f37;
+  --warn: #9a6700;
+  --bad: #cf222e;
+  --ok-bg: #e7f5ec;
+  --warn-bg: #fdf5e2;
+  --bad-bg: #fdeceb;
+  --info-bg: #e8f0fe;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1b22;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #3a3944;
+    --raised: #26252e;
+    --accent: #58a6ff;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --ok-bg: #12261a;
+    --warn-bg: #2b2413;
+    --bad-bg: #2d1618;
+    --info-bg: #10233d;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 26rem;
+  margin: 0;
+  padding: 0;
+  font: caption;
+  font-size: 0.8125rem;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ---- banner ---- */
+
+.banner { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+.banner-row { display: flex; align-items: center; gap: 0.5rem; }
+
+.pill {
+  flex: none;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.detail, .plan { margin: 0.4rem 0 0; color: var(--muted); line-height: 1.4; }
+.plan { font-style: italic; }
+.plan:empty, .detail:empty { display: none; }
+
+.state-alias        { background: var(--ok-bg); }
+.state-alias .pill  { background: var(--ok); color: #fff; }
+.state-created      { background: var(--ok-bg); }
+.state-created .pill{ background: var(--ok); color: #fff; }
+.state-will-create  { background: var(--warn-bg); }
+.state-will-create .pill { background: var(--warn); color: #fff; }
+.state-alias-disabled { background: var(--warn-bg); }
+.state-alias-disabled .pill { background: var(--warn); color: #fff; }
+.state-can-create   { background: var(--info-bg); }
+.state-can-create .pill { background: var(--accent); color: #fff; }
+.state-cannot-create, .state-error { background: var(--bad-bg); }
+.state-cannot-create .pill, .state-error .pill { background: var(--bad); color: #fff; }
+.state-not-alias, .state-loading, .state-stale, .state-no-key { background: var(--raised); }
+.state-not-alias .pill, .state-loading .pill, .state-stale .pill, .state-no-key .pill {
+  background: var(--border); color: var(--muted);
+}
+
+.actions { display: flex; gap: 0.4rem; margin-top: 0.6rem; flex-wrap: wrap; }
+
+/* ---- controls ---- */
+
+button {
+  font: inherit;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 1px solid var(--border);
+  background: var(--raised);
+  color: var(--fg);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.ghost { background: transparent; }
+button.link {
+  background: none; border: none; color: var(--accent);
+  padding: 0; text-decoration: underline; cursor: pointer;
+}
+
+input, select {
+  font: inherit;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.3rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  min-width: 0;
+}
+input:focus, select:focus, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.toolbar { display: flex; gap: 0.4rem; padding: 0.5rem 0.75rem; }
+.toolbar input { flex: 1; }
+
+.notice {
+  margin: 0 0.75rem 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.3rem;
+  background: var(--bad-bg);
+  color: var(--bad);
+  line-height: 1.4;
+}
+.notice.info { background: var(--info-bg); color: var(--accent); }
+
+/* ---- alias list ---- */
+
+.aliases {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 20rem;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+
+.aliases li {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.aliases li:hover { background: var(--raised); }
+.aliases li.current { background: var(--ok-bg); }
+
+.alias-top { display: flex; align-items: center; gap: 0.5rem; }
+.alias-top button.more { flex: none; padding: 0.2rem 0.4rem; line-height: 1; }
+
+/* Management controls stay folded away: the list is mostly used for picking,
+   and a Delete button on every visible row is an accident waiting to happen. */
+.alias-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+.alias-tools input { flex: 1 1 7rem; }
+.alias-tools button { flex: none; }
+.alias-tools button.danger { color: var(--bad); border-color: var(--bad); margin-left: auto; }
+
+.alias-main { flex: 1; min-width: 0; }
+.alias-email {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.alias-email.off { text-decoration: line-through; color: var(--muted); }
+.alias-meta { color: var(--muted); font-size: 0.75rem; margin-top: 0.1rem; }
+
+.empty { padding: 1rem 0.75rem; margin: 0; color: var(--muted); text-align: center; }
+
+/* ---- create ---- */
+
+.create { border-top: 1px solid var(--border); }
+.create summary { padding: 0.5rem 0.75rem; cursor: pointer; user-select: none; }
+.create-body { padding: 0 0.75rem 0.75rem; }
+
+.field { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.field label { flex: none; width: 5.5rem; color: var(--muted); }
+.field input, .field select { flex: 1; }
+
+.preview {
+  margin: 0.4rem 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.preview.invalid { color: var(--bad); }
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+}

@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "SimpleLogin Aliases",
+  "version": "1.0.0",
+  "description": "Browse your SimpleLogin aliases from the compose window, send as them, and create them on the fly from the From field.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "simplelogin-aliases@stefan.local",
+      "strict_min_version": "151.0"
+    }
+  },
+  "permissions": [
+    "compose",
+    "accountsRead",
+    "accountsIdentities",
+    "addressBooks",
+    "messagesRead",
+    "storage",
+    "notifications"
+  ],
+  "optional_permissions": [
+    "messagesImport",
+    "messagesDelete"
+  ],
+  "host_permissions": [
+    "https://app.simplelogin.io/*"
+  ],
+  "background": {
+    "scripts": [
+      "lib/api.js",
+      "lib/prefs.js",
+      "lib/classify.js",
+      "lib/messages.js",
+      "lib/store.js",
+      "background.js"
+    ]
+  },
+  "compose_action": {
+    "default_title": "SimpleLogin aliases",
+    "default_label": "SimpleLogin",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/simplelogin.svg",
+      "32": "icons/simplelogin.svg"
+    },
+    "default_area": "maintoolbar"
+  },
+  "message_display_action": {
+    "default_title": "SimpleLogin",
+    "default_label": "SimpleLogin",
+    "default_popup": "message/message.html",
+    "default_icon": {
+      "16": "icons/simplelogin.svg",
+      "32": "icons/simplelogin.svg"
+    }
+  },
+  "compose_scripts": [
+    {
+      "js": [
+        "compose-script.js"
+      ]
+    }
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "48": "icons/simplelogin.svg",
+    "96": "icons/simplelogin.svg"
+  }
+}

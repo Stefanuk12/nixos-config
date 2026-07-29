@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+    <title>SimpleLogin Aliases — options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <h1>SimpleLogin Aliases</h1>
+
+      <section>
+        <h2>Account</h2>
+        <p class="hint">
+          Create a key in SimpleLogin under <em>Settings → API Keys</em>. It can list and
+          create aliases on your account, so treat it as a credential — it is stored in
+          Thunderbird's extension storage inside your profile, unencrypted.
+        </p>
+        <div class="field">
+          <label for="apiKey">API key</label>
+          <input id="apiKey" type="password" autocomplete="off" spellcheck="false" />
+          <button id="reveal" class="ghost" type="button">Show</button>
+          <button id="test" class="ghost" type="button">Test</button>
+        </div>
+        <p id="account-status" class="status"></p>
+        <p id="managed-note" class="hint" hidden>
+          The key is being supplied by a managed-storage manifest outside Thunderbird, so
+          this field is read-only. Change it at the source instead.
+        </p>
+      </section>
+
+      <section>
+        <h2>Replies</h2>
+        <label class="check">
+          <input type="checkbox" id="autoAliasOnReply" />
+          <span>
+            On reply or forward, send from the alias the message arrived at
+            <em>
+              Reads SimpleLogin's <code>X-SimpleLogin-Envelope-To</code> header on the original
+              message. Without this, replies go out from your real mailbox — the alias having
+              done its job on the way in and been abandoned on the way out. Only ever applied
+              once per compose window, so changing From by hand sticks.
+            </em>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="suggestByRecipient" />
+          <span>
+            Suggest an alias you have used with this recipient before
+            <em>Uses SimpleLogin's own recommendation for the recipient's domain. One request per new domain per session.</em>
+          </span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Sent folder</h2>
+        <label class="check">
+          <input type="checkbox" id="restoreSentRecipients" />
+          <span>
+            Put the real recipients back into the copy saved in Sent
+            <em>
+              In reverse-alias mode the message is transmitted to addresses like
+              <code>reply+a7f3x9k2@simplelogin.co</code>, and that is what Sent would otherwise
+              show — making Sent unsearchable by who you actually wrote to. This re-imports the
+              saved copy with corrected To/Cc headers and deletes the original.
+              <strong>It is the only thing here that rewrites stored mail</strong>, so it needs
+              extra permissions and is off by default. The import always happens before the
+              delete, so a failure leaves the original copy intact.
+            </em>
+          </span>
+        </label>
+        <p id="rewrite-permission" class="status"></p>
+      </section>
+
+      <section>
+        <h2>How aliases are sent from</h2>
+        <p class="hint">
+          These two mechanisms are mutually exclusive, which is why this is one choice and
+          not two checkboxes.
+        </p>
+
+        <label class="radio">
+          <input type="radio" name="sendMode" value="reverse-alias" />
+          <span>
+            <strong>Via reverse-aliases</strong> (works with any provider)
+            <em>
+              Recipients are swapped for SimpleLogin reverse-aliases and the message leaves
+              from your real mailbox; SimpleLogin re-sends it to each contact as the alias.
+              The From field is just a selector here and is reset on send. Reverse-aliases
+              need a paid SimpleLogin plan.
+            </em>
+          </span>
+        </label>
+
+        <label class="radio">
+          <input type="radio" name="sendMode" value="identity" />
+          <span>
+            <strong>As a Thunderbird identity</strong> (needs a server that accepts it)
+            <em>
+              A real Thunderbird identity is created for the alias and used directly, with
+              recipients left alone. Cleaner, but it changes the envelope sender — which is
+              exactly what SimpleLogin checks to authorise a reverse-alias send — so the two
+              cannot be combined. Your outgoing server must be willing to send as the alias;
+              a Proton bridge normally is not.
+            </em>
+          </span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Creating aliases</h2>
+        <label class="check">
+          <input type="checkbox" id="autoCreateOnSend" />
+          <span>
+            Create the alias automatically when sending
+            <em>Off: the button still tells you the address is creatable, but you must press Create in the panel.</em>
+          </span>
+        </label>
+
+        <div class="field">
+          <label for="defaultMailboxIds">Forward new aliases to</label>
+          <select id="defaultMailboxIds" multiple size="4"></select>
+        </div>
+        <p class="hint">Select nothing to let SimpleLogin use the account's default mailbox.</p>
+
+        <div class="field">
+          <label for="aliasNote">Note on new aliases</label>
+          <input id="aliasNote" type="text" />
+        </div>
+      </section>
+
+      <section>
+        <h2>Reverse-alias safety</h2>
+        <label class="check">
+          <input type="checkbox" id="strictRewrite" />
+          <span>
+            Cancel the send if any recipient cannot be rewritten
+            <em>Recommended. Sending anyway would deliver to that recipient from your real mailbox, which is the leak the alias exists to prevent.</em>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="expandMailingLists" />
+          <span>
+            Expand local mailing lists to their members
+            <em>SimpleLogin has no notion of a local list, so each member needs its own reverse-alias. Off: a list counts as unresolvable.</em>
+          </span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Timing</h2>
+        <div class="field">
+          <label for="pollIntervalMs">From-field check</label>
+          <input id="pollIntervalMs" type="number" min="250" step="50" />
+          <span class="unit">ms</span>
+        </div>
+        <p class="hint">
+          Thunderbird fires no event when the From field is edited by hand, so the compose
+          window is re-read on this interval. The check is local; only a changed address
+          costs a request.
+        </p>
+        <div class="field">
+          <label for="cacheTtlSec">Alias cache</label>
+          <input id="cacheTtlSec" type="number" min="10" step="10" />
+          <span class="unit">seconds</span>
+        </div>
+      </section>
+
+      <section id="identities-section">
+        <h2>Identities created by this add-on</h2>
+        <p class="hint">
+          Only shown in identity mode. Removing one here deletes the Thunderbird identity;
+          the SimpleLogin alias itself is untouched.
+        </p>
+        <ul id="identities" class="identities"></ul>
+      </section>
+
+      <p id="saved" class="saved" hidden>Saved</p>
+    </main>
+
+    <script src="../lib/prefs.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

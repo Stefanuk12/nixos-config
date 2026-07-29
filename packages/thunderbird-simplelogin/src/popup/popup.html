@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+    <title>SimpleLogin aliases</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- What is about to happen to this message, in plain words. Everything
+         else in the panel is secondary to this. -->
+    <div id="banner" class="banner state-loading">
+      <div class="banner-row">
+        <span id="banner-pill" class="pill">…</span>
+        <span id="banner-address" class="address">Reading compose window…</span>
+      </div>
+      <p id="banner-detail" class="detail"></p>
+      <p id="banner-plan" class="plan"></p>
+      <div id="banner-actions" class="actions" hidden></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Filter aliases…" autocomplete="off" />
+      <button id="random" class="ghost" title="Create a randomly named alias and use it">Random</button>
+      <button id="refresh" class="ghost" title="Re-fetch aliases from SimpleLogin">Refresh</button>
+    </div>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <ul id="aliases" class="aliases"></ul>
+    <p id="empty" class="empty" hidden></p>
+
+    <details id="create-box" class="create">
+      <summary>Create a new alias</summary>
+      <div class="create-body">
+        <div class="field">
+          <label for="new-prefix">Prefix</label>
+          <input id="new-prefix" type="text" placeholder="netflix" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="new-suffix">Domain</label>
+          <select id="new-suffix"></select>
+        </div>
+        <div class="field">
+          <label for="new-name">Display name</label>
+          <input id="new-name" type="text" placeholder="(none)" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="new-mailbox">Forward to</label>
+          <select id="new-mailbox" multiple size="3"></select>
+        </div>
+        <div class="field">
+          <label for="new-note">Note</label>
+          <input id="new-note" type="text" autocomplete="off" />
+        </div>
+        <p id="create-preview" class="preview"></p>
+        <button id="create-submit" class="primary">Create and use</button>
+      </div>
+    </details>
+
+    <footer>
+      <span id="synced"></span>
+      <button id="open-options" class="link">Options</button>
+    </footer>
+
+    <script src="../lib/classify.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

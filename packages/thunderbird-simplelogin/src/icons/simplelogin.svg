@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Envelope with a fork in the delivery path: one address in, another out.
+       Fixed colours rather than context-fill: toolbar icon theming is not
+       reliably applied to add-on SVGs, and a mid-tone grey with a green accent
+       stays legible on both light and dark toolbars. -->
+  <rect x="2.5" y="7" width="20" height="15" rx="2.5" fill="none" stroke="#8b949e" stroke-width="2"/>
+  <path d="M3.5 9.5 12.5 16.5 21.5 9.5" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 25.5h5a4 4 0 0 0 4-4v-9" fill="none" stroke="#2ea043" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="28" cy="9.5" r="3" fill="#2ea043"/>
+  <circle cx="18.5" cy="25.5" r="2.5" fill="#2ea043"/>
+</svg>
