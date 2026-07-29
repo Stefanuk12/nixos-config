@@ -3,6 +3,7 @@
 {
   imports = [
     ./claude_desktop.nix
+    ./cli_tools.nix
     ./dolphin.nix
     ./getmedia.nix
     ./jdownloader.nix
