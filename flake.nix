@@ -2,36 +2,30 @@
   description = "yo mother";
 
   inputs = {
-    # Nixpkgs + HyDE
     hydenix.url = "github:Stefanuk12/hydenix";
-    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # nixpkgs.follows = "hydenix/nixpkgs";
+    # nixpkgs is deliberately left undeclared; the alternatives are nixos-unstable directly or
+    # following hydenix/nixpkgs.
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
 
-    # Home manager
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    # sops
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Nixvim!!
     Neve.url = "github:redyf/Neve";
 
-    # cool looks
     nix-colors.url = "github:misterio77/nix-colors";
 
-    # VM stuff
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
-    barely-metal.url = "github:Stefanuk12/BarelyMetal/update";
+    # Local working tree for testing (was github:Stefanuk12/BarelyMetal/update)
+    barely-metal.url = "path:/home/stefan/Documents/Backup/GitHub/BarelyMetal";
     barely-metal.inputs.nixpkgs.follows = "nixpkgs";
     nixvirt.url = "github:Stefanuk12/NixVirt/patch-pulseaudio";
     nixvirt.inputs.nixpkgs.follows = "nixpkgs";
     osx-kvm.url = "./packages/osx-kvm";
     osx-kvm.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Secure Boot
     lanzaboote.url = "github:nix-community/lanzaboote/v1.1.0";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -47,11 +41,17 @@
     rbw-fetch.url = "./packages/rbw-fetch";
     rbw-fetch.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Helium browser -- not in nixpkgs yet (PR pending), packaged from the upstream .deb
+    # Not in nixpkgs yet (PR pending); packaged from the upstream .deb.
     helium.url = "github:oxcl/nix-flake-helium-browser";
     helium.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Other tools
+    # Fork that serves Proton's CAPTCHA on a local page so a flagged login can be finished in a
+    # browser (stock hydroxide just errors out on 9001). Built by the overlay below.
+    hydroxide-jahroots = {
+      url = "github:Jahroots/hydroxide/60a7c7e846afcf49743ae28afd6692d82a3db8fc";
+      flake = false;
+    };
+
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";
@@ -59,7 +59,6 @@
     winapps.url = "github:winapps-org/winapps";
     winapps.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Gaming
     nix-reshade.url = "github:LovingMelody/nix-reshade";
     nix-reshade.inputs.nixpkgs.follows = "nixpkgs";
     dbd-tools.url = "./packages/dbd-tools";
@@ -100,22 +99,28 @@
       ];
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs systems;
-      # openldap 2.6.x syncrepl tests flake on timing; disable so both NixOS and home-manager configs build.
       homeOverlays = [
         hydenix.overlays.default
-        # Exposes pkgs.helium for scripts that exec the browser directly
         inputs.helium.overlays.default
+        # openldap 2.6.x syncrepl tests flake on timing.
         (final: prev: {
           openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
         })
-        # Bottles 63.2 needs `fvs2` but nixpkgs still ships old `fvs`; mirrors nixpkgs PR #511730, remove once merged.
+        # rbw with WebAuthn 2FA (aokellermann/rbw PR #334); drop once merged into nixpkgs.
+        (final: prev: {
+          rbw = final.callPackage ./packages/rbw-webauthn { };
+        })
+        (final: _prev: {
+          thunderbird-simplelogin = final.callPackage ./packages/thunderbird-simplelogin { };
+        })
+        # Bottles 63.2 needs `fvs2`, nixpkgs still ships `fvs`; mirrors nixpkgs PR #511730.
         (final: prev: {
           fvs2 = final.callPackage ./packages/fvs2 { };
           bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
             propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
           });
         })
-        # Spotify bumped ahead of nixpkgs to the latest stable snap (refresh via the snapcraft info API + nix store prefetch-file).
+        # Ahead of nixpkgs; refresh via the snapcraft info API + `nix store prefetch-file`.
         (final: prev: {
           spotify = prev.spotify.overrideAttrs (_: rec {
             version = "1.2.92.147.g5b8f9367";
@@ -126,6 +131,45 @@
               hash = "sha512-Gk0/WjfgJZIG+2w4teaznAk/7evOXUsuCikDvOhmhAQ5ksQV99VeiYnE+OJf7hHnrPaHoueERvIkk7Psed/kwA==";
             };
           });
+        })
+        (final: prev: {
+          rbw = prev.rbw.overrideAttrs (old: rec {
+            version = "1.15.0-webauthn-pr334";
+            src = final.fetchFromGitHub {
+              owner = "aokellermann";
+              repo = "rbw";
+              rev = "02471b8a798e8021a10ff6799f7e997a71a4070a";
+              hash = "sha256-pXqOjQq8f7cu8zo+Lbf5DOUMCHYc+Lv4PV7uG/m7ZSo=";
+            };
+            cargoDeps = final.rustPlatform.fetchCargoVendor {
+              inherit src;
+              name = "rbw-${version}-vendor";
+              hash = "sha256-EFT+J4k/QMLCPV4qy/clbO/s9ET9kFrbmLXN7XMKcBg=";
+            };
+            # buildRustPackage bakes `buildFeatures` into cargo flags at call time, so
+            # setting it via overrideAttrs is a no-op. Set the vars the cargo hooks read
+            # directly (structuredAttrs -> these become bash arrays). Both build and check,
+            # so the test phase doesn't rebuild the binaries without the feature.
+            cargoBuildFeatures = (old.cargoBuildFeatures or [ ]) ++ [ "webauthn" ];
+            cargoCheckFeatures = (old.cargoCheckFeatures or [ ]) ++ [ "webauthn" ];
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
+              final.pkg-config
+              final.rustPlatform.bindgenHook # fido-hid-rs uses bindgen; needs libclang
+            ];
+            buildInputs = (old.buildInputs or [ ]) ++ [ final.udev final.openssl ];
+          });
+        })
+        # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
+        # Recompute vendorHash on bump.
+        (final: prev: {
+          hydroxide = prev.buildGoModule {
+            pname = "hydroxide";
+            version = "0-unstable-jahroots";
+            src = inputs.hydroxide-jahroots;
+            vendorHash = "sha256-BIHvURCgqEzhl4NsVB7vBwLqMPxkM3CQgHmIcSTdOE4=";
+            subPackages = [ "cmd/hydroxide" ];
+            meta = prev.hydroxide.meta;
+          };
         })
       ];
     in
