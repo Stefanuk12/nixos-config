@@ -146,6 +146,9 @@ in
         # 0, not the -0.8 the HyDE config asked for: HyDE failed to source userprefs.conf, so
         # -0.8 was never actually applied and 0 is what the mouse really felt like.
         sensitivity = 0;
+        # Hands games unaccelerated deltas instead of the compositor's processed motion. flat at
+        # speed 0 happens to be equivalent today, so this is about not depending on that.
+        force_no_accel = true;
         follow_mouse = 1;
       };
 
