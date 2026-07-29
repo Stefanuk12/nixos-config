@@ -4,7 +4,19 @@
 // without opening the SimpleLogin website.
 (() => {
   const $ = (id) => document.getElementById(id);
-  const send = (type, payload = {}) => browser.runtime.sendMessage({ type, ...payload });
+
+  const UNREACHABLE = "The add-on's background page did not answer. Close and reopen this panel.";
+
+  // sendMessage rejects outright when the MV3 event page is suspended or mid-restart, and resolves
+  // undefined when nothing handled the message. Both come back as null so no caller can leave the
+  // panel frozen on the markup's placeholder text.
+  const send = async (type, payload = {}) => {
+    try {
+      return (await browser.runtime.sendMessage({ type, ...payload })) ?? null;
+    } catch {
+      return null;
+    }
+  };
 
   let ctx = { tabId: null, info: null, sender: null, contact: null, settings: null };
 
@@ -30,7 +42,7 @@
     el.disabled = true;
     const res = await work();
     if (!res?.ok) {
-      showNotice(res?.error || "That did not work.");
+      showNotice(res ? res.error || "That did not work." : UNREACHABLE);
       el.disabled = false;
       return;
     }
@@ -132,8 +144,19 @@
   async function load() {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true }).catch(() => []);
     const res = await send("sl:message-context", { tabId: tab?.id ?? null });
+    if (!res) return renderUnreachable();
     ctx = { ...ctx, ...res };
     render();
+  }
+
+  function renderUnreachable() {
+    $("banner").className = "banner state-error";
+    $("banner-pill").textContent = "Error";
+    $("banner-address").textContent = "Add-on error";
+    $("banner-detail").textContent = UNREACHABLE;
+    $("facts").hidden = true;
+    $("actions").hidden = true;
+    $("edit-box").hidden = true;
   }
 
   $("edit-save").addEventListener("click", saveEdits);

@@ -4,7 +4,19 @@
 // answer and sends intents back, so the badge and the panel can't disagree.
 (() => {
   const $ = (id) => document.getElementById(id);
-  const send = (type, payload = {}) => browser.runtime.sendMessage({ type, ...payload });
+
+  const UNREACHABLE = "The add-on's background page did not answer. Close and reopen this panel.";
+
+  // sendMessage rejects outright when the MV3 event page is suspended or mid-restart, and resolves
+  // undefined when nothing handled the message. Both come back as null so no caller can leave the
+  // panel frozen on the markup's placeholder text.
+  const send = async (type, payload = {}) => {
+    try {
+      return (await browser.runtime.sendMessage({ type, ...payload })) ?? null;
+    } catch {
+      return null;
+    }
+  };
 
   // Populated once per open, then patched in place as actions complete.
   let ctx = { tabId: null, status: null, snapshot: null, settings: null };
@@ -25,6 +37,9 @@
     error: "Error",
   };
 
+  // A null reply means the background page never answered, which is not the same as it refusing.
+  const failure = (res, fallback) => (res ? res.error || fallback : UNREACHABLE);
+
   function showNotice(message, kind = "error") {
     const el = $("notice");
     el.textContent = message;
@@ -39,7 +54,8 @@
 
     banner.className = `banner state-${state}`;
     $("banner-pill").textContent = PILL[state] || state;
-    $("banner-address").textContent = status?.address || "(no From address)";
+    $("banner-address").textContent =
+      status?.address || (state === "error" ? "Add-on error" : "(no From address)");
     $("banner-detail").textContent = status?.detail || "";
 
     // The badge only carries three characters, so the full send-time promise lives here.
@@ -212,7 +228,7 @@
     el.disabled = true;
     const res = await work();
     if (!res?.ok) {
-      showNotice(res?.error || "That did not work.");
+      showNotice(failure(res, "That did not work."));
       el.disabled = false;
       return;
     }
@@ -271,7 +287,8 @@
   async function apply(email) {
     showNotice("");
     const res = await send("sl:apply", { tabId: ctx.tabId, email });
-    if (res?.warning) {
+    if (!res) return showNotice(UNREACHABLE);
+    if (res.warning) {
       showNotice(`From was set, but no identity was created: ${res.warning}`, "info");
     }
     if (res?.status) ctx.status = res.status;
@@ -286,7 +303,7 @@
 
     const res = await send("sl:create-current", { tabId: ctx.tabId });
     if (!res?.ok) {
-      showNotice(res?.error || "Could not create the alias.");
+      showNotice(failure(res, "Could not create the alias."));
       await load();
       return;
     }
@@ -308,7 +325,7 @@
     });
 
     if (!res?.ok) {
-      showNotice(res?.error || "Could not create the alias.");
+      showNotice(failure(res, "Could not create the alias."));
       $("create-submit").disabled = false;
       return;
     }
@@ -323,9 +340,12 @@
   async function refresh() {
     showNotice("");
     const res = await send("sl:refresh", { tabId: ctx.tabId });
-    if (res?.error) showNotice(res.error.message);
-    if (res?.snapshot) ctx.snapshot = res.snapshot;
-    if (res?.status) ctx.status = res.status;
+    // The background page may have been suspended since this panel opened; load() re-establishes
+    // it or reports the failure.
+    if (!res) return load();
+    if (res.error) showNotice(res.error.message || String(res.error));
+    if (res.snapshot) ctx.snapshot = res.snapshot;
+    if (res.status) ctx.status = res.status;
     renderAll();
   }
 
@@ -350,8 +370,14 @@
     }
 
     const res = await send("sl:context", { tabId });
+    if (!res) {
+      ctx.status = { state: "error", label: "Error", detail: UNREACHABLE };
+      renderAll();
+      return;
+    }
+
     ctx = { ...ctx, ...res, tabId: res.tabId ?? tabId };
-    if (res?.error) showNotice(res.error.message);
+    if (res.error) showNotice(res.error.message || String(res.error));
     renderAll();
   }
 
