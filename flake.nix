@@ -56,6 +56,10 @@
       flake = false;
     };
 
+    # Builds a Comfy-themed Spotify; spicetify itself can't patch a read-only store path.
+    spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    spicetify-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     ancs4linux.url = "./packages/ancs4linux";
     ancs4linux.inputs.nixpkgs.follows = "nixpkgs";

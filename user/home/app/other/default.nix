@@ -10,6 +10,7 @@
     ./libreoffice.nix
     ./nixfmt.nix
     ./obs_studio.nix
+    ./spicetify.nix
     ./spotify_notify.nix
     ./stremio.nix
     ./winapps
