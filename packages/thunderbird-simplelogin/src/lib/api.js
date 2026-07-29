@@ -13,6 +13,11 @@ globalThis.SLApi = (() => {
   const PAGE_SIZE = 20;
   const MAX_PAGES = 100;
 
+  // fetch() has no default timeout, and store.js hands one in-flight promise to every caller, so a
+  // connection that stalls rather than fails wedges the popup on its placeholder with nothing to
+  // show and no way to recover short of restarting Thunderbird.
+  const TIMEOUT_MS = 20000;
+
   class SLError extends Error {
     constructor(message, { status = 0, code = "error", body = null } = {}) {
       super(message);
@@ -49,15 +54,21 @@ globalThis.SLApi = (() => {
     const headers = { Authentication: apiKey, Accept: "application/json" };
     if (json !== null) headers["Content-Type"] = "application/json";
 
+    const unreachable = (e) =>
+      e.name === "TimeoutError"
+        ? new SLError(`${url.host} did not respond within ${TIMEOUT_MS / 1000}s.`, { code: "timeout" })
+        : new SLError(`Cannot reach ${url.host}: ${e.message}`, { code: "network" });
+
     let res;
     try {
       res = await fetch(url.toString(), {
         method,
         headers,
         body: json === null ? undefined : JSON.stringify(json),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
       });
     } catch (e) {
-      throw new SLError(`Cannot reach ${url.host}: ${e.message}`, { code: "network" });
+      throw unreachable(e);
     }
 
     if (!res.ok) {
@@ -72,7 +83,12 @@ globalThis.SLApi = (() => {
     }
 
     if (res.status === 204) return null;
-    return res.json();
+    // The timeout covers the body too, so a response that stops mid-stream lands here.
+    try {
+      return await res.json();
+    } catch (e) {
+      throw unreachable(e);
+    }
   }
 
   // `truncated` is surfaced so the UI can say "showing the first N" rather than under-report.
