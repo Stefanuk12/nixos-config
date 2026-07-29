@@ -1,7 +1,8 @@
 { pkgs, lib, config, ... }:
 
 let
-  # Declarative defaults installed as a *writable* copy (see the activation script) so Claude Code can mutate settings.json at runtime, which a read-only Nix store symlink would break with EROFS.
+  # Installed as a writable copy by the activation script below: Claude Code mutates settings.json
+  # at runtime, which a read-only store symlink breaks with EROFS.
   defaultSettings = {
     theme = "dark";
     model = "claude-opus-4-8";
@@ -33,23 +34,11 @@ in
     enable = true;
     package = pkgs.claude-code;
 
-    # Intentionally NOT setting `settings` here (that would make settings.json a read-only store symlink); we seed a writable copy below instead.
-
-    # memory.text = ''
-    #   # Personal coding preferences
-    #   - Prefer concise answers
-    #   - Use tabs not spaces in this repo
-    # '';
-
-    # mcpServers = {
-    #   github = {
-    #     command = "docker";
-    #     args = [ "run" "-i" "--rm" "-e" "GITHUB_PERSONAL_ACCESS_TOKEN" "ghcr.io/github/github-mcp-server" ];
-    #   };
-    # };
+    # `settings` is deliberately unset — it would make settings.json a read-only store symlink.
   };
 
-  # Seed a writable settings.json only if none exists; after that Claude Code owns it, so delete ~/.claude/settings.json and rebuild to re-apply changed Nix defaults.
+  # Seeded only if absent; after that Claude Code owns the file, so delete it and rebuild to
+  # re-apply changed defaults.
   home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     _claudeSettings="${config.home.homeDirectory}/.claude/settings.json"
     if [ ! -e "$_claudeSettings" ]; then

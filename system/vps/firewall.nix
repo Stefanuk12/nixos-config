@@ -41,10 +41,9 @@ let
   );
 in
 {
-  # Fail2Ban (basic SSH protection)
   services.fail2ban.enable = true;
 
-  # Allow SSH openly but only Cloudflare IPs on HTTP(S)
+  # SSH is open; HTTP(S) only from Cloudflare IPs.
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];

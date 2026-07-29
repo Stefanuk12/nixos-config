@@ -1,10 +1,10 @@
 { pkgs, lib, ... }:
 
 let
-  # Saved clips land here (~ expanded by the shell at runtime).
   replayDir = "Videos/Replays";
 
-  # Runs after each save; for an .mkv replay it also emits a shareable mp4 mixing desktop (track 0) + mic, stream-copying video and re-encoding audio, keeping both (mkv master, mp4 shareable).
+  # After each save, emit a shareable mp4 alongside the mkv master: desktop (track 0) mixed with
+  # mic, video stream-copied, audio re-encoded.
   onSave = pkgs.writeShellScript "gsr-on-save" ''
     src="$1"
     case "$src" in
@@ -29,7 +29,8 @@ let
     esac
   '';
 
-  # Arm the rolling replay buffer on the high-refresh gaming monitor, falling back to whole-desktop capture if it can't be resolved (focused capture is X11-only).
+  # Rolling replay buffer on the high-refresh monitor, falling back to the whole desktop if it
+  # can't be resolved (focused capture is X11-only).
   replay = pkgs.writeShellScript "gsr-replay" ''
     ${pkgs.coreutils}/bin/sleep 2  # let pipewire + hyprland IPC come up
     monitor=$(hyprctl monitors -j 2>/dev/null \
@@ -54,21 +55,18 @@ let
   '';
 in
 {
-  # Ensure the output directory exists so GSR never fails on a missing path.
+  # GSR fails on a missing output path.
   home.file."${replayDir}/.keep".text = "";
 
   hydenix.hm.hyprland = {
     extraConfig = lib.mkAfter ''
-      # GPU Screen Recorder: keep the last 120s buffered, armed at login.
       exec-once = ${replay}
     '';
 
-    # Match the truncated process name "gpu-screen-rec" (nixpkgs wraps + truncates the binary, and an unanchored -f would also hit gsr-kms-server); bindd shows these in HyDE's cheatsheet under $d's category.
+    # "gpu-screen-rec" is the truncated process name; an unanchored -f would also hit gsr-kms-server.
     keybindings.extraConfig = lib.mkAfter ''
       $d=[$ut|Screen Recording]
-      # SUPER+ALT+R: clip the last 30 seconds
       bindd = SUPER ALT, R, $d Clip last 30s (replay), exec, pkill --signal SIGRTMIN+2 gpu-screen-rec
-      # SUPER+ALT+F: save the full buffer (up to 120s)
       bindd = SUPER ALT, F, $d Save full replay buffer, exec, pkill --signal SIGUSR1 gpu-screen-rec
     '';
   };

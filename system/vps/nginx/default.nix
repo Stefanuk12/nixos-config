@@ -1,7 +1,8 @@
 { lib, config, ... }:
 
 let
-  # Cloudflare per-hostname Authenticated Origin Pull (mTLS): reject any origin-pull without our client cert (./cf-aop-ca.pem), since the CF-IP firewall allowlist is shared by all tenants; the Cf-Worker 403 is defence-in-depth.
+  # Cloudflare Authenticated Origin Pull (mTLS): the CF-IP firewall allowlist is shared by all
+  # tenants, so reject any origin-pull without our client cert. The Cf-Worker 403 is defence in depth.
   mtlsOriginPull = ''
     ssl_client_certificate ${./cf-aop-ca.pem};
     ssl_verify_client on;
@@ -13,7 +14,6 @@ let
   '';
 in
 {
-  # Load Cloudflare API credentials
   sops.secrets."api_token" = {
     sopsFile = ../../../secrets/vps/cloudflare.yaml;
     owner = "acme";
@@ -27,7 +27,6 @@ in
     '';
   };
 
-  # NGINX setup
   services.nginx.enable = true;
   services.nginx.virtualHosts = {
     default = {

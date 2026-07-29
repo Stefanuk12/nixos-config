@@ -16,7 +16,8 @@ in
     enable = true;
     autoPatch.enable = true;
 
-    # Download sources: kaoskrew (packs 1-10) and rexagames (pack 11 + Survey Scramble); Quiplash 2 and Drawful 2 not found.
+    # Sourced from kaoskrew (packs 1-10) and rexagames (pack 11 + Survey Scramble); Quiplash 2 and
+    # Drawful 2 not found.
     games = {
       "2948640" = "/home/stefan/Games/The Jackbox Survey Scramble";
       "3364070" = "/home/stefan/Games/The Jackbox Party Pack 11";
@@ -31,8 +32,6 @@ in
       "397460" = "/home/stefan/Games/The Jackbox Party Pack 2";
       "331670" = "/home/stefan/Games/The Jackbox Party Pack 1";
       "2652000" = "/home/stefan/Games/The Jackbox Naughty Pack";
-      # "1111940" = "/home/stefan/Games/Quiplash 2 InterLASHional";
-      # "442070" = "/home/stefan/Games/Drawful 2";
     };
 
     launchArgs = [ ];

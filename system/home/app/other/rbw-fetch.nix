@@ -8,14 +8,15 @@
   sops.secrets."bw/master_password" = {
     sopsFile = ../../../../secrets/home/bitwarden.yaml;
     key = "master_password";
-    # Readable by stefan so user-side pinentry-smart can serve `rbw unlock` non-interactively; the rbw-fetch service reads via LoadCredential as root.
+    # Readable by stefan so pinentry-smart can serve `rbw unlock` non-interactively; the service
+    # itself reads via LoadCredential as root.
     owner = "stefan";
     mode = "0400";
   };
   sops.secrets."bw/email" = {
     sopsFile = ../../../../secrets/home/bitwarden.yaml;
     key = "email";
-    # Readable by stefan so user-side home-manager activations (rbw-config) can read it; the rbw-fetch service reads via LoadCredential as root.
+    # Readable by stefan for the rbw-config home-manager activation.
     owner = "stefan";
     mode = "0400";
   };

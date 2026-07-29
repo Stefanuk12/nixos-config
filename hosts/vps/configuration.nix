@@ -19,7 +19,6 @@ in
     ../../system/${hostName}
   ];
 
-  # Use systemd
   boot.initrd.systemd.enable = true;
   boot.loader.systemd-boot.enable = true;
   systemd.targets.multi-user.enable = true;
@@ -28,27 +27,20 @@ in
     efiSysMountPoint = "/boot";
   };
 
-  # Setup networking
   networking.hostName = hostName;
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
   time.timeZone = timeZone;
 
-  # Select internationalisation properties.
   i18n.defaultLocale = locale;
 
-  # Configure keymap in X11
   services.xserver.xkb.layout = kbLayout;
   console.keyMap = kbLayout;
 
-  # Disable sound.
   services.pulseaudio.enable = false;
 
-  # Disable autologin.
   services.getty.autologinUser = null;
 
-  # Disable root login
   security.sudo.enable = true;
   security.pam.sshAgentAuth.enable = true;
   security.pam.services.sudo.sshAgentAuth = true;
@@ -65,7 +57,6 @@ in
     settings.ClientAliveCountMax = 2;
   };
 
-  # Define a user account
   users.mutableUsers = false;
   users.users.stefan = {
     isNormalUser = true;
@@ -80,7 +71,6 @@ in
     ];
   };
 
-  # Enable passwordless sudo.
   security.sudo.extraRules = [
     {
       users = [ "stefan" ];
@@ -93,20 +83,16 @@ in
     }
   ];
 
-  # Disable documentation for minimal install.
   documentation.enable = false;
 
-  # Systemd-journald limits (avoid log bloat)
   services.journald.extraConfig = ''
     SystemMaxUse=500M
     RuntimeMaxUse=200M
     MaxFileSec=1month
   '';
 
-  # Disable core dumps to save space / reduce info exposure
   systemd.coredump.enable = false;
 
-  # Basic network sysctl hardening
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.rp_filter" = 1;
     "net.ipv4.conf.default.rp_filter" = 1;
@@ -122,10 +108,8 @@ in
     "net.ipv4.conf.default.log_martians" = 1;
   };
 
-  # Time sync (explicit)
   services.timesyncd.enable = true;
 
-  # Nix store maintenance
   nix.gc = {
     automatic = true;
     dates = "daily";
@@ -133,14 +117,12 @@ in
   };
   nix.optimise.automatic = true;
 
-  # Auto upgrade
   system.autoUpgrade = {
     enable = true;
     allowReboot = false;
     flake = "github:Stefanuk12/nixos-config#vps";
   };
 
-  # Misc
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"

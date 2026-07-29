@@ -5,12 +5,14 @@
 
   programs.helium = {
     enable = true;
-    # Use the overlay package so this and the exec-once launcher share one store path.
+    # Overlay package, so this and the exec-once launcher share one store path.
     package = pkgs.helium;
-    # No `policies` / ExtensionInstallForcelist: helium's ungoogled download path never completes forced installs and forcelisted IDs just become policy-managed, blocking manual installs — install extensions from the web store instead.
+    # No `policies` / ExtensionInstallForcelist: helium's ungoogled download path never completes
+    # forced installs, and forcelisting an ID blocks installing it manually. Use the web store.
   };
 
-  # Mirror helium.desktop into ~/.local/share (always searched, unlike ~/.nix-profile/share) with force=true, since helium rewrites it at runtime when registering as default browser.
+  # ~/.local/share is always searched, unlike ~/.nix-profile/share; force=true because helium
+  # rewrites the file at runtime when registering as default browser.
   xdg.dataFile."applications/helium.desktop" = {
     source = "${pkgs.helium}/share/applications/helium.desktop";
     force = true;

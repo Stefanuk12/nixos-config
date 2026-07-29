@@ -1,7 +1,8 @@
 { pkgs, ... }:
 
 let
-  # Custom Vencord with the vendored "Global Search" userplugin (github.com/Atom1cByte/Global-Search) dropped into src/userplugins/* in preBuild, which adds no npm deps so the pnpmDeps cache is untouched.
+  # Vencord with the vendored Atom1cByte/Global-Search userplugin dropped into src/userplugins in
+  # preBuild. It adds no npm deps, so the pnpmDeps cache is untouched.
   vencord-globalsearch = pkgs.vencord.overrideAttrs (old: {
     preBuild = (old.preBuild or "") + ''
       mkdir -p src/userplugins/globalSearch
@@ -16,7 +17,7 @@ in
 {
   programs.vesktop.enable = true;
 
-  # Use Vesktop's system-Vencord path so it loads our patched build instead of self-managing Vencord.
+  # Vesktop's system-Vencord path, so it loads the patched build instead of self-managing Vencord.
   programs.vesktop.package = pkgs.vesktop.override {
     withSystemVencord = true;
     vencord = vencord-globalsearch;

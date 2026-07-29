@@ -1,6 +1,5 @@
-# Build a static-site root from a directory (excluding this repo's default.nix)
-# and symlink it into /var/www/<name> via tmpfiles. Shared by the per-site
-# modules so the runCommand + tmpfiles boilerplate isn't copy-pasted per host.
+# Build a static-site root from a directory (minus its default.nix) and symlink it into
+# /var/www/<name> via tmpfiles.
 { pkgs, name, dir }:
 
 let

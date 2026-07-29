@@ -8,7 +8,8 @@ let
   rtTable = "200";
 in
 {
-  # Hydenix's 6.18 kernel lacks legacy xtables but waydroid-net.sh defaults to it; flip to nft, absolute-path nft calls, and scope the host masquerade to skip pia-netns traffic.
+  # waydroid-net.sh defaults to legacy xtables, which this kernel lacks: flip to nft, absolute-path
+  # the nft calls, and scope the host masquerade to skip pia-netns traffic.
   nixpkgs.overlays = [
     (final: prev: {
       waydroid = prev.waydroid.overrideAttrs (old: {
@@ -33,7 +34,9 @@ in
     android-tools
   ];
 
-  # Route Android's bridge traffic through the pia netns (transit veth, source-route waydroid0's subnet, NAT out pia0); the "to <androidNet> lookup main" rule is load-bearing or the host's ${androidGw} replies match the source-route and break dnsmasq/DHCP.
+  # Route Android's bridge traffic through the pia netns: transit veth, source-route waydroid0's
+  # subnet, NAT out pia0. The "to <androidNet> lookup main" rule is load-bearing — without it the
+  # host's ${androidGw} replies match the source-route and break dnsmasq/DHCP.
   systemd.services.waydroid-pia-route = {
     description = "Route Android bridge traffic through pia netns";
     after = [ "pia.service" "waydroid-container.service" ];

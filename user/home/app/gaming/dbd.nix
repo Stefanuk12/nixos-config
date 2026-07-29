@@ -32,16 +32,6 @@
         };
       };
 
-      # "Engine.ini" = {
-      #   "/Script/Engine.Engine" = {
-      #     bUseFixedFrameRate = true;
-      #     FixedFrameRate = 240;
-      #     bSmoothFrameRate = false;
-      #     MinSmoothedFrameRate = 240;
-      #     MaxSmoothedFrameRate = 240;
-      #   };
-      # };
-
       "Input.ini" = {
         "/script/engine.inputsettings" = {
           bEnableMouseSmoothing = false;
@@ -95,10 +85,6 @@
     reshade = {
       enable = true;
       defaultPreset = "00. STX Stream.ini";
-      # Override or add ReShade.ini values here; module defaults handle paths and overlay.
-      # settings = {
-      #   INPUT.KeyOverlay = "45,0,0,0";  # Insert
-      # };
     };
   };
 

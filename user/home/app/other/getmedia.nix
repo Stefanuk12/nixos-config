@@ -1,12 +1,13 @@
 { pkgs, ... }:
 
 let
-  # Thin yt-dlp wrapper that gives each download a clean per-site filename, auto-sorts into ~/Videos or ~/Music, and forwards extra flags to yt-dlp.
+  # yt-dlp wrapper: clean per-site filenames, auto-sorted into ~/Videos or ~/Music. Extra flags
+  # pass through.
   getmedia = pkgs.writeShellApplication {
     name = "getmedia";
     runtimeInputs = with pkgs; [
       yt-dlp
-      ffmpeg # muxing, audio extraction
+      ffmpeg
       atomicparsley # thumbnail embedding for mp4/m4a
       coreutils
     ];
@@ -20,7 +21,8 @@ let
       video_dir="''${GETMEDIA_VIDEO_DIR:-$HOME/Videos}"
       audio_dir="''${GETMEDIA_AUDIO_DIR:-$HOME/Music}"
 
-      # Audio-looking invocations (-x, --audio-format, a bare format token) sort into ~/Music by artist/title; otherwise video into ~/Videos foldered per site.
+      # Audio-looking invocations (-x, --audio-format, a bare format token) sort into ~/Music by
+      # artist/title, everything else into ~/Videos foldered per site.
       mode="video"
       for arg in "$@"; do
         case "$arg" in

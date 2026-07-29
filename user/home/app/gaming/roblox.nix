@@ -1,17 +1,17 @@
 { pkgs, ... }:
 
 {
-  # Sober: the Roblox player for Linux (VinegarHQ), Flathub-only.
+  # Flathub-only.
   services.flatpak.packages = [ "org.vinegarhq.Sober" ];
 
-  # Let Sober reach Discord for Rich Presence (discord-rpc).
+  # Rich Presence.
   services.flatpak.overrides."org.vinegarhq.Sober".Context.filesystems = [
     "xdg-run/app/com.discordapp.Discord:create"
     "xdg-run/discord-ipc-0"
   ];
 
   home.packages = [
-    # nixpkgs pins Vinegar 1.9.3 which mangles "Edit in Studio" deeplinks; bump to 1.9.4 for the upstream fix and drop this override once nixpkgs ships 1.9.4+.
+    # nixpkgs pins 1.9.3, which mangles "Edit in Studio" deeplinks. Drop once it ships 1.9.4+.
     (pkgs.vinegar.overrideAttrs (old: rec {
       version = "1.9.4";
       src = pkgs.fetchFromGitHub {
@@ -22,7 +22,8 @@
       };
       vendorHash = "sha256-kS8awIGI5xHY4i7hvKMLcZKdMiFaoirokd3TSpMbC8c=";
 
-      # 1.9.4 moved the wine-root pin to internal/config/config.go, so re-bake the packaged wine (from buildInputs) into the new location since the nixpkgs postPatch no longer applies.
+      # 1.9.4 moved the wine-root pin to internal/config/config.go, so nixpkgs' postPatch no longer
+      # applies; re-bake the packaged wine into the new location.
       postPatch =
         let
           wine = pkgs.lib.findFirst (p: pkgs.lib.hasPrefix "wine64-" (p.name or "")) (
