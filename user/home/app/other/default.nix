@@ -5,6 +5,7 @@
     ./claude_desktop.nix
     ./cli_tools.nix
     ./dolphin.nix
+    ./fastfetch.nix
     ./getmedia.nix
     ./jdownloader.nix
     ./kde_connect.nix
