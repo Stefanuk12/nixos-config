@@ -95,6 +95,81 @@ let
 
   terminal = config.userSettings.terminal;
   noctalia = "${config.programs.noctalia.package}/bin/noctalia";
+
+  # Reads the descriptions off the bindd entries at runtime, so the cheatsheet cannot drift from
+  # the actual binds. modmask is a bitfield, hence the decode.
+  keybindsHint = pkgs.writeShellApplication {
+    name = "keybinds-hint";
+    runtimeInputs = with pkgs; [
+      hyprland
+      jq
+      gawk
+      less
+      coreutils
+    ];
+    text = ''
+      hyprctl binds -j \
+        | jq -r '.[] | select(.description != "") | [.modmask, .key, .description] | @tsv' \
+        | gawk -F'\t' '
+            # Catppuccin Mocha, matching the noctalia theme.
+            BEGIN {
+              mauve    = "\033[38;2;203;166;247m"
+              blue     = "\033[38;2;137;180;250m"
+              text     = "\033[38;2;205;214;244m"
+              subtext  = "\033[38;2;127;132;156m"
+              overlay  = "\033[38;2;88;91;112m"
+              bold     = "\033[1m"
+              reset    = "\033[0m"
+            }
+            function mods(m,   s) {
+              s = ""
+              if (and(m, 64)) s = s "SUPER+"
+              if (and(m,  4)) s = s "CTRL+"
+              if (and(m,  8)) s = s "ALT+"
+              if (and(m,  1)) s = s "SHIFT+"
+              return s
+            }
+            function rank(g,   c) {
+              if (g == "No modifier") return 900
+              c = gsub(/\+/, "+", g)
+              return (g ~ /^SUPER/ ? 0 : 100) + c
+            }
+            {
+              combo = mods($1)
+              group = combo
+              sub(/\+$/, "", group)
+              if (group == "") group = "No modifier"
+              if (!(group in seen)) { seen[group] = 1; order[++groups] = group }
+              n[group]++
+              keys[group, n[group]]  = combo $2
+              descs[group, n[group]] = $3
+            }
+            END {
+              # SUPER-first, then fewest modifiers; bare keys (media/function) sink to the end.
+              for (i = 1; i <= groups; i++)
+                for (j = i + 1; j <= groups; j++) {
+                  a = order[i]; b = order[j]
+                  ra = rank(a); rb = rank(b)
+                  if (rb < ra) { order[i] = b; order[j] = a }
+                }
+
+              printf "\n  %s%s╭─────────────────────────────────────────────╮%s\n", bold, mauve, reset
+              printf "  %s%s│%s  %sKeybinds%s                                   %s%s│%s\n", bold, mauve, reset, bold text, reset, bold, mauve, reset
+              printf "  %s%s╰─────────────────────────────────────────────╯%s\n", bold, mauve, reset
+
+              for (i = 1; i <= groups; i++) {
+                g = order[i]
+                printf "\n  %s%s%s%s\n", bold, blue, g, reset
+                printf "  %s────────────────────────────────────────────────%s\n", overlay, reset
+                for (k = 1; k <= n[g]; k++)
+                  printf "    %s%-24s%s %s%s%s\n", mauve, keys[g, k], reset, text, descs[g, k], reset
+              }
+              printf "\n  %s/ search   q or Esc to close%s\n\n", subtext, reset
+            }
+          ' \
+        | less -R --no-init --quit-if-one-screen --tilde
+    '';
+  };
 in
 {
   home.packages = with pkgs; [
@@ -187,96 +262,109 @@ in
       windowrule = [
         "float on, match:title FreeRDP:.*"
         "stay_focused on, match:title FreeRDP:.*"
+        "float on, match:title ^Keybinds$"
+        "size 900 700, match:title ^Keybinds$"
+        "center on, match:title ^Keybinds$"
       ];
 
-      bind = [
-        "$mainMod, Q, killactive"
-        "ALT, F4, killactive"
-        "$mainMod, W, togglefloating"
-        "$mainMod, G, togglegroup"
-        "$mainMod, J, layoutmsg, togglesplit"
-        "SHIFT, F11, fullscreen"
+      # bindd carries a description, which is what keybinds-hint reads back out.
+      bindd = [
+        # escape=close_surface is scoped to this window via the CLI rather than ghostty.nix, so
+        # Esc keeps its normal meaning in every other terminal. "esc" is rejected as invalid.
+        "$mainMod, slash, Show this keybind list, exec, $terminal --title=Keybinds --window-padding-x=18 --window-padding-y=14 --window-decoration=none --keybind=escape=close_surface -e ${keybindsHint}/bin/keybinds-hint"
 
-        "$mainMod, T, exec, $terminal"
-        "$mainMod, E, exec, dolphin"
-        "$mainMod, C, exec, codium"
-        "$mainMod, B, exec, helium"
+        "$mainMod, Q, Close window, killactive"
+        "ALT, F4, Close window, killactive"
+        "$mainMod, W, Toggle floating, togglefloating"
+        "$mainMod, G, Toggle group, togglegroup"
+        "$mainMod, J, Toggle split direction, layoutmsg, togglesplit"
+        "SHIFT, F11, Fullscreen, fullscreen"
 
-        "$mainMod, Left, movefocus, l"
-        "$mainMod, Right, movefocus, r"
-        "$mainMod, Up, movefocus, u"
-        "$mainMod, Down, movefocus, d"
-        "ALT, Tab, cyclenext"
+        "$mainMod, T, Terminal, exec, $terminal"
+        "$mainMod, E, File manager, exec, dolphin"
+        "$mainMod, C, Editor, exec, codium"
+        "$mainMod, B, Browser, exec, helium"
+        "$mainMod, I, Bitwarden picker, exec, rofi-rbw"
 
-        "$mainMod, S, togglespecialworkspace"
-        "$mainMod SHIFT, S, movetoworkspace, special"
-        "$mainMod CONTROL, Right, workspace, r+1"
-        "$mainMod CONTROL, Left, workspace, r-1"
-        "$mainMod CONTROL, Down, workspace, empty"
-        "$mainMod, mouse_down, workspace, e+1"
-        "$mainMod, mouse_up, workspace, e-1"
+        "$mainMod, Left, Focus left, movefocus, l"
+        "$mainMod, Right, Focus right, movefocus, r"
+        "$mainMod, Up, Focus up, movefocus, u"
+        "$mainMod, Down, Focus down, movefocus, d"
+        "ALT, Tab, Cycle windows, cyclenext"
+
+        "$mainMod, S, Toggle scratchpad, togglespecialworkspace"
+        "$mainMod SHIFT, S, Move to scratchpad, movetoworkspace, special"
+        "$mainMod CONTROL, Right, Next workspace, workspace, r+1"
+        "$mainMod CONTROL, Left, Previous workspace, workspace, r-1"
+        "$mainMod CONTROL, Down, First empty workspace, workspace, empty"
+        "$mainMod, mouse_down, Next workspace, workspace, e+1"
+        "$mainMod, mouse_up, Previous workspace, workspace, e-1"
 
         # Noctalia owns the shell surfaces that HyDE gave to rofi/wlogout/hyprlock.
-        "$mainMod, A, exec, ${noctalia} msg panel-toggle launcher"
-        "$mainMod, TAB, exec, ${noctalia} msg window-switcher"
-        "$mainMod, V, exec, ${noctalia} msg panel-toggle clipboard"
-        "$mainMod, N, exec, ${noctalia} msg panel-toggle control-center"
-        "$mainMod, L, exec, ${noctalia} msg session lock"
-        "CONTROL ALT, Delete, exec, ${noctalia} msg panel-toggle session"
-        "$mainMod SHIFT, W, exec, ${noctalia} msg panel-toggle wallpaper"
-        "$mainMod ALT, Right, exec, ${noctalia} msg wallpaper-next"
-        "$mainMod ALT, Left, exec, ${noctalia} msg wallpaper-previous"
-        "$mainMod, P, exec, ${noctalia} msg screenshot-region"
-        "$mainMod ALT, P, exec, ${noctalia} msg screenshot-fullscreen"
-        ", Print, exec, ${noctalia} msg screenshot-fullscreen"
-        "$mainMod SHIFT, P, exec, hyprpicker -an"
-
-        "$mainMod, I, exec, rofi-rbw"
+        "$mainMod, A, App launcher, exec, ${noctalia} msg panel-toggle launcher"
+        "$mainMod, TAB, Window switcher, exec, ${noctalia} msg window-switcher"
+        "$mainMod, V, Clipboard history, exec, ${noctalia} msg panel-toggle clipboard"
+        "$mainMod, N, Control centre, exec, ${noctalia} msg panel-toggle control-center"
+        "$mainMod, L, Lock screen, exec, ${noctalia} msg session lock"
+        "CONTROL ALT, Delete, Session menu, exec, ${noctalia} msg panel-toggle session"
+        "$mainMod SHIFT, W, Wallpaper picker, exec, ${noctalia} msg panel-toggle wallpaper"
+        "$mainMod ALT, Right, Next wallpaper, exec, ${noctalia} msg wallpaper-next"
+        "$mainMod ALT, Left, Previous wallpaper, exec, ${noctalia} msg wallpaper-previous"
+        "$mainMod, P, Screenshot region, exec, ${noctalia} msg screenshot-region"
+        "$mainMod ALT, P, Screenshot all monitors, exec, ${noctalia} msg screenshot-fullscreen"
+        ", Print, Screenshot all monitors, exec, ${noctalia} msg screenshot-fullscreen"
+        "$mainMod SHIFT, P, Colour picker, exec, hyprpicker -an"
       ]
-      ++ builtins.concatMap (n: [
-        "$mainMod, ${n}, workspace, ${if n == "0" then "10" else n}"
-        "$mainMod SHIFT, ${n}, movetoworkspace, ${if n == "0" then "10" else n}"
-        "$mainMod ALT, ${n}, movetoworkspacesilent, ${if n == "0" then "10" else n}"
-      ]) [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ];
+      ++ builtins.concatMap (
+        n:
+        let
+          ws = if n == "0" then "10" else n;
+        in
+        [
+          "$mainMod, ${n}, Go to workspace ${ws}, workspace, ${ws}"
+          "$mainMod SHIFT, ${n}, Move window to workspace ${ws}, movetoworkspace, ${ws}"
+          "$mainMod ALT, ${n}, Move window to workspace ${ws} silently, movetoworkspacesilent, ${ws}"
+        ]
+      ) [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "0" ];
 
-      bindm = [
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
-        "$mainMod, Z, movewindow"
-        "$mainMod, X, resizewindow"
+      binddm = [
+        "$mainMod, mouse:272, Drag to move window, movewindow"
+        "$mainMod, mouse:273, Drag to resize window, resizewindow"
+        "$mainMod, Z, Hold to move window, movewindow"
+        "$mainMod, X, Hold to resize window, resizewindow"
       ];
 
-      binde = [
-        "$mainMod SHIFT, Right, resizeactive, 30 0"
-        "$mainMod SHIFT, Left, resizeactive, -30 0"
-        "$mainMod SHIFT, Up, resizeactive, 0 -30"
-        "$mainMod SHIFT, Down, resizeactive, 0 30"
+      bindde = [
+        "$mainMod SHIFT, Right, Grow window right, resizeactive, 30 0"
+        "$mainMod SHIFT, Left, Shrink window left, resizeactive, -30 0"
+        "$mainMod SHIFT, Up, Shrink window up, resizeactive, 0 -30"
+        "$mainMod SHIFT, Down, Grow window down, resizeactive, 0 30"
       ];
 
       # Bare -> Spotify's own MPRIS volume/transport, SUPER -> the system sink via noctalia.
-      bindl = [
-        ", XF86AudioPlay, exec, ${spotifyOsd}/bin/spotify-osd playpause"
-        ", XF86AudioPause, exec, ${spotifyOsd}/bin/spotify-osd playpause"
-        ", XF86AudioNext, exec, playerctl -p spotify,%any next"
-        ", XF86AudioPrev, exec, playerctl -p spotify,%any previous"
-        ", XF86AudioMute, exec, ${spotifyOsd}/bin/spotify-osd mute"
-        "SUPER, XF86AudioPlay, exec, playerctl play-pause"
-        "SUPER, XF86AudioPause, exec, playerctl play-pause"
-        "SUPER, XF86AudioNext, exec, playerctl next"
-        "SUPER, XF86AudioPrev, exec, playerctl previous"
-        "SUPER, XF86AudioMute, exec, ${noctalia} msg volume-mute"
-        ", XF86AudioMicMute, exec, ${noctalia} msg mic-mute"
+      binddl = [
+        ", XF86AudioPlay, Spotify play / pause, exec, ${spotifyOsd}/bin/spotify-osd playpause"
+        ", XF86AudioPause, Spotify play / pause, exec, ${spotifyOsd}/bin/spotify-osd playpause"
+        ", XF86AudioNext, Spotify next track, exec, playerctl -p spotify,%any next"
+        ", XF86AudioPrev, Spotify previous track, exec, playerctl -p spotify,%any previous"
+        ", XF86AudioMute, Mute Spotify only, exec, ${spotifyOsd}/bin/spotify-osd mute"
+        "SUPER, XF86AudioPlay, Play / pause any player, exec, playerctl play-pause"
+        "SUPER, XF86AudioPause, Play / pause any player, exec, playerctl play-pause"
+        "SUPER, XF86AudioNext, Next track any player, exec, playerctl next"
+        "SUPER, XF86AudioPrev, Previous track any player, exec, playerctl previous"
+        "SUPER, XF86AudioMute, Mute system output, exec, ${noctalia} msg volume-mute"
+        ", XF86AudioMicMute, Mute microphone, exec, ${noctalia} msg mic-mute"
       ];
 
-      bindel = [
-        ", XF86AudioRaiseVolume, exec, ${spotifyOsd}/bin/spotify-osd up"
-        ", XF86AudioLowerVolume, exec, ${spotifyOsd}/bin/spotify-osd down"
-        "SUPER, XF86AudioRaiseVolume, exec, ${noctalia} msg volume-up"
-        "SUPER, XF86AudioLowerVolume, exec, ${noctalia} msg volume-down"
+      binddel = [
+        ", XF86AudioRaiseVolume, Spotify volume up, exec, ${spotifyOsd}/bin/spotify-osd up"
+        ", XF86AudioLowerVolume, Spotify volume down, exec, ${spotifyOsd}/bin/spotify-osd down"
+        "SUPER, XF86AudioRaiseVolume, System volume up, exec, ${noctalia} msg volume-up"
+        "SUPER, XF86AudioLowerVolume, System volume down, exec, ${noctalia} msg volume-down"
         # noctalia's brightness-set is absolute and rejects negatives, so step with brightnessctl
         # and let noctalia's brightness OSD pick the change up.
-        ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
+        ", XF86MonBrightnessUp, Brightness up, exec, brightnessctl set 5%+"
+        ", XF86MonBrightnessDown, Brightness down, exec, brightnessctl set 5%-"
       ];
     };
   };

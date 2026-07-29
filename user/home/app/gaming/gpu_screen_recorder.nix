@@ -64,9 +64,9 @@ in
     exec-once = [ "${replay}" ];
 
     # "gpu-screen-rec" is the truncated process name; an unanchored -f would also hit gsr-kms-server.
-    bind = [
-      "SUPER ALT, R, exec, pkill --signal SIGRTMIN+2 gpu-screen-rec"
-      "SUPER ALT, F, exec, pkill --signal SIGUSR1 gpu-screen-rec"
+    bindd = [
+      "SUPER ALT, R, Clip last 30s (replay), exec, pkill --signal SIGRTMIN+2 gpu-screen-rec"
+      "SUPER ALT, F, Save full replay buffer, exec, pkill --signal SIGUSR1 gpu-screen-rec"
     ];
   };
 }
