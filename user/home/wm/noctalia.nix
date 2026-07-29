@@ -12,13 +12,17 @@
       shell = {
         font_family = "Arimo Nerd Font";
         polkit_agent = false; # polkit-gnome already runs as a system user service
+
+        # Pushes the live palette/wallpaper to the greeter's sync.toml. Needs pkexec at runtime,
+        # so the first sync after login prompts for a password.
+        greeter_sync.auto_sync = true;
         clipboard_enabled = true;
       };
 
       theme = {
         mode = "dark";
         source = "builtin";
-        builtin = "Ayu";
+        builtin = "Catppuccin";
       };
 
       bar.main = {

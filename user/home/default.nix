@@ -17,7 +17,7 @@
     ../common/app/git.nix
   ];
 
-  colorScheme = inputs.nix-colors.colorSchemes.ayu-dark;
+  colorScheme = inputs.nix-colors.colorSchemes.catppuccin-mocha;
 
   nixpkgs.config.allowUnfree = true;
 }

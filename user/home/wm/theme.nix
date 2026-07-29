@@ -4,14 +4,21 @@
   gtk = {
     enable = true;
     theme = {
-      name = "Adwaita-dark";
-      package = pkgs.gnome-themes-extra;
+      name = "catppuccin-mocha-mauve-standard";
+      package = pkgs.catppuccin-gtk.override {
+        accents = [ "mauve" ];
+        variant = "mocha";
+        size = "standard";
+      };
     };
     iconTheme = {
       name = "Papirus-Dark";
-      package = pkgs.papirus-icon-theme;
+      package = pkgs.catppuccin-papirus-folders.override {
+        flavor = "mocha";
+        accent = "mauve";
+      };
     };
-    # Adwaita-dark ships no GTK4 assets; libadwaita apps follow GTK_THEME below instead.
+    # catppuccin-gtk ships no GTK4 assets; libadwaita apps follow GTK_THEME below instead.
     gtk4.theme = null;
   };
 
@@ -29,5 +36,5 @@
     x11.enable = true;
   };
 
-  home.sessionVariables.GTK_THEME = "Adwaita-dark";
+  home.sessionVariables.GTK_THEME = "catppuccin-mocha-mauve-standard";
 }

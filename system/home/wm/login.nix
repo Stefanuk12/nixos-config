@@ -12,7 +12,10 @@
       user.default = "stefan";
 
       appearance = {
-        scheme = "Ayu";
+        # "Synced", not "Catppuccin": a named builtin here overrides whatever greeter_sync
+        # writes to sync.toml, which would defeat auto_sync. No [appearance.palette] block
+        # either, since a complete one also wins over the synced values.
+        scheme = "Synced";
         theme_mode = "dark";
       };
 
