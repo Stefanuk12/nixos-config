@@ -3,6 +3,7 @@
 {
   imports = [
     ./looking_glass_client.nix
+    ./winapps
   ];
 
   home.packages = with pkgs; [

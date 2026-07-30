@@ -7,8 +7,9 @@
     ./comms/thunderbird.nix
     ./browser/helium.nix
     ./security
-    ./utils/nixvim
+    ./utils
     ./dev
+    ./media
     ./virtualisation
     ./other
     ./gaming
