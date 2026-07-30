@@ -7,13 +7,14 @@
 }:
 
 {
-  # eth0 is a br0 port: no DHCP, and unmanaged, else NM pulls it out and the bridge loses uplink.
-  networking.interfaces.eth0.useDHCP = false;
-  networking.networkmanager.unmanaged = [ "eth0" ];
+  # eno1 is the port with the cable (eth0 is the second, unused onboard NIC). As a br0 port it gets
+  # no DHCP, and must be unmanaged, else NM pulls it out and the bridge loses uplink.
+  networking.interfaces.eno1.useDHCP = false;
+  networking.networkmanager.unmanaged = [ "eno1" ];
   networking.interfaces.br0.useDHCP = true;
   networking.bridges = {
     "br0" = {
-      interfaces = [ "eth0" ];
+      interfaces = [ "eno1" ];
     };
   };
 
