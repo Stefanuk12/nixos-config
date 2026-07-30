@@ -19,11 +19,15 @@ let
       import os
       import subprocess
       import sys
+      import time
 
       import tomlkit
 
       HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
       SECTIONS = ("osd", "notification")
+      OSD_LAYER = "noctalia-osd"
+      OSD_WAIT = 5.0
+      OSD_POLL = 0.25
 
       STATE = os.path.join(
           os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")),
@@ -82,13 +86,16 @@ let
           return focused.get("name")
 
 
-      def apply(name):
+      def read():
           try:
               with open(STATE) as handle:
-                  doc = tomlkit.parse(handle.read())
+                  return tomlkit.parse(handle.read())
           except FileNotFoundError:
-              doc = tomlkit.document()
+              return tomlkit.document()
 
+
+      def retarget(doc, name):
+          """Point both sections at `name`. True when that changed the document."""
           changed = False
           for section_name in SECTIONS:
               section = doc.get(section_name)
@@ -98,8 +105,36 @@ let
               if list(section.get("monitors", [])) != [name]:
                   section["monitors"] = [name]
                   changed = True
+          return changed
 
-          if not changed:
+
+      def osd_on_screen():
+          """The layer only exists while noctalia holds OSD surfaces."""
+          try:
+              layers = hypr("layers")
+          except (subprocess.CalledProcessError, json.JSONDecodeError):
+              return False
+          return any(
+              layer.get("namespace") == OSD_LAYER
+              for output in layers.values()
+              for level in output.get("levels", {}).values()
+              for layer in level
+          )
+
+
+      def apply(name):
+          if not retarget(read(), name):
+              return False
+
+          # noctalia 5.0.0 tears its OSD surfaces down and rebuilds them whenever a config
+          # reload changes osd.monitors, and the rebuilt ones carry no hide timer — an OSD
+          # that happens to be on screen at that moment stays up forever. Let it finish.
+          deadline = time.monotonic() + OSD_WAIT
+          while osd_on_screen() and time.monotonic() < deadline:
+              time.sleep(OSD_POLL)
+
+          doc = read()
+          if not retarget(doc, name):
               return False
 
           tmp = STATE + ".tmp"
