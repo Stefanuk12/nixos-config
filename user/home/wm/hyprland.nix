@@ -273,6 +273,9 @@ in
         "float on, match:title ^Keybinds$"
         "size 900 700, match:title ^Keybinds$"
         "center on, match:title ^Keybinds$"
+        # vrr,2 on both monitors turns VRR on for whatever is fullscreen; this exempts LG,
+        # which is fullscreen by default (win.fullScreen in looking_glass_client.nix).
+        "no_vrr on, match:class ^looking-glass-client$"
       ];
 
       # bindd carries a description, which is what keybinds-hint reads back out.
