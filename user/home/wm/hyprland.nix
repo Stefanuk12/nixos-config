@@ -189,6 +189,10 @@ in
     hyprpicker
     hyprsunset
     libnotify
+    # The share picker shells out to this for its Region tab, and xdph to it plus grim for
+    # interactive screenshots; without it the picker just exits and the client re-prompts.
+    slurp
+    grim
   ];
 
   xdg.userDirs.setSessionVariables = true;
