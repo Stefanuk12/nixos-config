@@ -1,16 +1,18 @@
 { pkgs, ... }:
 
 let
-  # Vencord with the vendored Atom1cByte/Global-Search userplugin dropped into src/userplugins in
-  # preBuild. It adds no npm deps, so the pnpmDeps cache is untouched.
-  vencord-globalsearch = pkgs.vencord.overrideAttrs (old: {
+  # Vencord with the vendored userplugins dropped into src/userplugins in preBuild: Atom1cByte's
+  # Global-Search and the local streamer-mode override. Neither adds npm deps, so the pnpmDeps
+  # cache is untouched.
+  vencord-userplugins = pkgs.vencord.overrideAttrs (old: {
     preBuild = (old.preBuild or "") + ''
-      mkdir -p src/userplugins/globalSearch
+      mkdir -p src/userplugins/globalSearch src/userplugins/streamerModeOverride
       cp ${./global-search}/index.ts \
          ${./global-search}/MessageSearchChatBarIcon.tsx \
          ${./global-search}/MessageSearchModal.tsx \
          src/userplugins/globalSearch/
-      chmod -R u+w src/userplugins/globalSearch
+      cp ${./streamer-mode-override}/index.ts src/userplugins/streamerModeOverride/
+      chmod -R u+w src/userplugins/globalSearch src/userplugins/streamerModeOverride
     '';
   });
 in
@@ -24,7 +26,7 @@ in
   programs.vesktop.vencord.useSystem = true;
   programs.vesktop.package = pkgs.vesktop.override {
     withSystemVencord = true;
-    vencord = vencord-globalsearch;
+    vencord = vencord-userplugins;
   };
 
   # https://github.com/Vencord/Vesktop/blob/main/src/shared/settings.d.ts
@@ -43,7 +45,7 @@ in
   # https://github.com/Vendicated/Vencord/blob/main/src/api/Settings.ts
   programs.vesktop.vencord.settings = {
     plugins = {
-      # Vendored userplugin, compiled into vencord-globalsearch above.
+      # Vendored userplugin, compiled into vencord-userplugins above.
       "Global Search".enabled = true;
       Experiments.enabled = true;
       CallTimer.enabled = true;
@@ -74,6 +76,7 @@ in
       ReverseImageSearch.enabled = true;
       ShikiCodeblocks.enabled = true;
       ShowHiddenChannels.enabled = true;
+      StreamerModeManualOverride.enabled = true;
       Translate.enabled = true;
       Unindent.enabled = true;
       ValidReply.enabled = true;
