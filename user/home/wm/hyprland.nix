@@ -379,4 +379,13 @@ in
       ];
     };
   };
+
+  # Discord tears its screencast session down and opens a new one every second or so; without a
+  # restore token each of those is another share picker. This pre-ticks the picker's "allow
+  # restoring" box, so the second session onwards restores silently instead of prompting.
+  xdg.configFile."hypr/xdph.conf".text = ''
+    screencopy {
+      allow_token_by_default = true
+    }
+  '';
 }
