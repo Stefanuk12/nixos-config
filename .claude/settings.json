@@ -44,7 +44,9 @@
       "Bash(lsmod)",
       "Bash(git add *)",
       "Bash(git reset *)",
-      "Bash(git apply *)"
+      "Bash(git apply *)",
+      "Bash(git checkout *)",
+      "Bash(python3 -)"
     ]
   }
 }
