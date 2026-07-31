@@ -75,7 +75,7 @@ in
       };
       ReverseImageSearch.enabled = true;
       ShikiCodeblocks.enabled = true;
-      ShowHiddenChannels.enabled = true;
+      ShowHiddenChannels.enabled = false;
       StreamerModeManualOverride.enabled = true;
       Translate.enabled = true;
       Unindent.enabled = true;
