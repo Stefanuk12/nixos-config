@@ -18,6 +18,10 @@ in
   programs.vesktop.enable = true;
 
   # Vesktop's system-Vencord path, so it loads the patched build instead of self-managing Vencord.
+  # Both are needed: the module re-overrides the package with
+  # `withSystemVencord = cfg.vencord.useSystem`, so setting it here alone is silently undone and
+  # the vencord argument below goes unused.
+  programs.vesktop.vencord.useSystem = true;
   programs.vesktop.package = pkgs.vesktop.override {
     withSystemVencord = true;
     vencord = vencord-globalsearch;
