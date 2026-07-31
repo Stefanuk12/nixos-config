@@ -1,0 +1,29 @@
+The linux-dmabuf format_table event passes ownership of the fd to the client. xdph mmaps it and
+never closes it, so every re-sent feedback leaks one descriptor on an unlinked /dev/shm file. Once
+the first feedback has completed, dma.done short-circuits the handler and leaks the fd without even
+mapping it. At the 1024-fd default this kills every later ScreenCast session with EMFILE
+("Failed to create event object (Too many open files)") after roughly a day of uptime.
+
+The mapping is MAP_PRIVATE and stays valid after the descriptor is closed.
+
+--- a/src/core/PortalManager.cpp
++++ b/src/core/PortalManager.cpp
+@@ -151,13 +151,17 @@
+         m_sWaylandConnection.linuxDmabufFeedback->setFormatTable([this](CCZwpLinuxDmabufFeedbackV1* r, int fd, uint32_t size) {
+             Debug::log(TRACE, "[core] dmabufFeedbackFormatTable");
+ 
+-            if (m_sWaylandConnection.dma.done)
++            if (m_sWaylandConnection.dma.done) {
++                close(fd);
+                 return;
++            }
+ 
+             m_vDMABUFMods.clear();
+ 
+             m_sWaylandConnection.dma.formatTable = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+ 
++            close(fd);
++
+             if (m_sWaylandConnection.dma.formatTable == MAP_FAILED) {
+                 Debug::log(ERR, "[core] format table failed to mmap");
+                 m_sWaylandConnection.dma.formatTable     = nullptr;

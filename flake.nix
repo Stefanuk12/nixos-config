@@ -139,6 +139,13 @@
             };
           });
         })
+        # xdph never closes the linux-dmabuf format-table fd, so screen sharing dies with EMFILE
+        # after about a day of uptime. Drop once the fix lands upstream; nixpkgs is on 1.4.0.
+        (final: prev: {
+          xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.overrideAttrs (old: {
+            patches = (old.patches or [ ]) ++ [ ./packages/xdph-format-table-fd.patch ];
+          });
+        })
         # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
         # Recompute vendorHash on bump.
         (final: prev: {
