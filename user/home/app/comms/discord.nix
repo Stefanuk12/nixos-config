@@ -1,18 +1,13 @@
 { pkgs, ... }:
 
 let
-  # Vencord with the vendored userplugins dropped into src/userplugins in preBuild: Atom1cByte's
-  # Global-Search and the local streamer-mode override. Neither adds npm deps, so the pnpmDeps
-  # cache is untouched.
+  # Vencord with the local streamer-mode override dropped into src/userplugins in preBuild. It adds
+  # no npm deps, so the pnpmDeps cache is untouched.
   vencord-userplugins = pkgs.vencord.overrideAttrs (old: {
     preBuild = (old.preBuild or "") + ''
-      mkdir -p src/userplugins/globalSearch src/userplugins/streamerModeOverride
-      cp ${./global-search}/index.ts \
-         ${./global-search}/MessageSearchChatBarIcon.tsx \
-         ${./global-search}/MessageSearchModal.tsx \
-         src/userplugins/globalSearch/
+      mkdir -p src/userplugins/streamerModeOverride
       cp ${./streamer-mode-override}/index.ts src/userplugins/streamerModeOverride/
-      chmod -R u+w src/userplugins/globalSearch src/userplugins/streamerModeOverride
+      chmod -R u+w src/userplugins/streamerModeOverride
     '';
   });
 in
@@ -45,8 +40,6 @@ in
   # https://github.com/Vendicated/Vencord/blob/main/src/api/Settings.ts
   programs.vesktop.vencord.settings = {
     plugins = {
-      # Vendored userplugin, compiled into vencord-userplugins above.
-      "Global Search".enabled = true;
       Experiments.enabled = true;
       CallTimer.enabled = true;
       ClearURLs.enabled = true;
