@@ -18,6 +18,19 @@ in
       '';
       destination = "/etc/udev/rules.d/70-gpu-symlinks.rules";
     }
+  ) ++ lib.singleton (
+    # systemd tags every DRM card master-of-seat, so logind claims the dGPU's card node and hands
+    # it to the session — Hyprland then holds an fd on a GPU it never renders on, and nvidia_drm
+    # cannot be unloaded for dgpu-disable. No display is attached to it, so drop it from the seat.
+    # Numbered past 71-seat.rules and 73-seat-late.rules, which are what set these. Only card*, so
+    # the render node keeps uaccess and stays usable for offload.
+    pkgs.writeTextFile {
+      name = "dgpu-no-seat";
+      text = ''
+        SUBSYSTEM=="drm", KERNEL=="card*", KERNELS=="${hw.dgpu.pciAddr}", TAG-="seat", TAG-="master-of-seat", ENV{ID_SEAT}=""
+      '';
+      destination = "/etc/udev/rules.d/74-dgpu-no-seat.rules";
+    }
   );
 
   # Games render on the dGPU but the iGPU composites and scans out every one of their frames, and
