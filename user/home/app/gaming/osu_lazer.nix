@@ -1,6 +1,8 @@
 { config, inputs, pkgs, ... }:
 
 let
+  gpuEnv = import ../../../../hosts/home/gpu-env.nix;
+
   noctalia = "${config.programs.noctalia.package}/bin/noctalia";
 
   # Notifications trigger compositor repaint stalls mid-gameplay; they queue and pop on leaving.
@@ -54,7 +56,7 @@ let
 in
 {
   home.packages = [
-    pkgs.osu-lazer-bin
+    (gpuEnv.onDgpu pkgs pkgs.osu-lazer-bin)
     inputs.osu-collect.packages.${pkgs.stdenv.hostPlatform.system}.default
     osuDndSuppress
   ];
