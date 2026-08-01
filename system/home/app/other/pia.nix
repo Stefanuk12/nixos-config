@@ -30,5 +30,10 @@
       enable = true;
       user = "stefan";
     };
+
+    confinedApps.helium = {
+      enable = true;
+      user = "stefan";
+    };
   };
 }

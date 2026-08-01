@@ -4,6 +4,24 @@
 let
   cfg = config.services.pia-confinement;
   ns = cfg.namespace;
+
+  sessionEnv = app: {
+    HOME = "/home/${app.user}";
+    XDG_RUNTIME_DIR = "/run/user/${toString app.uid}";
+    WAYLAND_DISPLAY = app.waylandDisplay;
+    DISPLAY = ":0";
+    DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${toString app.uid}/bus";
+  };
+
+  manageUnitRule = user: unit: ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          action.lookup("unit") == "${unit}" &&
+          subject.user == "${user}") {
+        return polkit.Result.YES;
+      }
+    });
+  '';
 in
 {
   options.services.pia-confinement = {
@@ -82,6 +100,45 @@ in
         type = lib.types.str;
         default = "wayland-1";
         description = "Name of the user session's wayland socket (check `ls /run/user/<uid>/`).";
+      };
+    };
+
+    confinedApps.helium = {
+      enable = lib.mkEnableOption "a second Helium instance, confined to the PIA namespace";
+
+      user = lib.mkOption {
+        type = lib.types.str;
+        description = "User to run Helium as. Must have a working desktop session.";
+      };
+
+      uid = lib.mkOption {
+        type = lib.types.int;
+        default = 1000;
+        description = "UID of the user above (for XDG_RUNTIME_DIR / DBus path).";
+      };
+
+      waylandDisplay = lib.mkOption {
+        type = lib.types.str;
+        default = "wayland-1";
+        description = "Name of the user session's wayland socket (check `ls /run/user/<uid>/`).";
+      };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.helium;
+        defaultText = "pkgs.helium";
+        description = "Helium package to run. Should match the unconfined instance's package.";
+      };
+
+      profileDir = lib.mkOption {
+        type = lib.types.str;
+        default = ".config/net.imput.helium-vpn";
+        description = ''
+          Profile directory, relative to the user's home. MUST differ from the unconfined
+          instance's profile: Chromium hands a launch off to whichever process already holds
+          that profile's singleton socket, so a shared profile would silently route the
+          confined launch into the unconfined browser.
+        '';
       };
     };
   };
@@ -213,25 +270,78 @@ in
             RestartSec = "5s";
             ExecStart = "${pkgs.qbittorrent}/bin/qbittorrent";
           };
-          environment = {
-            HOME = "/home/${qbt.user}";
-            XDG_RUNTIME_DIR = "/run/user/${toString qbt.uid}";
-            WAYLAND_DISPLAY = qbt.waylandDisplay;
-            DISPLAY = ":0";
-            DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${toString qbt.uid}/bus";
+          environment = sessionEnv qbt // {
             QT_QPA_PLATFORM = "wayland;xcb";
           };
         };
 
-        security.polkit.extraConfig = ''
-          polkit.addRule(function(action, subject) {
-            if (action.id == "org.freedesktop.systemd1.manage-units" &&
-                action.lookup("unit") == "qbittorrent.service" &&
-                subject.user == "${qbt.user}") {
-              return polkit.Result.YES;
-            }
-          });
+        security.polkit.extraConfig = manageUnitRule qbt.user "qbittorrent.service";
+      }
+    ))
+
+    (lib.mkIf cfg.confinedApps.helium.enable (
+      let
+        hlm = cfg.confinedApps.helium;
+        profile = "/home/${hlm.user}/${hlm.profileDir}";
+        socket = "${profile}/SingletonSocket";
+        handoff = ''${hlm.package}/bin/helium --user-data-dir=${profile}'';
+
+        launcher = pkgs.writeShellScriptBin "helium-vpn" ''
+          set -eu
+
+          # With the socket present, this exec only forwards the command line to the confined
+          # process and exits; without it, the same exec would open the profile out here,
+          # unconfined. So never reach it until the service is actually up.
+          if [ ! -S ${socket} ]; then
+            ${pkgs.systemd}/bin/systemctl start helium-vpn.service
+            for _ in $(${pkgs.coreutils}/bin/seq 100); do
+              [ -S ${socket} ] && break
+              ${pkgs.coreutils}/bin/sleep 0.1
+            done
+            if [ ! -S ${socket} ]; then
+              echo "helium-vpn.service did not come up; is the ${ns} namespace running?" >&2
+              exit 1
+            fi
+            # The service opened its own startup window, so a bare launch is already served.
+            if [ "$#" -eq 0 ]; then exit 0; fi
+          fi
+
+          exec ${handoff} "$@"
         '';
+
+        desktopItem = pkgs.makeDesktopItem {
+          name = "helium-vpn";
+          desktopName = "Helium (VPN)";
+          genericName = "Web Browser";
+          exec = "${launcher}/bin/helium-vpn %U";
+          icon = "${hlm.package}/share/icons/hicolor/256x256/apps/helium.png";
+          categories = [ "Network" "WebBrowser" ];
+          startupWMClass = "helium-vpn";
+          # No mimeTypes: this must never win the default http/https handler.
+        };
+      in
+      {
+        environment.systemPackages = [ launcher desktopItem ];
+
+        systemd.services.helium-vpn = {
+          description = "Helium (confined to ${ns} netns)";
+          vpnConfinement = {
+            enable = true;
+            vpnNamespace = ns;
+          };
+          serviceConfig = {
+            Type = "simple";
+            User = hlm.user;
+            Group = "users";
+            Restart = "no";
+            ExecStart = "${handoff} --class=helium-vpn";
+          };
+          environment = sessionEnv hlm // {
+            NIXOS_OZONE_WL = "1";
+          };
+        };
+
+        security.polkit.extraConfig = manageUnitRule hlm.user "helium-vpn.service";
       }
     ))
   ]);
