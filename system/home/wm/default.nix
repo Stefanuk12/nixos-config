@@ -20,6 +20,22 @@ in
     }
   );
 
+  # Games render on the dGPU but the iGPU composites and scans out every one of their frames, and
+  # that load is bursty enough that amdgpu's `auto` governor keeps parking sclk at 600MHz and then
+  # being slammed to 100% busy. The resulting oscillation is the stutter at high refresh rates.
+  systemd.services.igpu-performance = {
+    description = "Pin the iGPU to its top DPM state";
+    wantedBy = [ "multi-user.target" ];
+    unitConfig.ConditionPathExists = "/sys/bus/pci/devices/${hw.igpu.pciAddr}/power_dpm_force_performance_level";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "igpu-performance" ''
+        echo high > /sys/bus/pci/devices/${hw.igpu.pciAddr}/power_dpm_force_performance_level
+      '';
+    };
+  };
+
   services.xserver.enable = true;
   services.xserver.xkb.extraLayouts.iso_us = {
     description = "US with ISO keys";
