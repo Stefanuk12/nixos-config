@@ -19,10 +19,23 @@ aud_node="pci_$(printf '%s' "$gpu_addr" | sed 's/\.[0-9]*$//' | tr ':.' '__')_1"
 
 echo "Detaching $gpu_addr  ($gpu_node + $aud_node)"
 
-# Otherwise nvidia_drm holds a DRM node on the GPU and nodedev-detach fails.
+# Unbinding while nvidia_drm still owns the DRM node sends the remove through nvidia's
+# console-restore path, which NULL-derefs in nv_audio_dynamic_power and kills the caller
+# inside device_release_driver_internal, still holding the device lock. The GPU is then
+# wedged until reboot, so refuse rather than let rmmod fail quietly.
 sudo rmmod nvidia_drm nvidia_modeset nvidia_uvm 2>/dev/null || true
 
-sudo modprobe -i vfio_pci vfio_pci_core vfio_iommu_type1
+if lsmod | grep -qE '^nvidia_(drm|modeset)'; then
+  echo "dgpu-disable: nvidia_drm/nvidia_modeset are still loaded; detaching now would oops the" >&2
+  echo "kernel and wedge the GPU until reboot. Close these holders and retry:" >&2
+  sudo sh -c 'for d in /proc/[0-9]*; do
+    ls -l "$d"/fd 2>/dev/null | grep -q /dev/nvidia &&
+      printf "  %s (pid %s)\n" "$(cat "$d"/comm)" "${d#/proc/}"
+  done' >&2 || true
+  exit 1
+fi
+
+sudo modprobe -a vfio_pci vfio_iommu_type1
 echo "VFIO drivers added"
 
 sudo virsh nodedev-detach "$gpu_node"
