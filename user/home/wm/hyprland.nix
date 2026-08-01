@@ -267,6 +267,8 @@ in
       exec-once = [
         "kdeconnect-indicator"
         "[workspace 2 silent] ${heliumDeferred}/bin/helium-deferred"
+        "[workspace special silent] spotify"
+        "[workspace special silent] thunderbird"
         "systemctl --user start spotify-notify.service"
         "systemctl --user start osu-noctalia-dnd.service"
       ];
