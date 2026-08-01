@@ -11,6 +11,7 @@
 
     ./wm
     ./app
+    ./gpu.nix
     ../common/app/sops.nix
     ../common/app/shell/sh.nix
     ../common/app/terminal
