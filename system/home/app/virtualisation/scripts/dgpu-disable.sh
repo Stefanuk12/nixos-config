@@ -27,11 +27,24 @@ sudo rmmod nvidia_drm nvidia_modeset nvidia_uvm 2>/dev/null || true
 
 if lsmod | grep -qE '^nvidia_(drm|modeset)'; then
   echo "dgpu-disable: nvidia_drm/nvidia_modeset are still loaded; detaching now would oops the" >&2
-  echo "kernel and wedge the GPU until reboot. Close these holders and retry:" >&2
-  sudo sh -c 'for d in /proc/[0-9]*; do
-    ls -l "$d"/fd 2>/dev/null | grep -q /dev/nvidia &&
-      printf "  %s (pid %s)\n" "$(cat "$d"/comm)" "${d#/proc/}"
-  done' >&2 || true
+  echo "kernel and wedge the GPU until reboot." >&2
+
+  # A stale client normally sits on nvidia_drm's own DRM nodes rather than /dev/nvidia*, so take
+  # the list from the GPU's sysfs. fuser needs root to see holders outside this session.
+  nodes=""
+  for n in /dev/nvidia[0-9]* /dev/nvidiactl /sys/bus/pci/devices/"$gpu_addr"/drm/*; do
+    case "$n" in */drm/*) n="/dev/dri/$(basename "$n")" ;; esac
+    [ -e "$n" ] && nodes="$nodes $n"
+  done
+
+  holders=$(sudo fuser -v $nodes 2>&1 | grep -vE '^ *USER' || true)
+  if [ -n "$holders" ]; then
+    echo "Close these holders and retry:" >&2
+    printf '%s\n' "$holders" >&2
+  else
+    echo "Nothing holds$nodes, so the reference is kernel-side rather than a process you can" >&2
+    echo "close — reboot to clear it." >&2
+  fi
   exit 1
 fi
 
