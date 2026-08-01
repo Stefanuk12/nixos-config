@@ -9,5 +9,7 @@ import ../lib/mkGamingVM.nix { inherit config; } {
   uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f31";
   diskFile = /var/lib/libvirt/images/win11-rblx.qcow2;
   serial = "ECFE037C590CE21A24AE";
-  mac = "52:54:3a:20:c8:5d";
+  # Was 52:54:3a:20:c8:5d — the same MAC as win11-base, which shares br0 with it. Two hosts
+  # claiming one address on the same L2 segment fights over the router's ARP/DHCP binding.
+  mac = "52:54:3a:20:c8:5e";
 }
