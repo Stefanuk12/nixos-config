@@ -6,6 +6,7 @@ let
   piaBrHost = "192.168.15.5"; # host side of vpn-confinement transit bridge
   piaBrNetns = "192.168.15.1"; # netns side
   rtTable = "200";
+  waydroidDev = "sys-subsystem-net-devices-waydroid0.device";
 in
 {
   # waydroid-net.sh defaults to legacy xtables, which this kernel lacks: flip to nft, absolute-path
@@ -39,9 +40,12 @@ in
   # host's ${androidGw} replies match the source-route and break dnsmasq/DHCP.
   systemd.services.waydroid-pia-route = {
     description = "Route Android bridge traffic through pia netns";
-    after = [ "pia.service" "waydroid-container.service" ];
+    # waydroid0 appears only once a session runs, not merely while the container is up: hang off
+    # the device unit, or multi-user.target waits out the whole poll for a link that never comes.
+    after = [ "pia.service" waydroidDev ];
     requires = [ "pia.service" ];
-    wantedBy = [ "waydroid-container.service" "multi-user.target" ];
+    bindsTo = [ waydroidDev ];
+    wantedBy = [ waydroidDev ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -49,11 +53,6 @@ in
     path = with pkgs; [ iproute2 iptables ];
     script = ''
       set -eu
-
-      for _ in $(seq 1 30); do
-        ip link show waydroid0 >/dev/null 2>&1 && break
-        sleep 1
-      done
 
       ip route replace default via ${piaBrNetns} dev pia-br table ${rtTable}
       ip rule add to ${androidNet} lookup main priority 50 2>/dev/null || true
