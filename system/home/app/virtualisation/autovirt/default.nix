@@ -15,6 +15,10 @@ in
   ];
 
   facter.reportPath = ./facter.json;
+  # NM owns addressing here, so facter's per-NIC useDHCP only adds a 40-<name>.link per detected
+  # interface. The one for the unused Realtek matched its kernel name and, having no NamePolicy,
+  # pinned it as "eth0" instead of letting udev give it a predictable name.
+  facter.detected.dhcp.interfaces = [ ];
 
   barelyMetal = {
     # On for firmware/SMBIOS/Secure-Boot activation, minus its two clobbering side effects: VMs keep
