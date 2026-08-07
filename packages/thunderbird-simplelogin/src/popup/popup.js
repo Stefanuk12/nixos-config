@@ -5,18 +5,10 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  const UNREACHABLE = "The add-on's background page did not answer. Close and reopen this panel.";
-
-  // sendMessage rejects outright when the MV3 event page is suspended or mid-restart, and resolves
-  // undefined when nothing handled the message. Both come back as null so no caller can leave the
-  // panel frozen on the markup's placeholder text.
-  const send = async (type, payload = {}) => {
-    try {
-      return (await browser.runtime.sendMessage({ type, ...payload })) ?? null;
-    } catch {
-      return null;
-    }
-  };
+  // SLIpc retries while the suspended event page restarts, and always resolves - a total failure
+  // arrives as { ok: false, unreachable: true } rather than null, so no caller can leave the panel
+  // frozen on the markup's placeholder text.
+  const send = (type, payload = {}) => SLIpc.send(type, payload);
 
   // Populated once per open, then patched in place as actions complete.
   let ctx = { tabId: null, status: null, snapshot: null, settings: null };
@@ -37,8 +29,14 @@
     error: "Error",
   };
 
-  // A null reply means the background page never answered, which is not the same as it refusing.
-  const failure = (res, fallback) => (res ? res.error || fallback : UNREACHABLE);
+  // An unreachable reply carries its own diagnosis; anything else is a refusal we can explain.
+  const failure = (res, fallback) => res?.error || fallback;
+
+  // A permission declared in the manifest but never granted means its whole API namespace is
+  // undefined. Thunderbird only re-evaluates the granted set on a version change, so the fix is an
+  // upgrade plus a restart - not something the user could guess from "browser.X is undefined".
+  const permissionAdvice = (missing) =>
+    `Thunderbird has not granted this add-on: ${missing.join(", ")}. Restart Thunderbird to pick up the update; if that does not clear it, remove and re-add the add-on.`;
 
   function showNotice(message, kind = "error") {
     const el = $("notice");
@@ -90,6 +88,16 @@
   }
 
   function sendPlan(status, reverse) {
+    // In reverse-alias mode the alias lives in the add-on, not the From field, so say where to look
+    // rather than leaving the compose window looking untouched.
+    const where = status.chosenInPanel
+      ? "This alias is selected here; the From field stays on your normal identity. "
+      : "";
+
+    return where + sendPlanFor(status, reverse);
+  }
+
+  function sendPlanFor(status, reverse) {
     switch (status.state) {
       case "will-create":
         return reverse
@@ -287,7 +295,7 @@
   async function apply(email) {
     showNotice("");
     const res = await send("sl:apply", { tabId: ctx.tabId, email });
-    if (!res) return showNotice(UNREACHABLE);
+    if (res.unreachable) return showNotice(res.error);
     if (res.warning) {
       showNotice(`From was set, but no identity was created: ${res.warning}`, "info");
     }
@@ -370,14 +378,19 @@
     }
 
     const res = await send("sl:context", { tabId });
-    if (!res) {
-      ctx.status = { state: "error", label: "Error", detail: UNREACHABLE };
+    if (res.unreachable) {
+      ctx.status = { state: "error", label: "Error", detail: res.error };
       renderAll();
       return;
     }
 
     ctx = { ...ctx, ...res, tabId: res.tabId ?? tabId };
     if (res.error) showNotice(res.error.message || String(res.error));
+    // A missing permission explains itself; a listener that merely failed does not.
+    else if (res.missing?.length) showNotice(permissionAdvice(res.missing));
+    else if (res.startupProblems?.length) {
+      showNotice(`Some features did not start: ${res.startupProblems.join("; ")}`);
+    }
     renderAll();
   }
 

@@ -67,6 +67,11 @@
               <strong>It is the only thing here that rewrites stored mail</strong>, so it needs
               extra permissions and is off by default. The import always happens before the
               delete, so a failure leaves the original copy intact.
+              <br /><br />
+              <strong>Does nothing on a Proton bridge.</strong> hydroxide allows IMAP APPEND only
+              into Drafts, so there is no locally-filed copy to repair and none could be written
+              back. Proton files sent mail server-side instead, with the reverse-aliases as
+              recipients, and nothing here can change that.
             </em>
           </span>
         </label>
@@ -180,6 +185,7 @@
     </main>
 
     <script src="../lib/prefs.js"></script>
+    <script src="../lib/ipc.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

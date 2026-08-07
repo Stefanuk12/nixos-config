@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "SimpleLogin Aliases",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Browse your SimpleLogin aliases from the compose window, send as them, and create them on the fly from the From field.",
   "browser_specific_settings": {
     "gecko": {

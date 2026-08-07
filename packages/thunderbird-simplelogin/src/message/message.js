@@ -5,20 +5,18 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  const UNREACHABLE = "The add-on's background page did not answer. Close and reopen this panel.";
-
-  // sendMessage rejects outright when the MV3 event page is suspended or mid-restart, and resolves
-  // undefined when nothing handled the message. Both come back as null so no caller can leave the
-  // panel frozen on the markup's placeholder text.
-  const send = async (type, payload = {}) => {
-    try {
-      return (await browser.runtime.sendMessage({ type, ...payload })) ?? null;
-    } catch {
-      return null;
-    }
-  };
+  // SLIpc retries while the suspended event page restarts, and always resolves - a total failure
+  // arrives as { ok: false, unreachable: true } rather than null, so no caller can leave the panel
+  // frozen on the markup's placeholder text.
+  const send = (type, payload = {}) => SLIpc.send(type, payload);
 
   let ctx = { tabId: null, info: null, sender: null, contact: null, settings: null };
+
+  // A permission declared in the manifest but never granted means its whole API namespace is
+  // undefined. Thunderbird only re-evaluates the granted set on a version change, so the fix is an
+  // upgrade plus a restart - not something the user could guess from "browser.X is undefined".
+  const permissionAdvice = (missing) =>
+    `Thunderbird has not granted this add-on: ${missing.join(", ")}. Restart Thunderbird to pick up the update; if that does not clear it, remove and re-add the add-on.`;
 
   function showNotice(message, kind = "error") {
     const el = $("notice");
@@ -42,7 +40,7 @@
     el.disabled = true;
     const res = await work();
     if (!res?.ok) {
-      showNotice(res ? res.error || "That did not work." : UNREACHABLE);
+      showNotice(res?.error || "That did not work.");
       el.disabled = false;
       return;
     }
@@ -58,6 +56,19 @@
       $("banner-pill").textContent = "Setup";
       $("banner-address").textContent = "No API key";
       $("banner-detail").textContent = "Add your SimpleLogin API key in the add-on options.";
+      $("facts").hidden = true;
+      $("actions").hidden = true;
+      $("edit-box").hidden = true;
+      return;
+    }
+
+    // Without messagesRead this panel cannot see the message at all, so lead with that rather
+    // than reporting the resulting blank as "not an alias".
+    if (ctx.missing?.length) {
+      banner.className = "banner state-error";
+      $("banner-pill").textContent = "Permission";
+      $("banner-address").textContent = "Cannot read messages";
+      $("banner-detail").textContent = permissionAdvice(ctx.missing);
       $("facts").hidden = true;
       $("actions").hidden = true;
       $("edit-box").hidden = true;
@@ -144,16 +155,20 @@
   async function load() {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true }).catch(() => []);
     const res = await send("sl:message-context", { tabId: tab?.id ?? null });
-    if (!res) return renderUnreachable();
+    if (res.unreachable) return renderUnreachable(res.error);
     ctx = { ...ctx, ...res };
     render();
+    if (res.missing?.length) showNotice(permissionAdvice(res.missing));
+    else if (res.startupProblems?.length) {
+      showNotice(`Some features did not start: ${res.startupProblems.join("; ")}`);
+    }
   }
 
-  function renderUnreachable() {
+  function renderUnreachable(detail) {
     $("banner").className = "banner state-error";
     $("banner-pill").textContent = "Error";
     $("banner-address").textContent = "Add-on error";
-    $("banner-detail").textContent = UNREACHABLE;
+    $("banner-detail").textContent = detail;
     $("facts").hidden = true;
     $("actions").hidden = true;
     $("edit-box").hidden = true;

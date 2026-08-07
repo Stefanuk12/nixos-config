@@ -12,6 +12,16 @@
 let
   manifest = lib.importJSON ./src/manifest.json;
 
+  # BUMP src/manifest.json's version whenever `permissions` changes.
+  #
+  # Thunderbird records the granted permission set at install time and re-evaluates it only when the
+  # version changes. Shipping a new manifest under the same version leaves any newly-added permission
+  # ungranted permanently, and its entire API namespace undefined at runtime - which surfaces far from
+  # the cause as "browser.<something> is undefined". permissionsFingerprint is embedded in the
+  # derivation name so `nix build` output changes visibly when the two drift.
+  permissionsFingerprint =
+    builtins.substring 0 8 (builtins.hashString "sha256" (builtins.toJSON manifest.permissions));
+
   # The XPI filename must equal this, or Thunderbird refuses the install with an id mismatch.
   extensionId = manifest.browser_specific_settings.gecko.id;
 
@@ -48,7 +58,7 @@ stdenvNoCC.mkDerivation {
   '';
 
   passthru = {
-    inherit extensionId;
+    inherit extensionId permissionsFingerprint;
 
     # Hands the API key to the add-on via managed storage, so it never lives in the Thunderbird
     # profile. A command rather than a login service: rbw needs an unlocked agent, and a unit

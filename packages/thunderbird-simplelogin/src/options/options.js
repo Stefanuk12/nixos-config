@@ -4,7 +4,7 @@
 // page repaints open compose windows from storage.onChanged.
 (() => {
   const $ = (id) => document.getElementById(id);
-  const send = (type, payload = {}) => browser.runtime.sendMessage({ type, ...payload });
+  const send = (type, payload = {}) => SLIpc.send(type, payload);
 
   const CHECKBOXES = [
     "autoCreateOnSend", "strictRewrite", "expandMailingLists",
@@ -59,7 +59,8 @@
     $("identities-section").hidden = sendMode !== "identity";
     if (sendMode !== "identity") return;
 
-    const { identities } = await send("sl:list-identities");
+    const res = await send("sl:list-identities");
+    const identities = res?.identities || [];
     const list = $("identities");
 
     if (!identities.length) {

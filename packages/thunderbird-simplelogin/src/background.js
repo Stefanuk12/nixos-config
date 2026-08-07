@@ -3,6 +3,56 @@
 // Orchestration: watch the From field of every compose window, render what is about to happen onto
 // the compose-toolbar button, and make it happen on send.
 
+// Registered FIRST, deliberately. Every panel reaches this page through runtime.onMessage, so if
+// the listener were installed after anything that can throw, one bad API call at load would leave
+// the add-on mute - sendMessage finding no receiver, and every panel reporting "the background page
+// did not answer" with no clue why. Registering it before any other statement means a later failure
+// can still be reported rather than swallowed.
+//
+// HANDLERS is declared far below; the listener only dereferences it once a message arrives, by
+// which time the script has finished loading.
+const startupProblems = [];
+
+browser.runtime.onMessage.addListener((message, sender) => {
+  const type = message?.type;
+  const handler = Object.prototype.hasOwnProperty.call(HANDLERS, type) ? HANDLERS[type] : null;
+
+  // Answer even an unrecognised message. Returning false would resolve the sender's sendMessage to
+  // undefined, which is indistinguishable from a dead background page - the very ambiguity this
+  // ordering exists to remove.
+  if (!handler) return Promise.resolve({ ok: false, error: `Unknown request "${type}".` });
+
+  return handler(message, sender).catch((e) => ({ ok: false, error: e.message }));
+});
+
+// Register a listener without letting its failure take the add-on down. A namespace missing because
+// a permission was declined should cost only the feature that needs it.
+function safeListen(label, register) {
+  try {
+    register();
+  } catch (e) {
+    startupProblems.push(`${label}: ${e.message}`);
+  }
+}
+
+/**
+ * Required permissions the manifest asks for but Thunderbird has not granted.
+ *
+ * Thunderbird records the granted set when an add-on is installed and re-evaluates it only on a
+ * version change. Shipping a new manifest under the same version therefore leaves a newly-added
+ * permission ungranted for ever, and its whole API namespace undefined - which surfaces as an
+ * inscrutable "browser.X is undefined" far from the cause. Naming the missing permission turns
+ * that into an instruction.
+ */
+async function missingPermissions() {
+  const required = (browser.runtime.getManifest().permissions || [])
+    .filter((p) => !p.includes("://"));
+  const granted = await browser.permissions.getAll().catch(() => null);
+  if (!granted) return [];
+  const have = new Set(granted.permissions || []);
+  return required.filter((p) => !have.has(p));
+}
+
 // Badge text caps at ~4 characters, so it carries only severity; the label carries the meaning and
 // the tooltip the full sentence.
 const BADGES = {
@@ -87,7 +137,12 @@ async function evaluate(tabId, { recheck = false, refetch = false } = {}) {
     return null;
   }
 
-  const { address, displayName } = await resolveFrom(details);
+  const typed = await resolveFrom(details);
+  // A panel choice wins over the From field: it is the only place it is recorded, since writing it
+  // into From would break the compose window.
+  const chosen = selectedAliasByTab.get(tabId);
+  const address = chosen || typed.address;
+  const displayName = chosen ? "" : typed.displayName;
   const previous = statusByTab.get(tabId);
 
   // The common case: the poll fired and nothing moved. Bail before any storage or network work.
@@ -108,6 +163,7 @@ async function evaluate(tabId, { recheck = false, refetch = false } = {}) {
     : SLClassify.classify(address, snapshot, settings, displayName);
 
   status.sendMode = settings.sendMode;
+  status.chosenInPanel = Boolean(chosen);
 
   // Explain a From the user did not type, for as long as it is still in place.
   const notice = autoAliasNotice.get(tabId);
@@ -183,6 +239,17 @@ async function ensureIdentity(accountId, email, displayName) {
 
 // Identity mode switches identity outright. In reverse-alias mode From is only a selector —
 // overridden for display, reset on send — so the identity is left alone.
+// The alias chosen from the panel, per compose tab.
+//
+// Held here rather than written into the From field, because writing it there breaks the compose
+// window. setComposeDetails({from}) calls Thunderbird's MakeFromFieldEditable() whenever the value
+// differs from the field's current one; that sets the identity menulist to a string matching no
+// identity, leaving selectedItem null. Any later call then dies on `selectedItem.value` inside
+// Thunderbird, the setComposeDetails promise rejects, and if that happens during onBeforeSend the
+// message is never sent. Reading a From the *user* typed is unaffected and still works - it is only
+// writing one programmatically that is unsafe.
+const selectedAliasByTab = new Map();
+
 async function applyAliasToTab(tabId, email, displayName = null) {
   const settings = await SLPrefs.getSettings();
   const details = await browser.compose.getComposeDetails(tabId);
@@ -192,19 +259,20 @@ async function applyAliasToTab(tabId, email, displayName = null) {
       const accountId = await accountIdFor(details);
       const current = details.identityId ? await browser.identities.get(details.identityId) : null;
       const identity = await ensureIdentity(accountId, email, displayName ?? current?.name ?? "");
+      // Selecting a real identity keeps the menulist's selectedItem valid, so this is safe.
       await browser.compose.setComposeDetails(tabId, { identityId: identity.id });
+      selectedAliasByTab.delete(tabId);
       return { ok: true, via: "identity" };
     } catch (e) {
-      // Fall back to a header override so the choice still lands, and say why.
-      await browser.compose.setComposeDetails(tabId, { from: email });
-      return { ok: true, via: "from", warning: e.message };
+      // No safe fallback: a raw From override is what breaks sending. Record the choice instead so
+      // the reverse-alias path still applies it on send.
+      selectedAliasByTab.set(tabId, email);
+      return { ok: true, via: "tracked", warning: e.message };
     }
   }
 
-  // Preserve the name already in From, so switching alias doesn't drop what the user typed.
-  const name = displayName ?? SLClassify.parseDisplayName(details.from);
-  await browser.compose.setComposeDetails(tabId, { from: name ? `${name} <${email}>` : email });
-  return { ok: true, via: "from" };
+  selectedAliasByTab.set(tabId, email);
+  return { ok: true, via: "tracked" };
 }
 
 // Compose tabs already considered; without this the poll would re-apply every tick and stomp a
@@ -239,9 +307,11 @@ async function maybeAutoAlias(tabId, details, settings, snapshot) {
   await applyAliasToTab(tabId, hit.alias.email);
   autoAliasNotice.set(tabId, {
     email: hit.alias.email,
+    // "Selected", not "set in From": in reverse-alias mode the From field is deliberately left
+    // alone, and claiming otherwise would send the user looking for a change that isn't there.
     detail: hit.via === "x-simplelogin-envelope-to"
-      ? `From was set automatically: this message arrived at ${hit.alias.email}.`
-      : `From was set automatically: ${hit.alias.email} appeared in the original message's ${hit.via} header.`,
+      ? `Selected automatically: the message you are replying to arrived at ${hit.alias.email}.`
+      : `Selected automatically: ${hit.alias.email} appeared in the original message's ${hit.via} header.`,
   });
   return true;
 }
@@ -372,14 +442,16 @@ async function buildReverseAliases(details, alias, settings) {
   return { patch, problems, rewritten, originals };
 }
 
-browser.compose.onBeforeSend.addListener(async (tab, details) => {
+safeListen("compose.onBeforeSend", () => browser.compose.onBeforeSend.addListener(async (tab, details) => {
   const settings = await SLPrefs.getSettings();
   if (!settings.apiKey) return {};
 
   const hostname = hostnameHint(details);
-  const { address, displayName } = await resolveFrom(details);
+  const typed = await resolveFrom(details);
+  const chosen = selectedAliasByTab.get(tab.id);
+  const address = chosen || typed.address;
   const { snapshot } = await SLStore.getSnapshot({ hostname });
-  const status = SLClassify.classify(address, snapshot, settings, displayName);
+  const status = SLClassify.classify(address, snapshot, settings, chosen ? "" : typed.displayName);
 
   let alias = status.alias;
 
@@ -477,7 +549,21 @@ browser.compose.onBeforeSend.addListener(async (tab, details) => {
     );
     return { cancel: true };
   }
-  if (identityAddress) result.patch.from = identity.email;
+  // Snap the From field back to the identity when the user typed an alias into it.
+  //
+  // Two constraints meet here. Proton (via the hydroxide bridge) rejects any sender address the
+  // account does not own - "transaction failed: unknown sender address" - so an alias must not be
+  // left in From. But writing `from` to fix that calls Thunderbird's MakeFromFieldEditable(), which
+  // throws on a null selectedItem and aborts the send outright.
+  //
+  // Setting identityId takes a different path: it assigns identityElement.selectedItem and calls
+  // LoadIdentity(), which resets the From field and restores a valid selection without going near
+  // setFromField. Only done when From actually differs, since LoadIdentity() re-applies the
+  // identity's signature and is not worth running for nothing.
+  if (identityAddress && typed.address && typed.address !== identityAddress) {
+    result.patch.identityId = details.identityId;
+  }
+
 
   // onAfterSend repairs the filed copy once Thunderbird has written it.
   rememberSentRewrite(tab.id, { originals: result.originals, aliasEmail: alias.email });
@@ -488,7 +574,7 @@ browser.compose.onBeforeSend.addListener(async (tab, details) => {
   });
 
   return { details: result.patch };
-});
+}));
 
 // Original recipients per compose tab, captured in onBeforeSend for onAfterSend. Deliberately not
 // cleared when a tab closes — sending closes the window, and racing that teardown would drop the
@@ -507,7 +593,7 @@ function rememberSentRewrite(tabId, entry) {
 // Optional permissions, granted from the options page.
 const REWRITE_PERMISSIONS = { permissions: ["messagesImport", "messagesDelete"] };
 
-browser.compose.onAfterSend.addListener(async (tab, sendInfo) => {
+safeListen("compose.onAfterSend", () => browser.compose.onAfterSend.addListener(async (tab, sendInfo) => {
   const pending = pendingSentRewrite.get(tab.id);
   pendingSentRewrite.delete(tab.id);
 
@@ -540,7 +626,7 @@ browser.compose.onAfterSend.addListener(async (tab, sendInfo) => {
       return;
     }
   }
-});
+}));
 
 const messageInfoByTab = new Map();
 
@@ -554,6 +640,8 @@ async function evaluateMessage(tabId) {
     ]).catch(() => {/* tab closed */});
 
   if (!settings.apiKey) return null;
+  // Withheld along with its permission; the panel explains that rather than showing a raw error.
+  if (!browser.messageDisplay) return null;
 
   const list = await browser.messageDisplay.getDisplayedMessages(tabId).catch(() => null);
   const message = list?.messages?.[0];
@@ -578,18 +666,27 @@ async function evaluateMessage(tabId) {
   return info;
 }
 
-browser.messageDisplay.onMessagesDisplayed.addListener((tab) => evaluateMessage(tab.id));
+safeListen("messageDisplay.onMessagesDisplayed", () =>
+  browser.messageDisplay.onMessagesDisplayed.addListener((tab) => evaluateMessage(tab.id)));
 
-browser.compose.onIdentityChanged.addListener((tab) => evaluate(tab.id, { recheck: true }));
+safeListen("compose.onIdentityChanged", () =>
+  browser.compose.onIdentityChanged.addListener((tab) => evaluate(tab.id, { recheck: true })));
 
-browser.tabs.onRemoved.addListener((tabId) => {
+safeListen("tabs.onRemoved", () => browser.tabs.onRemoved.addListener((tabId) => {
   statusByTab.delete(tabId);
   messageInfoByTab.delete(tabId);
   autoAliasHandled.delete(tabId);
   autoAliasNotice.delete(tabId);
-});
+  selectedAliasByTab.delete(tabId);
+}));
 
 const HANDLERS = {
+  // Liveness probe. Also carries whatever failed to wire up at load, so a panel can report a
+  // half-working add-on instead of a blank one.
+  async "sl:ping"() {
+    return { ok: true, startupProblems, missing: await missingPermissions() };
+  },
+
   async "sl:tick"(_msg, sender) {
     if (!sender.tab) return null;
     lastComposeTabId = sender.tab.id;
@@ -601,7 +698,7 @@ const HANDLERS = {
     const id = tabId ?? lastComposeTabId;
     const status = id != null ? await evaluate(id) : null;
     const { snapshot, error, settings } = await SLStore.getSnapshot();
-    return { tabId: id, status, snapshot, error, settings };
+    return { tabId: id, status, snapshot, error, settings, startupProblems, missing: await missingPermissions() };
   },
 
   async "sl:refresh"({ tabId }) {
@@ -722,7 +819,7 @@ const HANDLERS = {
       }
     }
 
-    return { tabId, info, sender, contact, settings };
+    return { tabId, info, sender, contact, settings, startupProblems, missing: await missingPermissions() };
   },
 
   // Per-contact: doesn't disturb the rest of the alias's traffic.
@@ -780,17 +877,10 @@ const HANDLERS = {
   },
 };
 
-browser.runtime.onMessage.addListener((message, sender) => {
-  const handler = HANDLERS[message?.type];
-  if (!handler) return false;
-  // Returning the promise keeps the channel open for the async reply.
-  return handler(message, sender).catch((e) => ({ ok: false, error: e.message }));
-});
-
 // A settings change can flip every open window's verdict, so repaint them all. A change to `cache`
 // alone is ignored: evaluate() writes the cache, so acting on it would loop back into evaluate().
-browser.storage.onChanged.addListener((changes, area) => {
+safeListen("storage.onChanged", () => browser.storage.onChanged.addListener((changes, area) => {
   const keys = Object.keys(changes);
   if (area !== "local" || keys.every((key) => key === "cache")) return;
   for (const tabId of statusByTab.keys()) evaluate(tabId, { recheck: true });
-});
+}));
