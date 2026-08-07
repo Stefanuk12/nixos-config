@@ -341,9 +341,12 @@ let
     audio = {
       id = 1;
       type = audioCfg.backend or "pipewire";
-      runtimeDir = "/run/user/${toString (audioCfg.uid or 1000)}";
       input.mixingEngine = false;
       output.mixingEngine = false;
+      # Only the session-socket backends take runtimeDir, and a VM wanting one cannot start
+      # before that user has logged in.
+    } // optionalAttrs (builtins.elem (audioCfg.backend or "pipewire") [ "pipewire" "pulseaudio" ]) {
+      runtimeDir = "/run/user/${toString (audioCfg.uid or 1000)}";
     };
   } // optionalAttrs spiceEnabled {
     redirdev = [

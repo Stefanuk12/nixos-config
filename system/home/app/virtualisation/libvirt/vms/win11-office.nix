@@ -61,10 +61,9 @@
     pciBus = 10;
   };
 
-  audio = {
-    backend = "pipewire";
-    uid = 1000;
-  };
+  # Autostarts at boot, so it cannot use the pipewire backend: /run/user/1000 does not exist yet
+  # and qemu aborts the domain. Parsec captures inside the guest, which only needs a sound card.
+  audio.backend = "spice";
 
   tpm = true; # Windows 11 requirement
   spice = true;
