@@ -1,7 +1,20 @@
 keys:
   - &vps_stefan age17uewr2tu8humxsgf6l4t97dyt55weyuecf9jajesclxnasakdf4semu6qv
   - &home_host age1tjyn6lt84ala8dlg9v94kw6cydtfe575mc7uwwg3nraraagx3pyqpn7tjm
+  - &stefan_user age1dajz50c7jpv7z6mtc4tx20gtes7twc8w3qa0502j43k0wz029f7shy7d3r
 creation_rules:
+  # Home Manager's sops-nix runs as stefan, which cannot read the root-owned host key that
+  # home_host derives from — so this one file is also encrypted to stefan's key. Deliberately
+  # ahead of the rule below and scoped to a single path: sops takes the first match, and the
+  # key it needs sits unencrypted at ~/.config/sops/age/keys.txt on an unencrypted root fs.
+  - path_regex: secrets/common/gh_pub_read_pat\.yaml$
+    key_groups:
+    - pgp:
+        - "EFA59E9166F5CE3F"
+      age:
+        - *vps_stefan
+        - *home_host
+        - *stefan_user
   - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
     key_groups:
     - pgp:
