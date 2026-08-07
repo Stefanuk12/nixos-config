@@ -111,6 +111,16 @@ in
     thunderbird = {
       enable = true;
       profiles = [ "stefan" ];
+
+      # Don't let Thunderbird file its own copy in Sent.
+      #
+      # Proton stores sent mail server-side the moment it accepts the message, and hydroxide allows
+      # IMAP APPEND only into Drafts - so Thunderbird's copy is both redundant and refused, with
+      # "cannot create messages outside the Drafts mailbox" after every otherwise-successful send.
+      # The message still shows up in Sent once the folder syncs back.
+      perIdentitySettings = id: {
+        "mail.identity.id_${id}.doFcc" = false;
+      };
     };
   };
 
