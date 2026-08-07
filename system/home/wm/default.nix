@@ -7,6 +7,7 @@ in
   imports = [
     ./hyprland.nix
     ./login.nix
+    ./sunshine_greeter.nix
   ];
 
   services.udev.packages = lib.singleton (
