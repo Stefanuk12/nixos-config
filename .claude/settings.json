@@ -46,7 +46,11 @@
       "Bash(git reset *)",
       "Bash(git apply *)",
       "Bash(git checkout *)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(git --no-pager log --oneline -1)",
+      "Bash(git --no-pager log --oneline -2)",
+      "Bash(git --no-pager log --oneline -3)",
+      "Bash(git --no-pager log --oneline main~12..main)"
     ]
   }
 }
