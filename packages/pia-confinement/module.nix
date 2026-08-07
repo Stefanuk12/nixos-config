@@ -13,15 +13,26 @@ let
     DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${toString app.uid}/bus";
   };
 
-  manageUnitRule = user: unit: ''
+  # unitTest is a JS expression over `unit`, so callers can match a template's instances.
+  manageUnitRule = user: unitTest: ''
     polkit.addRule(function(action, subject) {
-      if (action.id == "org.freedesktop.systemd1.manage-units" &&
-          action.lookup("unit") == "${unit}" &&
-          subject.user == "${user}") {
+      if (action.id != "org.freedesktop.systemd1.manage-units" ||
+          subject.user != "${user}") {
+        return;
+      }
+      var unit = action.lookup("unit");
+      if (${unitTest}) {
         return polkit.Result.YES;
       }
     });
   '';
+
+  regionFile = "/var/lib/pia/region";
+  runtimeDir = "/run/pia";
+
+  confinedUnits =
+    lib.optional cfg.confinedApps.qbittorrent.enable "qbittorrent.service"
+    ++ lib.optional cfg.confinedApps.helium.enable "helium-vpn.service";
 in
 {
   options.services.pia-confinement = {
@@ -41,6 +52,9 @@ in
         PIA region code passed to manual-connections as PREFERRED_REGION.
         Set to null to let manual-connections pick the lowest-latency region
         below `maxLatency` automatically.
+
+        This is only the boot default: `pia-region` writes ${regionFile} at
+        runtime and that wins until cleared with `pia-region auto`.
       '';
     };
 
@@ -141,6 +155,15 @@ in
         '';
       };
     };
+
+    regionSwitcher = {
+      enable = lib.mkEnableOption "the `pia-region` CLI for changing region without a rebuild";
+
+      user = lib.mkOption {
+        type = lib.types.str;
+        description = "User allowed to drive the switch (via polkit, no password).";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable (lib.mkMerge [
@@ -157,6 +180,8 @@ in
           RemainAfterExit = true;
           StateDirectory = "pia";
           StateDirectoryMode = "0750";
+          RuntimeDirectory = "pia";
+          RuntimeDirectoryPreserve = true;
           WorkingDirectory = "/var/lib/pia";
           TimeoutStartSec = "5min";
           Restart = "on-failure";
@@ -192,20 +217,34 @@ in
             | xargs -0 -r sed -i "s|/opt/piavpn-manual|$work/state|g"
           cd "$work"
 
+          # Resolved here rather than baked into the unit, so pia-region can change it by
+          # writing the file and restarting us. Empty means lowest-latency auto-select.
+          region=${lib.escapeShellArg (if cfg.region == null then "" else cfg.region)}
+          if [ -s ${regionFile} ]; then
+            region=$(cat ${regionFile})
+          fi
+
           # run_setup.sh runs non-interactively with AUTOCONNECT=true (lowest-latency region) or AUTOCONNECT=false + PREFERRED_REGION=<id>, else it prompts.
+          if [ -n "$region" ]; then
+            export AUTOCONNECT=false PREFERRED_REGION="$region"
+          else
+            export AUTOCONNECT=true
+          fi
+
           PIA_CONNECT=false \
           PIA_PF=false \
           PIA_DNS=true \
           VPN_PROTOCOL=wireguard \
           DISABLE_IPV6=yes \
           MAX_LATENCY=${cfg.maxLatency} \
-          ${if cfg.region == null
-            then "AUTOCONNECT=true"
-            else "AUTOCONNECT=false PREFERRED_REGION=${cfg.region}"} \
           PIA_CONF_PATH=${cfg.confPath} \
             ./run_setup.sh
 
           chmod 600 ${cfg.confPath}
+
+          # World-readable so `pia-region` can report state without root.
+          printf '%s\n' "''${region:-auto}" > ${runtimeDir}/region
+          sed -n 's/^Endpoint *= *\([^:]*\).*/\1/p' ${cfg.confPath} > ${runtimeDir}/endpoint
         '';
       };
 
@@ -275,7 +314,7 @@ in
           };
         };
 
-        security.polkit.extraConfig = manageUnitRule qbt.user "qbittorrent.service";
+        security.polkit.extraConfig = manageUnitRule qbt.user ''unit == "qbittorrent.service"'';
       }
     ))
 
@@ -341,7 +380,110 @@ in
           };
         };
 
-        security.polkit.extraConfig = manageUnitRule hlm.user "helium-vpn.service";
+        security.polkit.extraConfig = manageUnitRule hlm.user ''unit == "helium-vpn.service"'';
+      }
+    ))
+
+    (lib.mkIf cfg.regionSwitcher.enable (
+      let
+        serverList = "https://serverlist.piaservers.net/vpninfo/servers/v6";
+
+        cli = pkgs.writeShellScriptBin "pia-region" ''
+          set -eu
+          PATH=${lib.makeBinPath (with pkgs; [ coreutils curl jq gawk systemd ])}
+
+          # The serverlist is JSON on line 1 followed by a detached signature.
+          regions() { curl -sf --max-time 15 ${serverList} | head -1; }
+
+          status() {
+            printf 'region:   %s\n' "$(cat ${runtimeDir}/region 2>/dev/null || echo 'unknown (pia-wg-gen has not run)')"
+            endpoint=$(cat ${runtimeDir}/endpoint 2>/dev/null || true)
+            if [ -n "$endpoint" ]; then
+              name=$(regions | jq -r --arg ip "$endpoint" \
+                '.regions[] | select(any(.servers.wg[]?; .ip == $ip)) | .name' | head -1)
+              printf 'endpoint: %s%s\n' "$endpoint" "''${name:+  ($name)}"
+            fi
+          }
+
+          switch() {
+            target=$1
+            if [ "$target" != auto ]; then
+              # Validate before tearing anything down; also keeps the instance name sane.
+              case "$target" in
+                *[!a-z0-9_-]*) echo "pia-region: invalid region id '$target'" >&2; exit 1 ;;
+              esac
+              if ! regions | jq -e --arg id "$target" 'any(.regions[]; .id == $id)' >/dev/null; then
+                echo "pia-region: no such region '$target' — see 'pia-region list'" >&2
+                exit 1
+              fi
+            fi
+
+            echo "pia-region: switching to $target (this takes a moment)..." >&2
+            if ! systemctl start "pia-region@$target.service"; then
+              echo "pia-region: switch failed — journalctl -u pia-region@$target.service" >&2
+              exit 1
+            fi
+            status
+          }
+
+          case "''${1-}" in
+            "" | status) status ;;
+            list)
+              regions | jq -r '.regions[] | "\(.id)|\(.name)|\(if .port_forward then "PF" else "" end)"' \
+                | sort | awk -F'|' '{ printf "%-28s %-4s %s\n", $1, $3, $2 }'
+              ;;
+            -h | --help)
+              echo "usage: pia-region [status | list | auto | <region-id>]"
+              ;;
+            *) switch "$1" ;;
+          esac
+        '';
+      in
+      {
+        environment.systemPackages = [ cli ];
+
+        systemd.services."pia-region@" = {
+          description = "Switch the PIA tunnel to region %i";
+          path = with pkgs; [ coreutils systemd ];
+          serviceConfig = {
+            Type = "oneshot";
+            StateDirectory = "pia";
+            StateDirectoryMode = "0750";
+            TimeoutStartSec = "6min";
+          };
+          # Via scriptArgs, not the script body: systemd expands %i in unit directives only,
+          # and NixOS puts `script` in a store file where it would stay literal.
+          scriptArgs = "%i";
+          script = ''
+            set -euo pipefail
+            region=$1
+            case "$region" in
+              *[!a-z0-9_-]*) echo "invalid region id" >&2; exit 1 ;;
+            esac
+
+            if [ "$region" = auto ]; then
+              rm -f ${regionFile}
+            else
+              printf '%s\n' "$region" > ${regionFile}
+            fi
+
+            # Restarting ${ns} kills anything bound to it, so put back whatever was up.
+            running=""
+            for unit in ${lib.escapeShellArgs confinedUnits}; do
+              if systemctl is-active --quiet "$unit"; then running="$running $unit"; fi
+            done
+
+            # pia.service Requires= won't re-run a RemainAfterExit oneshot that is already
+            # active, so the generator has to be restarted explicitly and first.
+            systemctl restart pia-wg-gen.service
+            systemctl restart ${ns}.service
+
+            for unit in $running; do systemctl start "$unit" || true; done
+          '';
+        };
+
+        security.polkit.extraConfig =
+          manageUnitRule cfg.regionSwitcher.user ''unit.indexOf("pia-region@") == 0'';
       }
     ))
   ]);

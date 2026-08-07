@@ -35,5 +35,10 @@
       enable = true;
       user = "stefan";
     };
+
+    regionSwitcher = {
+      enable = true;
+      user = "stefan";
+    };
   };
 }
