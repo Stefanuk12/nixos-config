@@ -33,5 +33,13 @@ in
         Your GitHub username.
       '';
     };
+    mainMonitor = mkOption {
+      type = types.str;
+      default = "DP-1";
+      description = ''
+        Connector name of the primary output. Shell surfaces that should live on exactly one
+        monitor (bar, dock, OSD, notifications) are anchored here.
+      '';
+    };
   };
 }

@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
+  mainMonitor = config.userSettings.mainMonitor;
+
   # noctalia's config.toml is a read-only store symlink, but it merges an app-writable
   # settings.toml from its state dir on top ("sidecar wins") and inotify-watches it, so that file
   # is the only supported way to move these at runtime. It also holds whatever the settings UI has
@@ -24,6 +26,7 @@ let
       import tomlkit
 
       HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
+      MAIN = "${mainMonitor}"
       SECTIONS = ("osd", "notification")
       OSD_LAYER = "noctalia-osd"
       OSD_WAIT = 5.0
@@ -67,23 +70,19 @@ let
 
 
       def pick(monitors, clients):
+          """MAIN unless something covers it, in which case the first uncovered output."""
+          # Not focus-following: every write costs a full noctalia config reload, and focus
+          # changes far more often than coverage does.
           usable = [m for m in monitors if not m.get("disabled")]
           if not usable:
               return None
 
-          focused = next((m for m in usable if m.get("focused")), usable[0])
-          covered = [m for m in usable if is_covered(m, clients)]
+          home = next((m for m in usable if m.get("name") == MAIN), usable[0])
+          if not is_covered(home, clients):
+              return home.get("name")
 
-          # Exactly one output busy (and somewhere else to go) -> get out of its way. Zero, all,
-          # or several busy means there is no unambiguous refuge, so follow focus instead.
-          if len(covered) == 1 and len(usable) > 1:
-              busy = covered[0].get("name")
-              elsewhere = [m for m in usable if m.get("name") != busy]
-              return next(
-                  (m for m in elsewhere if m.get("focused")), elsewhere[0]
-              ).get("name")
-
-          return focused.get("name")
+          refuge = next((m for m in usable if not is_covered(m, clients)), None)
+          return (refuge or home).get("name")
 
 
       def read():
@@ -175,8 +174,7 @@ let
       socat -u "UNIX-CONNECT:$socket" - | while read -r line; do
         case "$line" in
           fullscreen\>\>* | openwindow\>\>* | closewindow\>\>* | movewindow\>\>* \
-          | focusedmon\>\>* | activewindow\>\>* | workspace\>\>* \
-          | monitoradded\>\>* | monitorremoved\>\>*)
+          | workspace\>\>* | monitoradded\>\>* | monitorremoved\>\>*)
             noctalia-osd-place || true
             ;;
         esac

@@ -1,9 +1,9 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 
 let
   # The G24F. noctalia matches on connector names, not Hyprland monitor IDs, and left empty it
   # falls back to whichever output enumerates first — HDMI-A-1, the Acer.
-  mainMonitor = "DP-1";
+  mainMonitor = config.userSettings.mainMonitor;
 in
 {
   imports = [ inputs.noctalia.homeModules.default ];
