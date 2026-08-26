@@ -12,5 +12,7 @@
     ./iphone.nix
     ./openrazer.nix
     ./swap.nix
+    ./thunderbolt.nix
+    ./samba.nix
   ];
 }
