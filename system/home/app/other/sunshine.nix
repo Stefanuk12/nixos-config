@@ -2,7 +2,7 @@
 
 {
   services.sunshine = {
-    enable = true;
+    enable = false;
     # DRM/KMS capture, which is the only backend that sees a Hyprland session — and, being a read
     # of the scanout framebuffer, the only one that still streams once the session is locked.
     capSysAdmin = true;
