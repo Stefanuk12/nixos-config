@@ -12,5 +12,6 @@
     lm_sensors # sensors
     gettext # envsubst
     trash-cli
+    nload
   ];
 }
