@@ -15,7 +15,7 @@ let
     };
     darwinOCPkg = {
       ocVersion       = "1.0.4";
-      ocReleaseSha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";  # first build prints real hash
+      ocReleaseSha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";
     };
   }.${source};
 
@@ -37,7 +37,7 @@ let
   darwinOcRev = "82a28361b61d4f664fb6e4f34789abce22bc3088";  # main @ 2025-06-03
   darwinOcRelease = fetchzip {
     url = "https://github.com/royalgraphx/DarwinOCPkg/archive/${darwinOcRev}.tar.gz";
-    sha256 = "sha256-B01OlZzEMmpXDguyvADxH5GWjZzFJUKF/QVuHFgQ1CQ=";  # first build prints real hash
+    sha256 = "sha256-95xaDYtNFytic57oe6Y80B1GOkG2vG7MkiyVAbu5Erg=";
   };
 
   # Resolution order for EFI files/Drivers: primary, then OpenCorePkg release as fallback (e.g. AudioDxe.efi isn't in DarwinOCPkg's Drivers/).
