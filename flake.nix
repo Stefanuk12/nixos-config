@@ -146,6 +146,17 @@
             patches = (old.patches or [ ]) ++ [ ./packages/xdph-format-table-fd.patch ];
           });
         })
+        # qtmultimedia reads pa_context_get_state() off a null context once PulseAudio drops the
+        # connection, so libpulse's assert aborts the host app (Dolphin's media preview). Drop once
+        # the null guard lands upstream; nixpkgs is on 6.11.2.
+        # Not pkgs.qt6: overrideScope drops the `override` that python-packages calls on it.
+        (final: prev: {
+          qt6Packages = prev.qt6Packages.overrideScope (_: qprev: {
+            qtmultimedia = qprev.qtmultimedia.overrideAttrs (old: {
+              patches = (old.patches or [ ]) ++ [ ./packages/qtmultimedia-pulse-null-context.patch ];
+            });
+          });
+        })
         # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
         # Recompute vendorHash on bump.
         (final: prev: {

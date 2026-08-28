@@ -1,0 +1,22 @@
+Guard QPulseAudioContextManager::getContextState() against a null context.
+
+m_context is reset to {} in three places: when pa_context_connect() fails, when the
+server reports the context TERMINATED or FAILED, and in release(). Any contextIsGood()
+call afterwards reaches pa_context_get_state(nullptr), which trips pa_assert(c) inside
+libpulse and aborts the whole process — so a pipewire-pulse reconfiguration that
+terminates the context takes down the next client to touch an audio sink.
+
+QPulseAudioSink::validatePulseaudio() already handles a non-good context by warning and
+setting QtAudio::Error::FatalError, so returning PA_CONTEXT_UNCONNECTED (not one of the
+PA_CONTEXT_IS_GOOD states) simply lets that existing recovery path run.
+
+--- a/src/multimedia/pulseaudio/qpulseaudio_contextmanager.cpp
++++ b/src/multimedia/pulseaudio/qpulseaudio_contextmanager.cpp
+@@ -598,6 +598,8 @@
+ pa_context_state_t QPulseAudioContextManager::getContextState()
+ {
+     auto lock = std::lock_guard{ *this };
++    if (!m_context)
++        return PA_CONTEXT_UNCONNECTED;
+     return pa_context_get_state(m_context.get());
+ }
