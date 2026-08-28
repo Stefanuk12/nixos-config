@@ -41,6 +41,14 @@ def apply_smbios(plist: dict, smbios: dict) -> None:
     if "romMac" in smbios:
         generic["ROM"] = encode_mac_to_bytes(smbios["romMac"])
 
+    # Under Automatic, OpenCore builds PlatformInfo from Generic and never reads the SMBIOS section.
+    # ocvalidate still demands its full 27-key schema whenever the key is present at all — even
+    # empty — and DarwinOCPkg's Sample.plist ships four manufacturer strings there. Upstream's
+    # sample omits the key entirely, so drop it; the values are unused either way.
+    platform = plist["PlatformInfo"]
+    if platform.get("Automatic"):
+        platform.pop("SMBIOS", None)
+
 
 def apply_drivers(plist: dict, drivers: list) -> None:
     """Replace UEFI.Drivers wholesale (one entry per filename, upstream
