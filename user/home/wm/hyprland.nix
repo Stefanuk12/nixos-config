@@ -314,8 +314,9 @@ in
         "$mainMod CONTROL, Right, Next workspace, workspace, r+1"
         "$mainMod CONTROL, Left, Previous workspace, workspace, r-1"
         "$mainMod CONTROL, Down, First empty workspace, workspace, empty"
-        "$mainMod, mouse_down, Next workspace, workspace, e+1"
-        "$mainMod, mouse_up, Previous workspace, workspace, e-1"
+        # Hyprland 0.56 fixed a long-standing inversion, so mouse_down is now physical scroll-down.
+        "$mainMod, mouse_down, Previous workspace, workspace, e-1"
+        "$mainMod, mouse_up, Next workspace, workspace, e+1"
 
         # Noctalia owns the shell surfaces that HyDE gave to rofi/wlogout/hyprlock.
         "$mainMod, A, App launcher, exec, ${noctalia} msg panel-toggle launcher"
