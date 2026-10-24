@@ -344,7 +344,7 @@ in
         "$mainMod, W, Toggle floating, togglefloating"
         "$mainMod, G, Toggle group, togglegroup"
         "$mainMod, J, Toggle split direction, layoutmsg, togglesplit"
-        "SHIFT, F11, Fullscreen, fullscreen"
+        "$mainMod SHIFT, F11, Fullscreen, fullscreen"
 
         "$mainMod, T, Terminal, exec, $terminal"
         "$mainMod, E, File manager, exec, dolphin"
