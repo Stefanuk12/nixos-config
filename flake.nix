@@ -211,16 +211,17 @@
             });
           });
         })
-        # AutoVirt's AMD-v11.0.0.patch is cut against QEMU 11.0.0, and its hw/nvme/ctrl.c hunk fails
-        # on 11.1.0, which gained a native `model` device param that makes the hunk redundant. Hold
-        # QEMU here until BarelyMetal moves the nvme spoof onto `model=`; the tasn1 patch is
-        # 11.1-only and does not apply to this tree.
+        # AutoVirt's AMD-v11.0.3.patch (now from HazedHV/AutoVirt, since Scrut1ny/AutoVirt was taken
+        # down) is still cut against the 11.0.x tree, and its hw/nvme/ctrl.c hunk fails on 11.1.0,
+        # which gained a native `model` device param that makes the hunk redundant. Hold QEMU here
+        # until BarelyMetal moves the nvme spoof onto `model=`; the tasn1 patch is 11.1-only and
+        # does not apply to this tree.
         (final: prev: {
           qemu = prev.qemu.overrideAttrs (old: rec {
-            version = "11.0.2";
+            version = "11.0.3";
             src = final.fetchurl {
               url = "https://download.qemu.org/qemu-${version}.tar.xz";
-              hash = "sha256-N0X26oji6H/g3IOLKx1OCncL9I4BodWhhoQqH/92zPU=";
+              hash = "sha256-2l/P/DJ2KCBWi4KO1DCnKIZNNNULbS8wNYWXdgy7BSM=";
             };
             patches = builtins.filter (
               p: !(final.lib.hasSuffix "fix-tls-tests-without-tasn1.patch" (toString p))
