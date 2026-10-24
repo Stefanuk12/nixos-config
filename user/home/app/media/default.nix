@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./flstudio.nix
     ./getmedia.nix
     ./jdownloader.nix
     ./libation.nix

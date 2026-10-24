@@ -190,6 +190,16 @@
             patches = (old.patches or [ ]) ++ [ ./packages/xdph-format-table-fd.patch ];
           });
         })
+        # FL Studio 26.1.4+ signs its binaries with non-DER-ordered authenticated attributes;
+        # crypt32 re-sorted them before hashing, so the self-check failed with
+        # TRUST_E_CERT_SIGNATURE. Wine MR !11824 (bug 60273); drop once it ships in nixpkgs' wine.
+        (final: prev: {
+          wineWow64Packages = prev.wineWow64Packages // {
+            staging = prev.wineWow64Packages.staging.overrideAttrs (old: {
+              patches = (old.patches or [ ]) ++ [ ./packages/wine-crypt32-signed-attr-order.patch ];
+            });
+          };
+        })
         # qtmultimedia reads pa_context_get_state() off a null context once PulseAudio drops the
         # connection, so libpulse's assert aborts the host app (Dolphin's media preview). Drop once
         # the null guard lands upstream; nixpkgs is on 6.11.2.

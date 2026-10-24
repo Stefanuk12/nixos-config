@@ -48,6 +48,10 @@ in
     pulse.enable = true;
     jack.enable = true;
   };
+  # wineasio mlockall()s FL Studio, so with the 8 MiB default every later thread stack fails to
+  # map and pipewire-jack can't start. Set on the system manager too: user@ inherits its hard cap.
+  systemd.settings.Manager.DefaultLimitMEMLOCK = "infinity";
+  systemd.user.settings.Manager.DefaultLimitMEMLOCK = "infinity";
 
   # Master switch for the proprietary NVIDIA driver — without "nvidia" here the hardware.nvidia
   # block below is inert and dgpu-enable leaves the card driverless. Drop it on an AMD dGPU swap.

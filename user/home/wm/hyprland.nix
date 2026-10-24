@@ -303,6 +303,13 @@ in
         # vrr,2 on both monitors turns VRR on for whatever is fullscreen; this exempts LG,
         # which is fullscreen by default (win.fullScreen in looking_glass_client.nix).
         "no_vrr on, match:class ^looking-glass-client$"
+        # FL Studio's WebView host/root window is a titleless 800x800 box Wine renders visibly;
+        # closing it quits FL. Its title stays empty while every real FL window has one, so tuck
+        # only that one onto a hidden special workspace. Drop if FL stops spawning it.
+        "workspace special:flhidden silent, match:class ^fl64.exe$, match:title ^$"
+        # Maximise FL's main window (a DAW wants the whole screen); without this it tiles and a
+        # terminal sharing the workspace squeezes its UI to half width. Dialogs float over it.
+        "maximize on, match:class ^fl64.exe$, match:title ^FL Studio"
       ];
 
       # bindd carries a description, which is what keybinds-hint reads back out.
