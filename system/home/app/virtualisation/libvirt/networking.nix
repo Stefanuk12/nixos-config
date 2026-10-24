@@ -20,6 +20,9 @@
     "mac:a0:ad:9f:59:4f:18"
   ];
   networking.interfaces.br0.useDHCP = true;
+  # The IPv6 RA lands ~2s before the v4 lease and would satisfy network-online on its own, but
+  # the only DNS server (Pi-hole) is v4-only, so early boot units (rbw, pia-wg-gen) can't resolve.
+  networking.dhcpcd.wait = "ipv4";
   networking.bridges = {
     "br0" = {
       interfaces = [ "eno1" ];

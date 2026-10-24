@@ -8,6 +8,7 @@
     ./docker.nix
     ./openssh.nix
     ./tailscale.nix
+    ./dns.nix
     ./power.nix
     ./iphone.nix
     ./openrazer.nix
