@@ -36,7 +36,12 @@
   ];
 
   networking.firewall.interfaces.br0 = {
-    allowedTCPPorts = [ 33882 ];
+    allowedTCPPorts = [
+      33882
+      # roblox-executor-mcp's bridge, reached from the bridged Windows guest. It is unauthenticated
+      # and runs whatever Lua it is sent, so it stays on br0 and never goes near the WAN.
+      16384
+    ];
     allowedTCPPortRanges = [
       {
         from = 1714;
