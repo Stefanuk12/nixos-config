@@ -144,27 +144,8 @@
         (final: _prev: {
           monado-psvr2 = final.callPackage ./packages/monado-psvr2 { };
         })
-        # Bottles 63.2 needs `fvs2`, nixpkgs still ships `fvs`; mirrors nixpkgs PR #511730.
-        (final: prev: {
-          fvs2 = final.callPackage ./packages/fvs2 { };
-          bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
-            propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
-          });
-        })
-        # Ahead of nixpkgs; refresh via the snapcraft info API + `nix store prefetch-file`.
-        (final: prev: {
-          spotify = prev.spotify.overrideAttrs (_: rec {
-            version = "1.2.92.147.g5b8f9367";
-            rev = "97";
-            src = final.fetchurl {
-              name = "spotify-${version}-${rev}.snap";
-              url = "https://api.snapcraft.io/api/v1/snaps/download/pOBIoZ2LrCB3rDohMxoYGnbN14EHOgD7_${rev}.snap";
-              hash = "sha512-Gk0/WjfgJZIG+2w4teaznAk/7evOXUsuCikDvOhmhAQ5ksQV99VeiYnE+OJf7hHnrPaHoueERvIkk7Psed/kwA==";
-            };
-          });
-        })
         # xdph never closes the linux-dmabuf format-table fd, so screen sharing dies with EMFILE
-        # after about a day of uptime. Drop once the fix lands upstream; nixpkgs is on 1.4.0.
+        # after about a day of uptime. Drop once the fix lands upstream; still missing in 1.4.1.
         (final: prev: {
           xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.overrideAttrs (old: {
             patches = (old.patches or [ ]) ++ [ ./packages/xdph-format-table-fd.patch ];
@@ -182,7 +163,7 @@
         })
         # qtmultimedia reads pa_context_get_state() off a null context once PulseAudio drops the
         # connection, so libpulse's assert aborts the host app (Dolphin's media preview). Drop once
-        # the null guard lands upstream; nixpkgs is on 6.11.2.
+        # the null guard lands upstream; still missing in 6.12.0.
         # Not pkgs.qt6: overrideScope drops the `override` that python-packages calls on it.
         (final: prev: {
           qt6Packages = prev.qt6Packages.overrideScope (_: qprev: {
