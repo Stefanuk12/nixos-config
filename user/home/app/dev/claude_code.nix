@@ -7,6 +7,8 @@ let
     theme = "dark";
     model = "claude-opus-4-8";
     includeCoAuthoredBy = false;
+    # AWS MCP Server + AWS skills (Agent Toolkit for AWS); needs awscli2 and uv from ./aws.nix.
+    enabledPlugins."aws-core@claude-plugins-official" = true;
     permissions = {
       allow = [
         "Bash(git diff:*)"
