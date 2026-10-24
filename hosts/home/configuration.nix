@@ -85,6 +85,12 @@ in
     "nix-command"
     "flakes"
   ];
+  # At the defaults (32 jobs × all 32 threads) a batch of local C++ builds — wine, dolphin, libjxl —
+  # exhausts RAM and the global OOM killer takes out the Hyprland session instead of cc1plus.
+  nix.settings.max-jobs = 4;
+  nix.settings.cores = 8;
+  # Builders inherit this, so any OOM that still happens lands on a build, not the desktop.
+  systemd.services.nix-daemon.serviceConfig.OOMScoreAdjust = 1000;
   # 25.05, not 23.05: hydenix used to force this value, so lowering it on its removal would
   # silently change service defaults on an already-installed system.
   system.stateVersion = "25.05";
