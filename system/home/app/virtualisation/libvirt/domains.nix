@@ -13,6 +13,7 @@ let
     win11-base   = import ./vms/win11-base.nix     { inherit config pkgs; };
     win11-rblx   = import ./vms/win11-rblx.nix     { inherit config pkgs; };
     win11-rblx-2 = import ./vms/win11-rblx-2.nix   { inherit config pkgs; };
+    win11-rust   = import ./vms/win11-rust.nix     { inherit config pkgs; };
     win11-office = import ./vms/win11-office.nix   { inherit inputs pkgs; };
     gaming       = import ./vms/gaming.nix         { inherit config pkgs; };
   };
