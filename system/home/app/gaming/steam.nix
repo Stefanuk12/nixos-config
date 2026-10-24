@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 let
   gpuEnv = import ../../../../hosts/home/gpu-env.nix;
+  sls = inputs.sls-steam.packages.${pkgs.stdenv.hostPlatform.system}.sls-steam;
 in
 {
   environment.systemPackages = [
@@ -28,7 +29,13 @@ in
     enable = true;
 
     # Games inherit the FHS env, so this covers the whole library without per-appid launch options.
-    package = pkgs.steam.override { extraProfile = gpuEnv.preferDgpu; };
+    package = pkgs.steam.override {
+      extraProfile = gpuEnv.preferDgpu;
+      extraEnv.LD_AUDIT = "${sls}/library-inject.so:${sls}/SLSsteam.so";
+    };
+
+    # Valve's Protons ship no winewayland, so PROTON_ENABLE_WAYLAND=1 is a no-op on them.
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
 
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;

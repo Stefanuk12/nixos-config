@@ -9,6 +9,7 @@
     ./osu_lazer.nix
     ./psvr2.nix
     ./steam.nix
+    ./sls_steam.nix
     ./roblox.nix
   ];
 }

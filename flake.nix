@@ -79,6 +79,9 @@
     # the SteamVRLinuxFixes layer, play-area app, firmware updater and xr-hardware udev rules.
     psvr2-toolkit.url = "./packages/psvr2-toolkit";
     psvr2-toolkit.inputs.nixpkgs.follows = "nixpkgs";
+    # steamclient.so hook: family-share lock bypass, DLC unlocking, etc. Not in nixpkgs.
+    sls-steam.url = "github:AceSLS/SLSsteam";
+    sls-steam.inputs.nixpkgs.follows = "nixpkgs";
     # Patches the Jackbox Megapicker for multi-directory game installs + ASAR integrity bypass.
     jackbox-megapicker-patcher.url = "github:Stefanuk12/jackbox_megapicker_patcher";
     jackbox-megapicker-patcher.inputs.nixpkgs.follows = "nixpkgs";
