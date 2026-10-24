@@ -1,14 +1,21 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
-  # Vencord with the local streamer-mode override dropped into src/userplugins in preBuild. It adds
-  # no npm deps, so the pnpmDeps cache is untouched.
+  # Vencord with the local plugins dropped into src/userplugins in preBuild. They add no npm deps,
+  # so the pnpmDeps cache is untouched.
+  userplugins = {
+    streamerModeOverride = ./streamer-mode-override;
+    autoPopoutCameras = ./auto-popout-cameras;
+  };
+
   vencord-userplugins = pkgs.vencord.overrideAttrs (old: {
-    preBuild = (old.preBuild or "") + ''
-      mkdir -p src/userplugins/streamerModeOverride
-      cp ${./streamer-mode-override}/index.ts src/userplugins/streamerModeOverride/
-      chmod -R u+w src/userplugins/streamerModeOverride
-    '';
+    preBuild = (old.preBuild or "") + lib.concatStrings (
+      lib.mapAttrsToList (name: src: ''
+        mkdir -p src/userplugins/${name}
+        cp ${src}/index.ts src/userplugins/${name}/
+        chmod -R u+w src/userplugins/${name}
+      '') userplugins
+    );
   });
 in
 {
@@ -70,6 +77,7 @@ in
       ShikiCodeblocks.enabled = true;
       ShowHiddenChannels.enabled = false;
       StreamerModeManualOverride.enabled = true;
+      AutoPopoutCameras.enabled = true;
       Translate.enabled = true;
       Unindent.enabled = true;
       ValidReply.enabled = true;

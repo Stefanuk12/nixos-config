@@ -4,6 +4,7 @@
   imports = [
     ./acc_server.nix
     ./dbd.nix
+    ./discord_overlay.nix
     ./gpu_screen_recorder.nix
     ./jackbox.nix
     ./moza.nix
