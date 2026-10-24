@@ -8,12 +8,9 @@
 
   home.packages = with pkgs; [
     libvirt
-    virt-manager
-    qemu
     uefi-run
     lxc
     swtpm
-    quickemu
     dosfstools
     sshfs
   ];
