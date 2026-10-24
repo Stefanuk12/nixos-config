@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./bottles.nix
     ./flstudio.nix
     ./getmedia.nix
     ./jdownloader.nix
