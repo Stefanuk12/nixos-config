@@ -9,6 +9,7 @@
     ./moza.nix
     ./moonlight.nix
     ./osu_lazer.nix
+    ./parsec.nix
     ./psvr2.nix
     ./steam.nix
     ./sls_steam.nix
