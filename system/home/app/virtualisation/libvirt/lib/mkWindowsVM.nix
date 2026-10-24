@@ -55,7 +55,7 @@ let
   gpuRomFile  = gpuCfg.romFile or null;
   hasGpu      = gpuAddrs != [];
 
-  # USB passthrough by integer vendor:product (libvirt reads base-0); the device must be present at VM start since nixvirt's hostdev has no startupPolicy.
+  # USB passthrough by integer vendor:product (libvirt reads base-0); domains.nix marks these startupPolicy='optional'.
   usbCfg      = cfg.usb or {};
   usbDevices  = usbCfg.devices or [];
   hasUsb      = usbDevices != [];

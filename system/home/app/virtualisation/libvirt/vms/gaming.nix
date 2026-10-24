@@ -1,9 +1,9 @@
 # PSVR2 + SteamVR guest on the non-hardened profile (Hyper-V on, hypervisor visible). Shares the
 # passthrough dGPU and Looking Glass, so never run it alongside win11-base/rblx/rblx-2.
 
-{ config }:
+{ config, pkgs }:
 
-import ../lib/mkGamingVM.nix { inherit config; } {
+import ../lib/mkGamingVM.nix { inherit config pkgs; } {
   name = "gaming";
   uuid = "6b78bf45-54fa-4b41-a59d-0dc28238e512";
   diskFile = /var/lib/libvirt/images/gaming.qcow2;

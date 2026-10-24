@@ -10,11 +10,11 @@ let
   mkWindowsVM = import ./lib/mkWindowsVM.nix;
 
   vms = {
-    win11-base   = import ./vms/win11-base.nix     { inherit config; };
-    win11-rblx   = import ./vms/win11-rblx.nix     { inherit config; };
-    win11-rblx-2 = import ./vms/win11-rblx-2.nix   { inherit config; };
+    win11-base   = import ./vms/win11-base.nix     { inherit config pkgs; };
+    win11-rblx   = import ./vms/win11-rblx.nix     { inherit config pkgs; };
+    win11-rblx-2 = import ./vms/win11-rblx-2.nix   { inherit config pkgs; };
     win11-office = import ./vms/win11-office.nix   { inherit inputs pkgs; };
-    gaming       = import ./vms/gaming.nix         { inherit config; };
+    gaming       = import ./vms/gaming.nix         { inherit config pkgs; };
   };
 
   # macOS uses ./lib/mkMacOSVM.nix instead (no Windows hardening); each module exports
@@ -25,10 +25,19 @@ let
     osx-kvm-gpu = import ./vms/osx-kvm-gpu.nix { inherit pkgs osxKvm; };
   };
 
-  mkDomain = cfg: {
-    definition = inputs.nixvirt.lib.domain.writeXML (mkWindowsVM cfg);
-    active = false;
-  };
+  # nixvirt's hostdev schema has no startupPolicy, so without this a VM with USB passthrough
+  # refuses to start whenever that device (e.g. the PSVR2) is unplugged.
+  optionalUsbHostdevs = xml: lib.concatMapStrings
+    (p: if builtins.isList p then "<source startupPolicy='optional'>${builtins.head p}<vendor " else p)
+    (builtins.split "<source>([[:space:]]*)<vendor " xml);
+
+  mkDomain = cfg:
+    let domain = mkWindowsVM cfg;
+    in {
+      definition = pkgs.writeText "NixVirt-domain-${domain.name}"
+        (optionalUsbHostdevs (inputs.nixvirt.lib.domain.getXML domain));
+      active = false;
+    };
 
   mkRawDomain = domain: {
     definition = inputs.nixvirt.lib.domain.writeXML domain;

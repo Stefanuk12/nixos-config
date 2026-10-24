@@ -1,8 +1,8 @@
 # Base-image VM (16G, evdev input passthrough for first install) via ../lib/mkGamingVM.nix.
 
-{ config }:
+{ config, pkgs }:
 
-import ../lib/mkGamingVM.nix { inherit config; } {
+import ../lib/mkGamingVM.nix { inherit config pkgs; } {
   name = "win11-base";
   uuid = "cad4ffc1-bd63-4faa-b0af-9f6740589f32";
   diskFile = /var/lib/libvirt/images/win11-base.qcow2;

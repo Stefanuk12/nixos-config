@@ -1,6 +1,6 @@
 # Shared config builder for the hardened GPU-passthrough Windows gaming VMs (win11-base/rblx/rblx-2); they share CPU pinning, GPU, Looking Glass /dev/kvmfr0 and default nvram/disk paths, so never run two at once.
 
-{ config }:
+{ config, pkgs }:
 
 let
   pinning = import ./pinning.nix;
@@ -16,7 +16,7 @@ in
 , memory ? 8
 , hugepages ? { enable = true; size = 2; unit = "M"; }   # 2MB on-demand pages
 , evdev ? [ ]                                             # direct host input passthrough; see win11-base for the shape
-, hardened ? true                                        # false = VR/perf profile (Hyper-V on, hypervisor visible, stock qemu for SteamVR)
+, hardened ? true                                        # false = VR/perf profile (Hyper-V on, hypervisor visible, stock qemu + OVMF for SteamVR)
 , usb ? [ ]                                               # USB passthrough by id, e.g. [ { vendor = 1356; product = 3294; } ]
 }:
 
@@ -42,10 +42,18 @@ in
     };
   };
 
-  firmware = {
+  # The AutoVirt EDK2 patch hard-codes the spoofed AMD host-bridge ID (0x14d8) into OVMF, so it
+  # dead-loops in PlatformPei on stock QEMU's genuine Q35 (0x29c0); the VR profile pairs stock
+  # QEMU with stock OVMF and Microsoft-keyed vars instead.
+  firmware = if hardened then {
     code = "${config.barelyMetal.ovmfPackage}/FV/OVMF_CODE.fd";
     # Host-SB-key-injected vars from the activation; the store vars carry no host keys.
     varsTemplate = config.barelyMetal.ovmfVarsPath;
+    inherit varsPath;
+    secureBoot = true;
+  } else {
+    code = "${pkgs.OVMFFull.fd}/FV/OVMF_CODE.fd";
+    varsTemplate = "${pkgs.OVMFFull.fd}/FV/OVMF_VARS.ms.fd";
     inherit varsPath;
     secureBoot = true;
   };
