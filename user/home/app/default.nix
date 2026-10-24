@@ -5,6 +5,7 @@
     ./comms/discord.nix
     ./comms/aerc.nix
     ./comms/thunderbird.nix
+    ./comms/teams.nix
     ./browser/helium.nix
     ./security
     ./utils
