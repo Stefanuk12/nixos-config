@@ -7,6 +7,7 @@
     ./getmedia.nix
     ./jdownloader.nix
     ./libation.nix
+    ./losslesscut.nix
     ./nuvio.nix
     ./obs_studio.nix
     ./spicetify.nix
