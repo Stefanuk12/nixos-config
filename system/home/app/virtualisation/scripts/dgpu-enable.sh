@@ -24,6 +24,12 @@ echo "GPU reattached (now host ready)"
 sudo rmmod vfio_pci vfio_pci_core vfio_iommu_type1 || true
 echo "VFIO drivers removed"
 
+# The audio function stays driverless after reattach, which hides DisplayPort audio (the PSVR2's
+# included) from PipeWire. Only after the rmmod: vfio-pci.ids lists it, so an earlier probe would
+# hand it straight back to vfio-pci.
+printf '%s' "$gpu_addr" | sed 's/\.[0-9]*$/.1/' | sudo tee /sys/bus/pci/drivers_probe >/dev/null
+echo "GPU audio function probed"
+
 # The base driver auto-binds on reattach but the modeset/DRM stack doesn't, and boot's
 # nvidia_drm.modeset=1 never applies to a runtime rebind. Without these there's no /dev/dri render
 # node, so Wayland/PRIME rendering black-screens.

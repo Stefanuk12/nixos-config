@@ -75,6 +75,10 @@
     steam-launch-options.inputs.nixpkgs.follows = "nixpkgs";
     osu-collect.url = "./packages/osu-collect";
     osu-collect.inputs.nixpkgs.follows = "nixpkgs";
+    # PSVR2 on SteamVR: Ignition hosts the Windows driver in Proton, PSVR2Toolkit wraps it, plus
+    # the SteamVRLinuxFixes layer, play-area app, firmware updater and xr-hardware udev rules.
+    psvr2-toolkit.url = "./packages/psvr2-toolkit";
+    psvr2-toolkit.inputs.nixpkgs.follows = "nixpkgs";
     # Patches the Jackbox Megapicker for multi-directory game installs + ASAR integrity bypass.
     jackbox-megapicker-patcher.url = "github:Stefanuk12/jackbox_megapicker_patcher";
     jackbox-megapicker-patcher.inputs.nixpkgs.follows = "nixpkgs";
@@ -119,6 +123,11 @@
         })
         (final: _prev: {
           thunderbird-simplelogin = final.callPackage ./packages/thunderbird-simplelogin { };
+        })
+        # nixpkgs monado (25.1.0) has no psvr2 driver at all; drop once one lands there with
+        # working Sense controllers.
+        (final: _prev: {
+          monado-psvr2 = final.callPackage ./packages/monado-psvr2 { };
         })
         # Bottles 63.2 needs `fvs2`, nixpkgs still ships `fvs`; mirrors nixpkgs PR #511730.
         (final: prev: {

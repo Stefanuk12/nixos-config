@@ -5,7 +5,18 @@
 
   programs.noctalia-greeter = {
     enable = true;
-    package = inputs.noctalia-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    # The dGPU's card node is on the seat (the PSVR2 lease needs Hyprland to manage it), so the
+    # greeter's wlroots compositor would open it too and pin nvidia_drm after logout, blocking
+    # dgpu-disable. noctalia-greeter-session finds the compositor next to itself, so wrapping it
+    # here also covers sunshine_greeter.nix.
+    package = pkgs.symlinkJoin {
+      name = "noctalia-greeter-igpu";
+      paths = [ inputs.noctalia-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/noctalia-greeter-compositor --set WLR_DRM_DEVICES /dev/dri/amd-igpu
+      '';
+    };
     settings = {
       # Picker label, not the .desktop id; uwsm is what gets graphical-session.target activated.
       session.default = "Hyprland (uwsm-managed)";

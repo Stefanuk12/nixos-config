@@ -3,6 +3,8 @@
 # node for its whole lifetime, which blocks the rmmod in dgpu-disable. Desktop apps therefore get
 # mesa only and games opt back in.
 let
+  hw = import ./hardware-profile.nix;
+
   mesaEgl = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
   nvidiaEgl = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
 
@@ -22,6 +24,9 @@ let
     __NV_PRIME_RENDER_OFFLOAD = "1";
     __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
     __VK_LAYER_NV_optimus = "NVIDIA_only";
+    # ICD order alone doesn't do it: the MESA device-select layer moves the Wayland compositor's GPU
+    # (the iGPU) to index 0, and apps that take the first device then land there — SteamVR's 496.
+    MESA_VK_DEVICE_SELECT = builtins.head hw.dgpu.deviceIds;
   };
 
   # Guarded because the dGPU sits on vfio-pci most of the time, and __GLX_VENDOR_LIBRARY_NAME=nvidia
@@ -40,6 +45,12 @@ let
 in
 {
   inherit preferDgpu;
+
+  dgpuEgl = dgpu.__EGL_VENDOR_LIBRARY_FILENAMES;
+
+  # Only the dGPU, unlike `dgpu` above which merely prefers it: Monado's direct mode needs the
+  # headset's GPU to be the one Vulkan device it sees.
+  dgpuOnly.VK_DRIVER_FILES = nvidiaVk;
 
   igpu = {
     __EGL_VENDOR_LIBRARY_FILENAMES = mesaEgl;

@@ -7,6 +7,7 @@
     ./jackbox.nix
     ./moonlight.nix
     ./osu_lazer.nix
+    ./psvr2.nix
     ./steam.nix
     ./roblox.nix
   ];

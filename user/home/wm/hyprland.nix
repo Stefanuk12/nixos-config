@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 
 let
+  gpuEnv = import ../../../hosts/home/gpu-env.nix;
+
   # playerctl and the Spotify client give no on-screen feedback for the media keys; the SUPER
   # (system) bindings go through noctalia's own OSD instead.
   spotifyOsd = pkgs.writeShellApplication {
@@ -197,6 +199,24 @@ in
 
   xdg.userDirs.setSessionVariables = true;
 
+  # SteamVR is only handed the PSVR2 panel if Hyprland manages the card it hangs off (DP-3 on the
+  # 5080). The dGPU sits on vfio-pci most of the time though, and aquamarine takes AQ_DRM_DEVICES
+  # literally, so naming an absent node would strand the session at the greeter. The iGPU must stay
+  # first: with the 5080 as primary the desktop comes up broken. uwsm sources this before Hyprland.
+  # Aquamarine also needs NVIDIA's EGL to bring up the 5080's renderer when the headset connects;
+  # with the session's mesa-only pin it fails ("DRI2: failed to load driver") and drops DP-3, so it
+  # is never offered for lease. Hyprland holds card0 for the whole session anyway, so the pin's
+  # reason (keeping dgpu-disable possible) does not apply here.
+  xdg.configFile."uwsm/env-hyprland".text = ''
+    if [ -e /dev/dri/rtx5080 ]; then
+      AQ_DRM_DEVICES=/dev/dri/amd-igpu:/dev/dri/rtx5080
+      export __EGL_VENDOR_LIBRARY_FILENAMES=${gpuEnv.dgpuEgl}
+    else
+      AQ_DRM_DEVICES=/dev/dri/amd-igpu
+    fi
+    export AQ_DRM_DEVICES
+  '';
+
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = false; # uwsm owns the session
@@ -220,7 +240,8 @@ in
       ];
 
       env = [
-        "AQ_DRM_DEVICES,/dev/dri/amd-igpu"
+        # AQ_DRM_DEVICES is in uwsm/env-hyprland instead: it may only name the dGPU when nvidia is
+        # actually bound, which hyprlang cannot test for.
         # Lets the iGPU compositor import frames rendered on the dGPU (else games offloaded to the
         # 5080 are a black screen).
         "AQ_NO_MODIFIERS,1"
