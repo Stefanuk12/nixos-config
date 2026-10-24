@@ -32,5 +32,8 @@ in
 
   home.packages = with pkgs; [
     eza
+    # lspci and fuser for the dgpu-*/hows-my-gpu scripts.
+    pciutils
+    psmisc
   ];
 }
