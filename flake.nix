@@ -144,31 +144,11 @@
         (final: _prev: {
           monado-psvr2 = final.callPackage ./packages/monado-psvr2 { };
         })
-        # 14.0.0 registers an Android device with a double-length serial, which Audible began
-        # refusing with "License Denied" in Sept 2026 (Libation #2021). Mirrors nixpkgs PR #560766;
-        # drop once the nixpkgs input carries libation >= 14.2.0.
-        (final: prev: {
-          libation = final.callPackage ./packages/libation { };
-        })
         # Bottles 63.2 needs `fvs2`, nixpkgs still ships `fvs`; mirrors nixpkgs PR #511730.
         (final: prev: {
           fvs2 = final.callPackage ./packages/fvs2 { };
           bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
             propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
-          });
-        })
-        # 2.44.0's css-map lacks the Spotify 1.2.92+ playback-progressbar-container hash, which
-        # hides Comfy's progress bar; drop once nixpkgs' spicetify-cli is >= 2.45.0.
-        (final: prev: {
-          spicetify-cli = prev.spicetify-cli.overrideAttrs (_: {
-            version = "2.45.1";
-            src = final.fetchFromGitHub {
-              owner = "spicetify";
-              repo = "cli";
-              tag = "v2.45.1";
-              hash = "sha256-Mu97p0HlvmEMkPV/VvHztJ1VqocxXoAXRtDKLGYd9mk=";
-            };
-            vendorHash = "sha256-nrUaocs+so35MDxC6TkRSakYKWmhoysrvhE6fXRvYco=";
           });
         })
         # Ahead of nixpkgs; refresh via the snapcraft info API + `nix store prefetch-file`.
@@ -226,47 +206,6 @@
             patches = builtins.filter (
               p: !(final.lib.hasSuffix "fix-tls-tests-without-tasn1.patch" (toString p))
             ) (old.patches or [ ]);
-          });
-        })
-        # Ahead of nixpkgs (2026.516). The prebuilt-ffmpeg tag is a let-binding upstream, so the
-        # cmake flag is swapped instead; it must match the third-party/build-deps submodule commit
-        # of the release. Drop once nixpkgs' sunshine is >= 2026.914.
-        (final: prev: {
-          sunshine = prev.sunshine.overrideAttrs (old: rec {
-            version = "2026.914.233613";
-            src = final.fetchFromGitHub {
-              owner = "LizardByte";
-              repo = "Sunshine";
-              tag = "v${version}";
-              hash = "sha256-HqbswLvX/UiY3nOwxSesBMqnFAF0zKP1ueE6PwDtTNs=";
-              fetchSubmodules = true;
-            };
-            ui = final.buildNpmPackage {
-              inherit src version;
-              pname = "sunshine-ui";
-              npmDepsHash = "sha256-/uY+zvYxQG0Yb8kygwF48YfS+Km0bcQBW4poaqkeJXs=";
-              installPhase = ''
-                runHook preInstall
-                mkdir -p "$out"
-                cp -a . "$out"/
-                runHook postInstall
-              '';
-            };
-            # The tray submodule moved to Qt in this release.
-            nativeBuildInputs = old.nativeBuildInputs ++ [ final.qt6.wrapQtAppsHook ];
-            buildInputs = old.buildInputs ++ [
-              final.qt6.qtbase
-              final.qt6.qtsvg
-              final.qt6.qtwayland
-            ];
-            cmakeFlags =
-              builtins.filter (f: !(final.lib.hasPrefix "-DFFMPEG_PREPARED_BINARIES" f)) old.cmakeFlags
-              ++ [
-                (final.lib.cmakeFeature "FFMPEG_PREPARED_BINARIES" "${final.fetchzip {
-                  url = "https://github.com/LizardByte/build-deps/releases/download/v2026.910.121303/Linux-x86_64-ffmpeg.tar.gz";
-                  hash = "sha256-1S57XfkJa+qEYQLmifWyT9ul0SASFhSk1lkk2timnOY=";
-                }}")
-              ];
           });
         })
         # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
