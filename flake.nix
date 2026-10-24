@@ -144,6 +144,12 @@
         (final: _prev: {
           monado-psvr2 = final.callPackage ./packages/monado-psvr2 { };
         })
+        # 14.0.0 registers an Android device with a double-length serial, which Audible began
+        # refusing with "License Denied" in Sept 2026 (Libation #2021). Mirrors nixpkgs PR #560766;
+        # drop once the nixpkgs input carries libation >= 14.2.0.
+        (final: prev: {
+          libation = final.callPackage ./packages/libation { };
+        })
         # Bottles 63.2 needs `fvs2`, nixpkgs still ships `fvs`; mirrors nixpkgs PR #511730.
         (final: prev: {
           fvs2 = final.callPackage ./packages/fvs2 { };
