@@ -17,6 +17,10 @@ let
     # by default has nothing to attach to. KMS reads the scanout framebuffer instead and needs no
     # cooperation from the compositor — which is what services.sunshine.capSysAdmin is for.
     capture = "kms";
+    # CSRF protection trusts only localhost by default, so every POST from the tailnet — entering
+    # the pairing PIN included — is rejected with a 409. Reaching this instance over the tailnet is
+    # the entire point of it, and it is not on br0, so there is no other origin to allow.
+    csrf_allowed_origins = "https://100.95.213.102:${toString (basePort + 1)},https://home:${toString (basePort + 1)}";
     file_state = "${stateDir}/state.json";
     credentials_file = "${stateDir}/credentials.json";
     log_path = "${stateDir}/sunshine.log";

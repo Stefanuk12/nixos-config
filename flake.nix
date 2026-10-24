@@ -228,6 +228,47 @@
             ) (old.patches or [ ]);
           });
         })
+        # Ahead of nixpkgs (2026.516). The prebuilt-ffmpeg tag is a let-binding upstream, so the
+        # cmake flag is swapped instead; it must match the third-party/build-deps submodule commit
+        # of the release. Drop once nixpkgs' sunshine is >= 2026.914.
+        (final: prev: {
+          sunshine = prev.sunshine.overrideAttrs (old: rec {
+            version = "2026.914.233613";
+            src = final.fetchFromGitHub {
+              owner = "LizardByte";
+              repo = "Sunshine";
+              tag = "v${version}";
+              hash = "sha256-HqbswLvX/UiY3nOwxSesBMqnFAF0zKP1ueE6PwDtTNs=";
+              fetchSubmodules = true;
+            };
+            ui = final.buildNpmPackage {
+              inherit src version;
+              pname = "sunshine-ui";
+              npmDepsHash = "sha256-/uY+zvYxQG0Yb8kygwF48YfS+Km0bcQBW4poaqkeJXs=";
+              installPhase = ''
+                runHook preInstall
+                mkdir -p "$out"
+                cp -a . "$out"/
+                runHook postInstall
+              '';
+            };
+            # The tray submodule moved to Qt in this release.
+            nativeBuildInputs = old.nativeBuildInputs ++ [ final.qt6.wrapQtAppsHook ];
+            buildInputs = old.buildInputs ++ [
+              final.qt6.qtbase
+              final.qt6.qtsvg
+              final.qt6.qtwayland
+            ];
+            cmakeFlags =
+              builtins.filter (f: !(final.lib.hasPrefix "-DFFMPEG_PREPARED_BINARIES" f)) old.cmakeFlags
+              ++ [
+                (final.lib.cmakeFeature "FFMPEG_PREPARED_BINARIES" "${final.fetchzip {
+                  url = "https://github.com/LizardByte/build-deps/releases/download/v2026.910.121303/Linux-x86_64-ffmpeg.tar.gz";
+                  hash = "sha256-1S57XfkJa+qEYQLmifWyT9ul0SASFhSk1lkk2timnOY=";
+                }}")
+              ];
+          });
+        })
         # Rebuilds pkgs.hydroxide from the pinned input above so aerc.nix's service picks it up.
         # Recompute vendorHash on bump.
         (final: prev: {

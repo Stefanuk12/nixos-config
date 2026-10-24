@@ -217,6 +217,17 @@ in
     export AQ_DRM_DEVICES
   '';
 
+  # Casting to the Apple TV goes through the Acer (HDMI-A-1): Sunshine's output_name = HDMI-A-1
+  # captures it and the window rules below drop Steam Big Picture and the Megapicker onto it
+  # fullscreen. A headless output would keep the cast off the physical monitors, but Hyprland 0.56.2
+  # aborts (CHyprOpenGLImpl::begin assert) the moment Sunshine captures a headless output, so a real
+  # monitor it is. cast-on moves an already-open Big Picture onto the Acer and keeps focus there, so
+  # packs the Megapicker spawns inherit it; cast-off sends Big Picture back to DP-1.
+  programs.zsh.shellAliases = {
+    cast-on = "hyprctl dispatch focuswindow 'title:^(Steam Big Picture Mode)$' && hyprctl dispatch movewindow mon:HDMI-A-1 && hyprctl dispatch fullscreen 1";
+    cast-off = "hyprctl dispatch focuswindow 'title:^(Steam Big Picture Mode)$' && hyprctl dispatch movewindow mon:DP-1";
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = false; # uwsm owns the session
@@ -310,6 +321,16 @@ in
         # Maximise FL's main window (a DAW wants the whole screen); without this it tiles and a
         # terminal sharing the workspace squeezes its UI to half width. Dialogs float over it.
         "maximize on, match:class ^fl64.exe$, match:title ^FL Studio"
+        # Steam Big Picture and the Jackbox Megapicker go to the Acer (HDMI-A-1) fullscreen, the
+        # monitor Sunshine streams, so driving Steam from the Apple TV stays on the streamed screen.
+        # Packs the Megapicker spawns inherit whatever monitor is focused, so keep focus on the Acer
+        # while casting (cast-on does this).
+        "monitor HDMI-A-1, match:class ^steam$, match:title ^Steam Big Picture Mode$"
+        "fullscreen on, match:class ^steam$, match:title ^Steam Big Picture Mode$"
+        "monitor HDMI-A-1, match:class ^steam_app_2828500$"
+        # Client state 0: told it's fullscreen, the Megapicker (Electron) insets its content and
+        # Wine paints its own frame into the gap. Tested on GE-Proton; Proton 11.0 also drew a caption.
+        "fullscreen_state 2 0, match:class ^steam_app_2828500$"
       ];
 
       # bindd carries a description, which is what keybinds-hint reads back out.
