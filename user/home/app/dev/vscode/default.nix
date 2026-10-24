@@ -45,8 +45,8 @@ in
       "43ZAwaApQBqNzq25Uy/AmkQqprU7QlgJVVimfCaiu9k="
     )
     (extFromMarketplace "Spoorloos" "rbxexecute" "0.5.0" "q706Yq2jICzmeHdtIIJ6t6I6aL0vJLPaNInqZMD8dG4=")
-    (extFromMarketplace "johnnymorganz" "luau-lsp" "1.64.1"
-      "Go0+DDvtTO4D3yBwx0t5Zcz0qOi187RWu9oT1+1JLZ8="
+    (extFromMarketplace "johnnymorganz" "luau-lsp" "1.69.0"
+      "GOU4A2O+2pHRMIRVMKaV7Xi21Wrpk7AcNqxxQ3xUd7k="
     )
     (extFromMarketplace "johnnymorganz" "stylua" "1.7.1" "AbMCYYyK6Ywm/VljzAdmjk0VWm7JRH5GgJAC38T3j/c=")
     (extFromMarketplace "jbockle" "jbockle-format-files" "3.4.0"
