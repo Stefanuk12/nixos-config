@@ -157,6 +157,20 @@
             propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.fvs2 ];
           });
         })
+        # 2.44.0's css-map lacks the Spotify 1.2.92+ playback-progressbar-container hash, which
+        # hides Comfy's progress bar; drop once nixpkgs' spicetify-cli is >= 2.45.0.
+        (final: prev: {
+          spicetify-cli = prev.spicetify-cli.overrideAttrs (_: {
+            version = "2.45.1";
+            src = final.fetchFromGitHub {
+              owner = "spicetify";
+              repo = "cli";
+              tag = "v2.45.1";
+              hash = "sha256-Mu97p0HlvmEMkPV/VvHztJ1VqocxXoAXRtDKLGYd9mk=";
+            };
+            vendorHash = "sha256-nrUaocs+so35MDxC6TkRSakYKWmhoysrvhE6fXRvYco=";
+          });
+        })
         # Ahead of nixpkgs; refresh via the snapcraft info API + `nix store prefetch-file`.
         (final: prev: {
           spotify = prev.spotify.overrideAttrs (_: rec {
