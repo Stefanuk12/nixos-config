@@ -23,7 +23,7 @@
 
   services.pia-confinement = {
     enable = true;
-    region = null;
+    region = "uk";
     credentialsFile = config.rbw-fetch.secrets.pia-creds.path;
 
     confinedApps.qbittorrent = {
