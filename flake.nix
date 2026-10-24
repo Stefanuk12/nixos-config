@@ -136,6 +136,9 @@
         (final: _prev: {
           thunderbird-simplelogin = final.callPackage ./packages/thunderbird-simplelogin { };
         })
+        (final: _prev: {
+          nuvio = final.callPackage ./packages/nuvio { };
+        })
         # nixpkgs monado (25.1.0) has no psvr2 driver at all; drop once one lands there with
         # working Sense controllers.
         (final: _prev: {
