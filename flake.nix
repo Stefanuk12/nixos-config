@@ -116,9 +116,18 @@
       homeOverlays = [
         inputs.noctalia.overlays.default
         inputs.helium.overlays.default
-        # openldap 2.6.x syncrepl tests flake on timing.
+        # Ungoogled strips Chrome's page translation, and helium's native translate (0.13.4.1) is
+        # macOS-only, so load an extension instead. Baked into the package rather than set only via
+        # programs.helium.flags, because that override would fork the store path away from the one
+        # the hyprland exec-once launcher and the .desktop entry resolve. The module re-overrides
+        # `flags`, so the same list is repeated in user/home/app/browser/helium.nix; both must match.
+        # --load-extension was only removed from Chrome-branded builds (137+), not unbranded
+        # chromium; check that first if the extension ever stops appearing.
         (final: prev: {
-          openldap = prev.openldap.overrideAttrs (_: { doCheck = false; });
+          helium-autotranslate = final.callPackage ./packages/helium-autotranslate { };
+          helium = prev.helium.override {
+            flags = [ "--load-extension=${final.helium-autotranslate}" ];
+          };
         })
         # rbw with WebAuthn 2FA (aokellermann/rbw PR #334); drop once merged into nixpkgs.
         (final: prev: {
