@@ -6,16 +6,6 @@
 }:
 {
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest; # in-tree btmtk MT6639 (MT7927 BT) lands in 7.1
-  boot.kernelPatches = [
-    # Lets barely-metal's patched QEMU map the dGPU's large BARs (the 5080's 16 GB Resizable BAR);
-    # without it OVMF stalls enumerating the GPU. `option` = skipped rather than a build error on
-    # kernels predating VFIO_PCI_DMABUF.
-    {
-      name = "enable-vfio-pci-dmabuf";
-      patch = null;
-      structuredExtraConfig.VFIO_PCI_DMABUF = lib.kernel.option lib.kernel.yes;
-    }
-  ];
   # vfio-pci ids come from barelyMetal.vfio; the softdeps keep nvidia/nouveau off the dGPU first.
   boot.extraModprobeConfig = ''
     options kvm_amd nested=1
