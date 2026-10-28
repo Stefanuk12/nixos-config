@@ -19,7 +19,6 @@ in
     ../../system/${hostName}
   ];
 
-  boot.initrd.systemd.enable = true;
   boot.loader.systemd-boot.enable = true;
   systemd.targets.multi-user.enable = true;
   boot.loader.efi = {
@@ -85,11 +84,11 @@ in
 
   documentation.enable = false;
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=500M
-    RuntimeMaxUse=200M
-    MaxFileSec=1month
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "500M";
+    RuntimeMaxUse = "200M";
+    MaxFileSec = "1month";
+  };
 
   systemd.coredump.enable = false;
 
