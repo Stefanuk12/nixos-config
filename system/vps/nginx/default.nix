@@ -36,7 +36,10 @@ in
       locations."/".return = "444";
     };
     "petrovic.foo" = {
-      root = "/var/www/petrovic.foo";
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:3000";
+        recommendedProxySettings = true;
+      };
       forceSSL = true;
       enableACME = true;
       extraConfig = mtlsOriginPull;
